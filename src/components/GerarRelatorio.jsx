@@ -1,4 +1,17 @@
+import React, {useState} from "react";
+import ModalSql from "./modais/ModalSql";
+
 function GerarRelatorio() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleModalSql = () => {
+        setIsModalOpen(true)
+    }
+
+    const closeModal = () => {
+        setIsModalOpen(false)
+    }
+
     return (
         <div className="flex flex-col w-full">
             <div className="w-full flex flex-row justify-between mt-4">
@@ -9,10 +22,12 @@ function GerarRelatorio() {
                 <div className="flex mr-36 justify-center items-center">
                     <div className="mx-2">
                         <div className=" flex flex-col justify-center items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-                            </svg>
-                            <label htmlFor="mais">SQL</label>
+                            <button onClick={handleModalSql}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+                                </svg>
+                                <label htmlFor="mais">SQL</label>
+                            </button>
                         </div>
                     </div>
                     <div className="mx-2">
@@ -61,6 +76,7 @@ function GerarRelatorio() {
             <div className="w-full flex flex-col justify-center items-center">
                 <canvas id="tabelas" className='border-2 border-neutral-600 my-3 w-10/12'></canvas>
             </div>
+            <ModalSql isOpen={isModalOpen} onClose={closeModal}/>
         </div>
     )
 }

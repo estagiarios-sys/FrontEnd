@@ -1,50 +1,36 @@
 import React, { useState, useEffect } from 'react';
 
 function TabelaCampos({ onDataChange }) {
-  const [tabelas, setTabelas] = useState([]);
-  const [relacionadas, setRelacionadas] = useState([]);
-  const [campos, setCampos] = useState([]);
-
+  const [jsonData, setJsonData] = useState({});
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
   const [selectedCampos, setSelectedCampos] = useState([]);
 
   useEffect(() => {
-    async function fetchTabelas() {
+    async function fetchJsonData() {
       try {
-        // Exemplo de chamada à API para buscar as tabelas
-        const responseTabelas = await fetch('https://jsonplaceholder.typicode.com/todos');
-        const tabelasData = await responseTabelas.json();
-        setTabelas(tabelasData);
+        // Exemplo de chamada à API para buscar o JSON
+        const response = await fetch('http://localhost:8080/procurar/tabela', {
+          credentials: 'include' // Se precisar enviar cookies ou outros credenciais
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erro na requisição: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Dados recebidos:', data);
+
+        setJsonData(data); // Armazene o JSON no estado
       } catch (error) {
-        console.error('Erro ao buscar as tabelas:', error);
+        console.error('Erro ao buscar os dados do JSON:', error);
       }
     }
 
-    fetchTabelas();
+    fetchJsonData();
   }, []);
 
-  useEffect(() => {
-    async function fetchRelacionadasECampos() {
-      if (!selectedTabela) return;
-
-      try {
-        // Exemplo de chamada à API para buscar as relacionadas com base na tabela selecionada
-        const responseRelacionadas = await fetch(`https://jsonplaceholder.typicode.com/users?table=${selectedTabela}`);
-        const relacionadasData = await responseRelacionadas.json();
-        setRelacionadas(relacionadasData);
-
-        // Exemplo de chamada à API para buscar os campos com base na tabela selecionada
-        const responseCampos = await fetch(`https://jsonplaceholder.typicode.com/users?table=${selectedTabela}`);
-        const camposData = await responseCampos.json();
-        setCampos(camposData);
-      } catch (error) {
-        console.error('Erro ao buscar relacionadas e campos:', error);
-      }
-    }
-
-    fetchRelacionadasECampos();
-  }, [selectedTabela]);
+  const tabelas = Object.keys(jsonData); // Obtenha os nomes das tabelas a partir do JSON
 
   useEffect(() => {
     onDataChange({ tabela: selectedTabela, relacionada: selectedRelacionada, campos: selectedCampos });
@@ -69,8 +55,8 @@ function TabelaCampos({ onDataChange }) {
             <option value="">Selecione uma tabela</option>
             {tabelas.length > 0 ? (
               tabelas.map((tabela) => (
-                <option key={tabela.id} value={tabela.title}>
-                  {tabela.title}
+                <option key={tabela} value={tabela}>
+                  {tabela}
                 </option>
               ))
             ) : (
@@ -79,6 +65,7 @@ function TabelaCampos({ onDataChange }) {
           </select>
         </div>
       </div>
+
       <div className="mt-5">
         <label htmlFor="relacionadas">Relacionadas</label>
         <div>
@@ -90,18 +77,14 @@ function TabelaCampos({ onDataChange }) {
             value={selectedRelacionada}
           >
             <option value="">Selecione uma relacionada</option>
-            {relacionadas.length > 0 ? (
-              relacionadas.map((relacionada) => (
-                <option key={relacionada.id} value={relacionada.name}>
-                  {relacionada.name}
-                </option>
-              ))
-            ) : (
-              <option value="" disabled>Nenhuma relacionada disponível</option>
-            )}
+            {/* Coloque aqui as opções para as relacionadas */}
+            {/* Você pode adicionar as opções das tabelas relacionadas conforme sua necessidade */}
+            <option value="relacionada1">Relacionada 1</option>
+            <option value="relacionada2">Relacionada 2</option>
           </select>
         </div>
       </div>
+
       <div className="mt-5">
         <label htmlFor="campos">Campos</label>
         <div>
@@ -113,10 +96,10 @@ function TabelaCampos({ onDataChange }) {
             onChange={(e) => setSelectedCampos([...e.target.selectedOptions].map(o => o.value))}
             value={selectedCampos}
           >
-            {campos.length > 0 ? (
-              campos.map((campo) => (
-                <option key={campo.id} value={campo.username}>
-                  {campo.username}
+            {selectedTabela && jsonData[selectedTabela] ? (
+              jsonData[selectedTabela].map((campo) => (
+                <option key={campo} value={campo}>
+                  {campo}
                 </option>
               ))
             ) : (
