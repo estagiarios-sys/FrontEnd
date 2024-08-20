@@ -129,14 +129,15 @@ export default function Nova() {
               height: 0.8,
               color: '#000000'
             },
+
             table: {
               type: 'table',
               position: {
-                x: 28.7,
-                y: 37.85
+                x: 20,
+                y: 46
               },
-              width: 150,
-              height: 57.5,
+              width: 170,
+              height: 53,
               content: JSON.stringify([
                 ["Alice", "New York", "Alice is a freelance web designer and developer"],
                 ["Bob", "Paris", "Bob is a freelance illustrator and graphic designer"]
