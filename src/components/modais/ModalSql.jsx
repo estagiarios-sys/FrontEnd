@@ -11,12 +11,12 @@ function ModalSql({ isOpen, onClose, children }) {
                     <button className="font-bold mx-2 " onClick={onClose}>X</button>
                 </div>
                 <div className="w-full h-full flex flex-row justify-center items-start mt-2">
-                    <div className="w-11/12 h-5/6 bg-neutral-300">
+                    <div className="w-11/12 h-5/6 bg-neutral-300 rounded-md">
                         <h5 className="m-6">Select * FROM Clientes</h5>
                    </div>
                 </div>
             </div>
-            <div className="w-full h-full bg-black absolute top-0 z-10 opacity-70">
+            <div className="w-full h-full bg-black absolute top-0 z-10 opacity-40">
 
             </div>
         </div>

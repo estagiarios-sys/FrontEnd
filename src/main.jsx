@@ -3,34 +3,38 @@ import TabelaCampos from './components/tabelas_campos';
 import CamposSelecionados from './components/CamposSelecionados';
 
 function Main() {
-  const [selectedData, setSelectedData] = useState({
-    tabela: '',
-    relacionada: '',
-    campos: []
-  });
+  const [selectedCampos, setSelectedCampos] = useState([]);
+  const [availableCampos, setAvailableCampos] = useState([]);
 
   const handleDataChange = (data) => {
-    setSelectedData(data);
-  };
-
-  const handleIndividualLeftClick = () => {
-    // Lógica para mover um item individualmente para a esquerda
-    console.log('Mover individualmente para a esquerda');
+    setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo))); 
+    // Filtra os campos disponíveis para excluir os que já estão selecionados
   };
 
   const handleIndividualRightClick = () => {
-    // Lógica para mover um item individualmente para a direita
-    console.log('Mover individualmente para a direita');
+    if (availableCampos.length > 0) {
+      const [firstCampo, ...rest] = availableCampos;
+      setSelectedCampos([...selectedCampos, firstCampo]);
+      setAvailableCampos(rest);
+    }
   };
 
-  const handleAllLeftClick = () => {
-    // Lógica para mover todos os itens para a esquerda
-    console.log('Mover todos para a esquerda');
+  const handleIndividualLeftClick = () => {
+    if (selectedCampos.length > 0) {
+      const [firstCampo, ...rest] = selectedCampos;
+      setAvailableCampos([...availableCampos, firstCampo]);
+      setSelectedCampos(rest);
+    }
   };
 
   const handleAllRightClick = () => {
-    // Lógica para mover todos os itens para a direita
-    console.log('Mover todos para a direita');
+    setSelectedCampos([...selectedCampos, ...availableCampos]);
+    setAvailableCampos([]);
+  };
+
+  const handleAllLeftClick = () => {
+    setAvailableCampos([...availableCampos, ...selectedCampos]);
+    setSelectedCampos([]);
   };
 
   return (
@@ -82,8 +86,8 @@ function Main() {
         </div>
       </div>
       <div>
-        <h1 className="font-bold text-3xl mt-4 mb-6">Campos Selecionados</h1>
-        <CamposSelecionados selectedData={selectedData} />
+        <h1 className="font-bold text-3xl mt-4 mb-6 mr-10">Campos Selecionados</h1>
+        <CamposSelecionados selectedCampos={selectedCampos} />
       </div>
     </div>
   );
