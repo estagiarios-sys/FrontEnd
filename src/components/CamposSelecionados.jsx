@@ -11,9 +11,9 @@ function CamposSelecionados({ selectedData }) {
           </tr>
         </thead>
         <tbody className="text-left">
-          {selectedData.campos.map((campo, index) => (
+          {selectedData.campos.map((name, index) => (
             <tr key={index} className="border-2">
-              <th scope="row" className="border-2 p-2">{campo}</th>
+              <th scope="row" className="border-2 p-2">{name}</th>
               <td>
                 <select name="ordem" id={`ordem-${index}`} className="w-24 p-2">
                   <option value="asc">Ascendente</option>

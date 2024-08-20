@@ -10,29 +10,41 @@ function TabelaCampos({ onDataChange }) {
   const [selectedCampos, setSelectedCampos] = useState([]);
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchTabelas() {
       try {
         // Exemplo de chamada à API para buscar as tabelas
-        const responseTabelas = await fetch('/api/tabelas');
+        const responseTabelas = await fetch('https://jsonplaceholder.typicode.com/todos');
         const tabelasData = await responseTabelas.json();
         setTabelas(tabelasData);
-
-        // Exemplo de chamada à API para buscar as relacionadas
-        const responseRelacionadas = await fetch('/api/relacionadas');
-        const relacionadasData = await responseRelacionadas.json();
-        setRelacionadas(relacionadasData);
-
-        // Exemplo de chamada à API para buscar os campos
-        const responseCampos = await fetch('/api/campos');
-        const camposData = await responseCampos.json();
-        setCampos(camposData);
       } catch (error) {
-        console.error('Erro ao buscar os dados:', error);
+        console.error('Erro ao buscar as tabelas:', error);
       }
     }
 
-    fetchData();
+    fetchTabelas();
   }, []);
+
+  useEffect(() => {
+    async function fetchRelacionadasECampos() {
+      if (!selectedTabela) return;
+
+      try {
+        // Exemplo de chamada à API para buscar as relacionadas com base na tabela selecionada
+        const responseRelacionadas = await fetch(`https://jsonplaceholder.typicode.com/users?table=${selectedTabela}`);
+        const relacionadasData = await responseRelacionadas.json();
+        setRelacionadas(relacionadasData);
+
+        // Exemplo de chamada à API para buscar os campos com base na tabela selecionada
+        const responseCampos = await fetch(`https://jsonplaceholder.typicode.com/users?table=${selectedTabela}`);
+        const camposData = await responseCampos.json();
+        setCampos(camposData);
+      } catch (error) {
+        console.error('Erro ao buscar relacionadas e campos:', error);
+      }
+    }
+
+    fetchRelacionadasECampos();
+  }, [selectedTabela]);
 
   useEffect(() => {
     onDataChange({ tabela: selectedTabela, relacionada: selectedRelacionada, campos: selectedCampos });
@@ -47,14 +59,18 @@ function TabelaCampos({ onDataChange }) {
             name="tabelas"
             id="tabela"
             className="w-56 border-2 border-neutral-300 mt-2"
-            onChange={(e) => setSelectedTabela(e.target.value)}
+            onChange={(e) => {
+              setSelectedTabela(e.target.value);
+              setSelectedRelacionada('');  // Resetando relacionadas e campos ao selecionar nova tabela
+              setSelectedCampos([]);
+            }}
             value={selectedTabela}
           >
             <option value="">Selecione uma tabela</option>
             {tabelas.length > 0 ? (
               tabelas.map((tabela) => (
-                <option key={tabela.id} value={tabela.nome}>
-                  {tabela.nome}
+                <option key={tabela.id} value={tabela.title}>
+                  {tabela.title}
                 </option>
               ))
             ) : (
@@ -76,8 +92,8 @@ function TabelaCampos({ onDataChange }) {
             <option value="">Selecione uma relacionada</option>
             {relacionadas.length > 0 ? (
               relacionadas.map((relacionada) => (
-                <option key={relacionada.id} value={relacionada.nome}>
-                  {relacionada.nome}
+                <option key={relacionada.id} value={relacionada.name}>
+                  {relacionada.name}
                 </option>
               ))
             ) : (
@@ -99,8 +115,8 @@ function TabelaCampos({ onDataChange }) {
           >
             {campos.length > 0 ? (
               campos.map((campo) => (
-                <option key={campo.id} value={campo.nome}>
-                  {campo.nome}
+                <option key={campo.id} value={campo.username}>
+                  {campo.username}
                 </option>
               ))
             ) : (

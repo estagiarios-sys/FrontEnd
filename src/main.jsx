@@ -13,6 +13,26 @@ function Main() {
     setSelectedData(data);
   };
 
+  const handleIndividualLeftClick = () => {
+    // Lógica para mover um item individualmente para a esquerda
+    console.log('Mover individualmente para a esquerda');
+  };
+
+  const handleIndividualRightClick = () => {
+    // Lógica para mover um item individualmente para a direita
+    console.log('Mover individualmente para a direita');
+  };
+
+  const handleAllLeftClick = () => {
+    // Lógica para mover todos os itens para a esquerda
+    console.log('Mover todos para a esquerda');
+  };
+
+  const handleAllRightClick = () => {
+    // Lógica para mover todos os itens para a direita
+    console.log('Mover todos para a direita');
+  };
+
   return (
     <div className="flex justify-around items-start">
       <div>
@@ -21,32 +41,44 @@ function Main() {
       </div>
       <div>
         <div className='mt-36'>
-          <div className='rounded-full bg-neutral-300 w-10 h-10 my-3 justify-center items-center flex'>
+          <button 
+            onClick={handleIndividualLeftClick} 
+            className='rounded-full bg-neutral-300 w-10 h-10 my-3 justify-center items-center flex'
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
             </svg>
-          </div>
+          </button>
         </div>
         <div>
-          <div className='rounded-full bg-neutral-300 h-10 my-3 justify-center items-center flex'>
+          <button 
+            onClick={handleIndividualRightClick} 
+            className='rounded-full bg-neutral-300 w-10 h-10 my-3 justify-center items-center flex'
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
             </svg>
-          </div>
+          </button>
         </div>
         <div>
-          <div className='rounded-full bg-red-700 w-10 h-10 my-3 justify-center items-center flex'>
+          <button 
+            onClick={handleAllLeftClick} 
+            className='rounded-full bg-red-700 w-10 h-10 my-3 justify-center items-center flex'
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
             </svg>
-          </div>
+          </button>
         </div>
         <div>
-          <div className='rounded-full bg-red-700 w-10 h-10 my-3 justify-center items-center flex'>
+          <button 
+            onClick={handleAllRightClick} 
+            className='rounded-full bg-red-700 w-10 h-10 my-3 justify-center items-center flex'
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
             </svg>
-          </div>
+          </button>
         </div>
       </div>
       <div>
