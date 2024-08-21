@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import ModalSql from "./modais/ModalSql";
+import ModalSql from "../modais/ModalSql";
 import { useNavigate } from 'react-router-dom';
 
 function GerarRelatorio() {
