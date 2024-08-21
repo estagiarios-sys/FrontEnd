@@ -7,11 +7,14 @@ import GerarRelatorio from './components/GerarRelatorio';
 function Main() {
   const [selectedCampos, setSelectedCampos] = useState([]);
   const [availableCampos, setAvailableCampos] = useState([]);
+  const [selectedTabela, setSelectedTabela] = useState('');
 
   const handleDataChange = (data) => {
     setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo)));
+    setSelectedTabela(data.tabela);
 
   };
+
 
   const handleIndividualRightClick = () => {
     if (availableCampos.length > 0) {
@@ -38,6 +41,8 @@ function Main() {
     setAvailableCampos([...availableCampos, ...selectedCampos]);
     setSelectedCampos([]);
   };
+
+  
 
   return (
     <div className='flex flex-col justify-center'>
@@ -93,10 +98,13 @@ function Main() {
           <CamposSelecionados selectedCampos={selectedCampos} />
         </div>
       </div>
-      <GerarRelatorio selectedColumns={selectedCampos} />
+      <GerarRelatorio selectedColumns={selectedCampos} selectTable={selectedTabela}/>
+        
     </div>
 
   );
+
+  
 }
 
 export default Main;
