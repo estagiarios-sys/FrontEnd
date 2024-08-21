@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 
 function TabelaCampos({ onDataChange }) {
   const [jsonData, setJsonData] = useState({});
@@ -9,9 +10,8 @@ function TabelaCampos({ onDataChange }) {
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        // Exemplo de chamada à API para buscar o JSON
         const response = await fetch('http://localhost:8080/procurar/tabela', {
-          credentials: 'include' // Se precisar enviar cookies ou outros credenciais
+          credentials: 'include'
         });
 
         if (!response.ok) {
@@ -21,7 +21,7 @@ function TabelaCampos({ onDataChange }) {
         const data = await response.json();
         console.log('Dados recebidos:', data);
 
-        setJsonData(data); // Armazene o JSON no estado
+        setJsonData(data);
       } catch (error) {
         console.error('Erro ao buscar os dados do JSON:', error);
       }
@@ -36,76 +36,76 @@ function TabelaCampos({ onDataChange }) {
     onDataChange({ tabela: selectedTabela, relacionada: selectedRelacionada, campos: selectedCampos });
   }, [selectedTabela, selectedRelacionada, selectedCampos, onDataChange]);
 
+  
+  const tabelaOptions = tabelas.map(tabela => ({
+    value: tabela,
+    label: tabela,
+  }));
+
+  
+  const campoOptions = selectedTabela && jsonData[selectedTabela]
+    ? jsonData[selectedTabela].map(campo => ({ value: campo, label: campo }))
+    : [];
+
+  
+  const relacionadaOptions = [
+    { value: 'relacionada1', label: 'Relacionada 1' },
+    { value: 'relacionada2', label: 'Relacionada 2' }
+  ];
+
   return (
     <div className="flex flex-col justify-start items-start ml-20">
       <div className="mt-5">
         <label htmlFor="tabelas">Tabela</label>
         <div>
-          <select
+          <Select
             name="tabelas"
-            id="tabela"
-            className="w-56 border-2 border-neutral-300 mt-2"
-            onChange={(e) => {
-              setSelectedTabela(e.target.value);
-              setSelectedRelacionada('');  // Resetando relacionadas e campos ao selecionar nova tabela
+            options={tabelaOptions}
+            className="basic-single w-60"
+            classNamePrefix="Select"
+            placeholder="Selecione uma tabela..."
+            onChange={(selectedOption) => {
+              setSelectedTabela(selectedOption ? selectedOption.value : '');
+              setSelectedRelacionada('');  
               setSelectedCampos([]);
             }}
-            value={selectedTabela}
-          >
-            <option value="">Selecione uma tabela</option>
-            {tabelas.length > 0 ? (
-              tabelas.map((tabela) => (
-                <option key={tabela} value={tabela}>
-                  {tabela}
-                </option>
-              ))
-            ) : (
-              <option value="" disabled>Nenhuma tabela disponível</option>
-            )}
-          </select>
+            value={tabelaOptions.find(option => option.value === selectedTabela)}
+          />
         </div>
       </div>
 
       <div className="mt-5">
         <label htmlFor="relacionadas">Relacionadas</label>
         <div>
-          <select
+          <Select
             name="relacionadas"
-            id="relacionada"
-            className="w-56 border-2 border-neutral-300 mt-2"
-            onChange={(e) => setSelectedRelacionada(e.target.value)}
-            value={selectedRelacionada}
-          >
-            <option value="">Selecione uma relacionada</option>
-            {/* Coloque aqui as opções para as relacionadas */}
-            {/* Você pode adicionar as opções das tabelas relacionadas conforme sua necessidade */}
-            <option value="relacionada1">Relacionada 1</option>
-            <option value="relacionada2">Relacionada 2</option>
-          </select>
+            options={relacionadaOptions}
+            className="basic-single w-60"
+            classNamePrefix="Select"
+            placeholder="Selecione outra tabela..."
+            onChange={(selectedOption) => {
+              setSelectedRelacionada(selectedOption ? selectedOption.value : '');
+            }}
+            value={relacionadaOptions.find(option => option.value === selectedRelacionada)}
+          />
         </div>
       </div>
 
       <div className="mt-5">
         <label htmlFor="campos">Campos</label>
         <div>
-          <select
+          <Select
+            isMulti
             name="campos"
-            id="campo"
-            className="w-56 border-2 border-neutral-300 mt-2"
-            multiple
-            onChange={(e) => setSelectedCampos([...e.target.selectedOptions].map(o => o.value))}
-            value={selectedCampos}
-          >
-            {selectedTabela && jsonData[selectedTabela] ? (
-              jsonData[selectedTabela].map((campo) => (
-                <option key={campo} value={campo}>
-                  {campo}
-                </option>
-              ))
-            ) : (
-              <option value="" disabled>Nenhum campo disponível</option>
-            )}
-          </select>
+            options={campoOptions}
+            className="basic-multi-select w-60"
+            classNamePrefix="Select"
+            placeholder="Selecione os Campos..."
+            onChange={(selectedOptions) => {
+              setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
+            }}
+            value={campoOptions.filter(option => selectedCampos.includes(option.value))}
+          />
         </div>
       </div>
     </div>
