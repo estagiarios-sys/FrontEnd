@@ -3,18 +3,17 @@ import TabelaCampos from './components/tabelas_campos';
 import CamposSelecionados from './components/CamposSelecionados';
 import GerarRelatorio from './components/GerarRelatorio';
 
-
 function Main() {
   const [selectedCampos, setSelectedCampos] = useState([]);
   const [availableCampos, setAvailableCampos] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
+  const [selectedRelacionada, setSelectedRelacionada] = useState(''); // Adicionando o estado para tabela relacionada
 
   const handleDataChange = (data) => {
     setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo)));
     setSelectedTabela(data.tabela);
-
+    setSelectedRelacionada(data.relacionada); // Atualize o estado com a tabela relacionada
   };
-
 
   const handleIndividualRightClick = () => {
     if (availableCampos.length > 0) {
@@ -41,8 +40,6 @@ function Main() {
     setAvailableCampos([...availableCampos, ...selectedCampos]);
     setSelectedCampos([]);
   };
-
-  
 
   return (
     <div className='flex flex-col justify-center'>
@@ -98,13 +95,13 @@ function Main() {
           <CamposSelecionados selectedCampos={selectedCampos} />
         </div>
       </div>
-      <GerarRelatorio selectedColumns={selectedCampos} selectTable={selectedTabela}/>
-        
+      <GerarRelatorio 
+        selectedColumns={selectedCampos} 
+        selectTable={selectedTabela}
+        selectedRelacionada={selectedRelacionada} // Passe a tabela relacionada para o GerarRelatorio
+      />
     </div>
-
   );
-
-  
 }
 
 export default Main;
