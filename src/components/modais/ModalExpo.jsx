@@ -1,4 +1,5 @@
 import React from "react";
+import {generatePDF} from "../PDF/pdfGenerate";
 
 function ModalExpo({ isOpen, onClose }) {
     if (!isOpen) return null;
@@ -63,7 +64,7 @@ function ModalExpo({ isOpen, onClose }) {
                         gap: '60px', // Espaçamento entre os botões
                     }}
                 >
-                    <button
+                    <button onClick={generatePDF}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -96,7 +97,9 @@ function ModalExpo({ isOpen, onClose }) {
                         </svg>
                         <span>Baixar PDF</span>
                     </button>
-                    <button
+
+
+                    <button 
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
