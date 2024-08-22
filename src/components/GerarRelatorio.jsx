@@ -196,8 +196,8 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
                     </div>
                 </div>
             </div>
-            <div className="w-full flex flex-col justify-center items-center">
-                <canvas id="tabelas" ref={canvasRef} className='border-2 border-neutral-600 my-3 w-10/12' width="800" height="400"></canvas>
+            <div className="border-2 border-neutral-600 my-3 w-10/12 h-96 overflow-auto mx-auto">
+                <canvas id="tabelas" ref={canvasRef} className='w-full'></canvas>
             </div>
             <ModalSql isOpen={isModalOpen} onClose={closeModal} />
         </div>
