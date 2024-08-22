@@ -22,11 +22,11 @@ function ModalPdf({ isOpen, onClose }) {
       <div
         style={{
           backgroundColor: '#fff',
-          padding: '0px',
+          padding: '0px', // Adicionando padding para espaçamento interno, removi para ocultar o fundo branco
           borderRadius: '5px',
           position: 'relative',
           width: '80%',
-          maxWidth: '600px', // Limite máximo para a largura
+          maxWidth: '600px', // Aumentando o limite máximo para a largura
           maxHeight: '90%', // Garantindo que a altura não exceda 90% da tela
           overflowY: 'auto', // Permitindo rolagem se o conteúdo exceder a altura do modal
         }}
@@ -39,7 +39,6 @@ function ModalPdf({ isOpen, onClose }) {
             right: '10px',
             backgroundColor: 'rgba(255, 255, 255, 0.8)', // Fundo semi-transparente
             border: '1px solid #ccc', // Borda cinza clara
-            borderRadius: '0%', 
             width: '60px', // Largura do botão
             height: '30px', // Altura do botão
             display: 'flex',
@@ -52,6 +51,7 @@ function ModalPdf({ isOpen, onClose }) {
         >
           Fechar
         </button>
+        <View /> {/* Componente que exibe o PDF */}
       </div>
     </div>
   );
