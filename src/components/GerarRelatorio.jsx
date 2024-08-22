@@ -1,11 +1,14 @@
-
 import React, { useState, useRef } from "react";
 import ModalSql from "./modais/ModalSql";
-
+import ModalPdf from "./modais/ModalPdf";
 import { useNavigate } from 'react-router-dom';
+import View from './PDF/pdfViewer';
 
 function GerarRelatorio({ selectedColumns, selectTable }) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [isModalSqlOpen, setIsModalSqlOpen] = useState(false);
+    const [isModalPdfOpen, setIsModalPdfOpen] = useState(false);
+
     const navigate = useNavigate();
     const canvasRef = useRef(null);
 
@@ -14,11 +17,19 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
     };
 
     const handleModalSql = () => {
-        setIsModalOpen(true);
+        setIsModalSqlOpen(true);
     };
 
-    const closeModal = () => {
-        setIsModalOpen(false);
+    const handleModalPdf = () => {
+        setIsModalPdfOpen(true);
+    };
+
+    const closeModalSql = () => {
+        setIsModalSqlOpen(false);
+    };
+
+    const closeModalPdf = () => {
+        setIsModalPdfOpen(false);
     };
 
     const fetchData = async (columns) => {
@@ -40,16 +51,14 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
             console.error('Erro ao buscar os dados:', error);
             return [];
         }
-
-
     };
 
 
 
     const handleGenerateReport = async () => {
 
-        console.log('Colunas selecionadas:', selectedColumns)
-        console.log('Tabelas selecionas:', selectTable)
+        console.log('Colunas selecionadas:', selectedColumns);
+        console.log('Tabelas selecionas:', selectTable);
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
 
@@ -103,6 +112,8 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
         }
     };
 
+
+
     return (
         <div className="flex flex-col w-full">
             <div className="w-full flex flex-row justify-between mt-4">
@@ -155,8 +166,8 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={redirectToPDF}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">                                   
+                            <button onClick={handleModalPdf}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Zm3.75 11.625a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                                 <label htmlFor="mais">Prévia</label>
@@ -177,9 +188,11 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
             <div className="w-full flex flex-col justify-center items-center">
                 <canvas id="tabelas" ref={canvasRef} className='border-2 border-neutral-600 my-3 w-10/12' width="800" height="400"></canvas>
             </div>
-            <ModalSql isOpen={isModalOpen} onClose={closeModal} />
+            <ModalSql isOpen={isModalSqlOpen} onClose={closeModalSql} />
+            <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} />
         </div>
     );
 }
+
 
 export default GerarRelatorio;
