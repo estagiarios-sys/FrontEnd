@@ -103,7 +103,7 @@ export default function View() {
       ]
     };
     
-    const inputs = [{ titulo: 'teste', op_produto: '10', qrcode: 'https://systextil.com.br/', barcodes: 'https://systextil.com.br/', infos: 'Informações Genéricas...', line_1: 'teste', line_2: 'teste' }];
+    const inputs = [{ titulo: '', op_produto: '10', qrcode: 'https://systextil.com.br/', barcodes: 'https://systextil.com.br/', infos: 'Informações Genéricas...', line_1: 'teste', line_2: 'teste' }];
 
     if (domContainer) {
       new Viewer({ domContainer, template, inputs });

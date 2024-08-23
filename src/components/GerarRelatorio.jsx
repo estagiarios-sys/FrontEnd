@@ -1,24 +1,17 @@
-
 import React, { useState, useRef, useEffect } from "react";
-import ModalSql from "./modais/ModalSql";
-import { useNavigate } from 'react-router-dom';
-
-function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [relationshipData, setRelationshipData] = useState([]);
-
-import React, { useState, useRef } from "react";
 import ModalSql from "./modais/ModalSql";
 import ModalPdf from "./modais/ModalPdf";
 import ModalExpo from "./modais/ModalExpo";
 import { useNavigate } from 'react-router-dom';
 
 
-function GerarRelatorio({ selectedColumns, selectTable }) {
+function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
     const [isModalSqlOpen, setIsModalSqlOpen] = useState(false);
     const [isModalPdfOpen, setIsModalPdfOpen] = useState(false);
     const [isModalExpoOpen, setIsModalExpoOpen] = useState(false);
+
+    const [relationshipData, setRelationshipData] = useState([]);
 
     const handleModalExpo = () => {
         setIsModalExpoOpen(true);
@@ -52,7 +45,7 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
             try {
                 const response = await fetch('http://localhost:8080/procurar/relationship');
                 const data = await response.json();
-               
+
                 setRelationshipData(data);
             } catch (error) {
                 console.error('Erro ao buscar os relacionamentos:', error);
@@ -67,7 +60,7 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
     };
 
     const handleSaveQuery = () => {
-        console.log ('Consulta salva com sucesso!');
+        console.log('Consulta salva com sucesso!');
     };
 
     const fetchData = async () => {
@@ -172,30 +165,30 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
             <div className="w-full flex flex-row justify-between mt-4">
                 <div className="flex flex-col justify-start items-start ml-36">
                     <h1 className="font-bold text-3xl">Ações</h1>
-                    <div className="flex mt-3"> 
+                    <div className="flex mt-3">
                         <button
                             className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm mr-2"
                             onClick={handleGenerateReport}
-                            >
-                        Gerar Relatório
+                        >
+                            Gerar Relatório
                         </button>
                         <button
                             className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
-                            onClick={handleSaveQuery} 
-                            >
-                        Salvar Consulta
+                            onClick={handleSaveQuery}
+                        >
+                            Salvar Consulta
                         </button>
                     </div>
                 </div>
                 <div className="flex mr-36 justify-center items-center">
-                <div className="mx-2">
+                    <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                        <button onClick={redirectToPDF}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
-                            </svg>
-                            <label htmlFor="mais">Salvos</label>
-                         </button>
+                            <button className="flex flex-col justify-center items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
+                                </svg>
+                                <label htmlFor="mais">Salvos</label>
+                            </button>
                         </div>
                     </div>
                     <div className="mx-2">
@@ -218,13 +211,12 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-
-                            <button onClick={redirectToPDF}>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" name="mais" />
-                            </svg>
-                            <label htmlFor="mais">Condições</label>
+                            <button  className="flex flex-col justify-center items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" name="mais" />
+                                </svg>
+                                <label htmlFor="mais">Condições</label>
+                            </button>
                         </div>
                     </div>
                     <div className="mx-2">
