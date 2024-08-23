@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Designer } from '@pdfme/ui';
 import { Template } from '@pdfme/common';
 import { text, image, barcodes, line, rectangle, ellipse, svg, tableBeta } from "@pdfme/schemas";
-//import { generate } from '@pdfme/generator';
 
 export default function Nova() {
   useEffect(() => {
