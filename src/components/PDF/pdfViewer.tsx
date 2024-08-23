@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
 import type { Template } from '@pdfme/common';
+import React, { useEffect } from 'react';
 import { Viewer } from '@pdfme/ui';
 
 export default function View() {
   useEffect(() => {
 
-    const domContainer = document.getElementById('designer-container');
+    const domContainer = document.getElementById('container');
 
     const template: Template = {
 
@@ -17,18 +17,8 @@ export default function View() {
 
       schemas: [
         {
-          top: {
-            type: 'text',
-            position: {
-              x: 0,
-              y: 0
-            },
-            width: 210.02,
-            height: 30,
-          },
           titulo: {
             type: 'text',
-            content: 'Título Aqui',
             fontSize: 47,
             position: {
               x: 64,
@@ -37,9 +27,9 @@ export default function View() {
             width: 81.1,
             height: 15.2,
           },
+
           op_produto: {
             type: 'text',
-            content: 'op: 555555',
             fontSize: 20,
             position: {
               x: 166,
@@ -48,9 +38,19 @@ export default function View() {
             width: 36,
             height: 8.5,
           },
+
+          image: {
+            type: 'image',
+            position: {
+              x: 8.7,
+              y: 2.9
+            },
+            width: 33,
+            height: 25
+          },
+
           qrcode: {
             type: 'qrcode',
-            content: 'https://systextil.com.br/',
             position: {
               x: 7.1,
               y: 271
@@ -58,9 +58,9 @@ export default function View() {
             width: 26.60,
             height: 23
           },
+
           barcodes: {
             type: 'code128',
-            content: 'https://systextil.com.br/',
             position: {
               x: 148.50,
               y: 272
@@ -68,9 +68,9 @@ export default function View() {
             width: 56,
             height: 19.4
           },
+
           infos: {
             type: 'text',
-            content: 'Informações Genéricas...',
             fontSize: 20,
             position: {
               x: 56.7,
@@ -79,6 +79,7 @@ export default function View() {
             width: 87,
             height: 9.8,
           },
+
           line_1: {
             type: 'line',
             position: {
@@ -89,6 +90,7 @@ export default function View() {
             height: 0.8,
             color: '#000000'
           },
+
           line_2: {
             type: 'line',
             position: {
@@ -98,12 +100,91 @@ export default function View() {
             width: 194,
             height: 0.8,
             color: '#000000'
+
           },
+
+          table: {
+            type: 'table',
+            position: {
+              x: 28.7,
+              y: 37.85
+            },
+            width: 150,
+            height: 57.5,
+            showHead: true,
+            head: ["Name", "City", "Description"],
+            headWidthPercentages: [30, 30, 40],
+            tableStyles: {
+              borderWidth: 0.3,
+              borderColor: "#000000"
+            },
+            headStyles: {
+              fontName: "Helvetica",
+              fontSize: 13,
+              characterSpacing: 0,
+              alignment: "left",
+              verticalAlignment: "middle",
+              lineHeight: 1,
+              fontColor: "#ffffff",
+              backgroundColor: "#2980ba",
+              borderWidth: {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0
+              },
+              padding: {
+                top: 5,
+                right: 5,
+                bottom: 5,
+                left: 5
+              }
+            },
+            bodyStyles: {
+              fontName: "Helvetica",
+              fontSize: 13,
+              characterSpacing: 0,
+              alignment: "left",
+              verticalAlignment: "middle",
+              lineHeight: 1,
+              fontColor: "#000000",
+              borderColor: "#888888",
+              alternateBackgroundColor: "#f5f5f5",
+              borderWidth: {
+                top: 0.1,
+                right: 0.1,
+                bottom: 0.1,
+                left: 0.1
+              },
+              padding: {
+                top: 5,
+                right: 5,
+                bottom: 5,
+                left: 5
+              }
+            },
+            columnStyles: {}
+          }
         }
       ]
     };
-    
-    const inputs = [{ titulo: '', op_produto: '10', qrcode: 'https://systextil.com.br/', barcodes: 'https://systextil.com.br/', infos: 'Informações Genéricas...', line_1: 'teste', line_2: 'teste' }];
+
+    const inputs = [
+      {
+        table: [
+          ["Alice", "New York", "Alice is a freelance web designer and developer"],
+          ["Bob", "Paris", "Bob is a freelance illustrator and graphic designer"]
+        ],
+        titulo: 'Título Aqui',
+        op_produto: 'op: 555555',
+        qrcode: 'https://systextil.com.br/',
+        barcodes: 'https://systextil.com.br/',
+        infos: 'Informações Genéricas...',
+        image: '',
+        line_1: 'test',
+        line_2: 'test'
+      }
+    ];
 
     if (domContainer) {
       new Viewer({ domContainer, template, inputs });
@@ -112,5 +193,5 @@ export default function View() {
     }
   }, []);
 
-  return <div id="designer-container" style={{ width: '100%', height: '100%' }}></div>;
+  return <div id="container" style={{ width: '100%', height: '100%' }}></div>;
 }
