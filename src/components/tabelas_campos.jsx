@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Select from 'react-select';
 
 function TabelaCampos({ onDataChange }) {
@@ -58,39 +58,52 @@ function TabelaCampos({ onDataChange }) {
     label: tabela,
   }));
 
-  const campoOptions = [];
+  const campoOptions = useMemo(() => {
+    const options = [];
 
-  // Adiciona campos da tabela selecionada
-  if (selectedTabela && jsonData[selectedTabela]) {
-    jsonData[selectedTabela].forEach(campo => {
-      campoOptions.push({ value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
-    });
-  }
-
-  // Adiciona campos das tabelas relacionadas
-  if (selectedRelacionada && selectedTabela) {
-    relationships
-      .filter(rel => rel.tabelas.includes(selectedTabela) && rel.tabelas.includes(selectedRelacionada))
-      .forEach(rel => {
-        const [table1, table2] = rel.tabelas.split(' e ');
-        const relatedTable = table1 === selectedTabela ? table2 : table1;
-
-        if (jsonData[relatedTable]) {
-          jsonData[relatedTable].forEach(campo => {
-            campoOptions.push({ value: `${relatedTable}.${campo}`, label: `${relatedTable} - ${campo}` });
-          });
-        }
+    if (selectedTabela && jsonData[selectedTabela]) {
+      jsonData[selectedTabela].forEach(campo => {
+        options.push({ value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
       });
-  }
+    }
 
-  const relacionadaOptions = selectedTabela
-    ? relationships
-        .filter(rel => rel.tabelas.includes(selectedTabela))  
-        .map(relacionada => ({
-          value: relacionada.tabelas.replace(selectedTabela, '').replace(' e ', '').trim(),
-          label: relacionada.tabelas.replace(selectedTabela, '').replace(' e ', '').trim(),
+    if (selectedRelacionada && selectedTabela) {
+      relationships
+        .filter(rel => rel.tabelas.includes(selectedTabela) && rel.tabelas.includes(selectedRelacionada))
+        .forEach(rel => {
+          const [table1, table2] = rel.tabelas.split(' e ');
+          const relatedTable = table1 === selectedTabela ? table2 : table1;
+
+          if (jsonData[relatedTable]) {
+            jsonData[relatedTable].forEach(campo => {
+              options.push({ value: `${relatedTable}.${campo}`, label: `${relatedTable} - ${campo}` });
+            });
+          }
+        });
+    }
+
+    // Remove duplicatas dos campos
+    return [...new Set(options.map(option => option.value))].map(value => {
+      const [table, campo] = value.split('.');
+      return { value, label: `${table} - ${campo}` };
+    });
+  }, [selectedTabela, selectedRelacionada, jsonData, relationships]);
+
+  const relacionadaOptions = useMemo(() => {
+    return selectedTabela
+      ? [...new Set(
+          relationships
+            .filter(rel => rel.tabelas.includes(selectedTabela))
+            .flatMap(relacionada => 
+              relacionada.tabelas.split(' e ')
+                .filter(tabela => tabela !== selectedTabela)
+            )
+        )].map(value => ({
+          value,
+          label: value,
         }))
-    : [];
+      : [];
+  }, [selectedTabela, relationships]);
 
   return (
     <div className="flex flex-col justify-start items-start ml-20">
@@ -136,7 +149,7 @@ function TabelaCampos({ onDataChange }) {
           <Select
             isMulti
             name="campos"
-            options={[...new Set(campoOptions)]} // Remove campos duplicados
+            options={campoOptions} // Já sem duplicatas
             className="basic-multi-select w-60"
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."
