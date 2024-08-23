@@ -37,7 +37,7 @@ function TabelaCampos({ onDataChange }) {
         }
 
         const data = await response.json();
-        setRelationships(data); // Armazena os relacionamentos no estado
+        setRelationships(data); 
       } catch (error) {
         console.error('Erro ao buscar as relações:', error);
       }
@@ -58,17 +58,37 @@ function TabelaCampos({ onDataChange }) {
     label: tabela,
   }));
 
-  const campoOptions = selectedTabela && jsonData[selectedTabela]
-    ? jsonData[selectedTabela].map(campo => ({ value: campo, label: campo }))
-    : [];
+  const campoOptions = [];
 
-  // Filtra as relações para mostrar apenas aquelas relacionadas com a tabela selecionada
+  // Adiciona campos da tabela selecionada
+  if (selectedTabela && jsonData[selectedTabela]) {
+    jsonData[selectedTabela].forEach(campo => {
+      campoOptions.push({ value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
+    });
+  }
+
+  // Adiciona campos das tabelas relacionadas
+  if (selectedRelacionada && selectedTabela) {
+    relationships
+      .filter(rel => rel.tabelas.includes(selectedTabela) && rel.tabelas.includes(selectedRelacionada))
+      .forEach(rel => {
+        const [table1, table2] = rel.tabelas.split(' e ');
+        const relatedTable = table1 === selectedTabela ? table2 : table1;
+
+        if (jsonData[relatedTable]) {
+          jsonData[relatedTable].forEach(campo => {
+            campoOptions.push({ value: `${relatedTable}.${campo}`, label: `${relatedTable} - ${campo}` });
+          });
+        }
+      });
+  }
+
   const relacionadaOptions = selectedTabela
     ? relationships
-        .filter(rel => rel.tabelas.includes(selectedTabela))  // Filtra as relações com base na tabela selecionada
+        .filter(rel => rel.tabelas.includes(selectedTabela))  
         .map(relacionada => ({
-          value: relacionada.tabelas.replace(selectedTabela, '').replace(' e ', '').trim(),  // Obtém a outra tabela relacionada
-          label: relacionada.tabelas.replace(selectedTabela, '').replace(' e ', '').trim(), // Formata o nome da tabela relacionada
+          value: relacionada.tabelas.replace(selectedTabela, '').replace(' e ', '').trim(),
+          label: relacionada.tabelas.replace(selectedTabela, '').replace(' e ', '').trim(),
         }))
     : [];
 
@@ -116,7 +136,7 @@ function TabelaCampos({ onDataChange }) {
           <Select
             isMulti
             name="campos"
-            options={campoOptions}
+            options={[...new Set(campoOptions)]} // Remove campos duplicados
             className="basic-multi-select w-60"
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."
