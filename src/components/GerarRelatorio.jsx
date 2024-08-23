@@ -1,8 +1,10 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import ModalSql from "./modais/ModalSql";
 import ModalPdf from "./modais/ModalPdf";
 import ModalExpo from "./modais/ModalExpo";
 import { useNavigate } from 'react-router-dom';
+
 
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
@@ -95,6 +97,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 },
             });
 
+
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
@@ -102,6 +105,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             const data = await response.json();
 
             return selectedColumns.map((column, index) => ({
+
                 column,
                 values: data.map(row => row[index]) // Acessa pelo índice
             }));
@@ -112,6 +116,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     };
 
     const handleGenerateReport = async () => {
+
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
 
@@ -155,8 +160,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             ctx.strokeRect(10, 30, canvas.width - 20, 40 + data[0].values.length * 40);
         } else {
             ctx.fillText('Nenhum dado encontrado.', 10, 40);
+
         }
-    };
+    }, [selectedColumns, selectTable]);
 
 
 
@@ -183,7 +189,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 <div className="flex mr-36 justify-center items-center">
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
+
                             <button className="flex flex-col justify-center items-center">
+
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
                                 </svg>
@@ -228,7 +236,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                                 </svg>
                                 <label htmlFor="mais">Editar</label>
 
-
                             </button>
                         </div>
                     </div>
@@ -239,7 +246,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Zm3.75 11.625a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                                 <label htmlFor="mais">Prévia</label>
-
                             </button>
                         </div>
                     </div>
@@ -255,8 +261,31 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                 </div>
             </div>
-            <div className="w-full flex flex-col justify-center items-center">
-                <canvas id="tabelas" ref={canvasRef} className='border-2 border-neutral-600 my-3 w-10/12' width="800" height="400"></canvas>
+            <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
+                <table className="w-full text-sm">
+                    <thead className="bg-gray-200">
+                        <tr>
+                            {selectedColumns.map((column, index) => (
+                                <th key={index} className="p-2 border-b">{column}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {tableData.length > 0 ? (
+                            tableData[0].values.map((_, rowIndex) => (
+                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                                    {selectedColumns.map((column, colIndex) => (
+                                        <td key={colIndex} className="p-2 border-b">{tableData[colIndex].values[rowIndex]}</td>
+                                    ))}
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={selectedColumns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
             <ModalSql isOpen={isModalSqlOpen} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} />
