@@ -1,26 +1,37 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import ModalSql from "./modais/ModalSql";
 import ModalPdf from "./modais/ModalPdf";
 import ModalExpo from "./modais/ModalExpo";
+import ModalSalvos from "./modais/ModalSalvos";
+import ModalCondicao from "./modais/ModalCondicoes";
 import { useNavigate } from 'react-router-dom';
-
-
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
-    const [isModalSqlOpen, setIsModalSqlOpen] = useState(false);
+    const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false);
+    const [isModalOpenSQl, setIsModalOpenSQL] = useState(false);
+    const [isModalOpenCondicao, setIsModalOpenCondicao] = useState(false);
     const [isModalPdfOpen, setIsModalPdfOpen] = useState(false);
     const [isModalExpoOpen, setIsModalExpoOpen] = useState(false);
 
     const [relationshipData, setRelationshipData] = useState([]);
+    const [tableData, setTableData] = useState([]);
+    const [columns, setColumns] = useState([]);
+
+    const handleModalCondicao = () => {
+        setIsModalOpenCondicao(true);
+    };
+
+    const handleModalSalvos = () => {
+        setIsModalOpenSalvos(true);
+    };
 
     const handleModalExpo = () => {
         setIsModalExpoOpen(true);
     };
 
     const handleModalSql = () => {
-        setIsModalSqlOpen(true);
+        setIsModalOpenSQL(true);
     };
 
     const handleModalPdf = () => {
@@ -32,22 +43,28 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     };
 
     const closeModalSql = () => {
-        setIsModalSqlOpen(false);
+        setIsModalOpenSQL(false);
     };
 
     const closeModalPdf = () => {
         setIsModalPdfOpen(false);
     };
 
+    const closeModalCondicao = () => {
+        setIsModalOpenCondicao(false);
+    };
+
+    const closeModalSalvos = () => {
+        setIsModalOpenSalvos(false);
+    };
+
     const navigate = useNavigate();
-    const canvasRef = useRef(null);
 
     useEffect(() => {
         const fetchRelationshipData = async () => {
             try {
                 const response = await fetch('http://localhost:8080/procurar/relationship');
                 const data = await response.json();
-
                 setRelationshipData(data);
             } catch (error) {
                 console.error('Erro ao buscar os relacionamentos:', error);
@@ -74,7 +91,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             if (selectedRelacionada && relationshipData.length > 0) {
                 const tablePair = `${selectTable} e ${selectedRelacionada}`;
-
                 const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
                 if (relationship) {
                     console.log('Relacionamento encontrado:', relationship);
@@ -82,13 +98,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 } else {
                     console.log('Relacionamento não encontrado para:', tablePair);
                 }
-
             }
 
             const url = `http://localhost:8080/procurar/table/${selectTable}?${queryParams.toString()}${joinParam ? `&joins=${encodeURIComponent(joinParam)}` : ''}`;
-
-            console.log('URL gerada:', url); // Verifique a URL gerada
-            console.log('Join encontrado:', joinParam);
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -97,7 +109,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 },
             });
 
-
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
@@ -105,7 +116,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             const data = await response.json();
 
             return selectedColumns.map((column, index) => ({
-
                 column,
                 values: data.map(row => row[index]) // Acessa pelo índice
             }));
@@ -116,55 +126,11 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     };
 
     const handleGenerateReport = async () => {
-
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-
-        // Limpar o canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Configurações básicas do texto
-        ctx.font = '16px "Segoe UI", Arial';
-        ctx.fillStyle = 'black';
-
         const data = await fetchData();
         console.log('Dados recebidos para as colunas:', data);
-
-        if (data.length > 0) {
-            ctx.fillStyle = '#01aab5';
-            ctx.fillRect(10, 30, canvas.width - 20, 40);
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 18px "Segoe UI", Arial';
-
-            selectedColumns.forEach((column, index) => {
-                ctx.fillText(column, 20 + index * 200, 55);
-            });
-
-            ctx.font = '16px "Segoe UI", Arial';
-            data[0].values.forEach((_, rowIndex) => {
-                const yPosition = 90 + rowIndex * 40;
-
-                ctx.fillStyle = rowIndex % 2 === 0 ? '#F1F1F1' : '#FFFFFF';
-                ctx.fillRect(10, yPosition - 20, canvas.width - 20, 40);
-
-                selectedColumns.forEach((column, colIndex) => {
-                    const value = data[colIndex].values[rowIndex];
-                    ctx.fillStyle = 'black';
-                    ctx.fillText(value, 20 + colIndex * 200, yPosition);
-                });
-            });
-
-            // Adicionar bordas à tabela
-            ctx.strokeStyle = '#CCCCCC';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(10, 30, canvas.width - 20, 40 + data[0].values.length * 40);
-        } else {
-            ctx.fillText('Nenhum dado encontrado.', 10, 40);
-
-        }
-    }, [selectedColumns, selectTable]);
-
-
+        setTableData(data);  // Atualize o estado com os dados recebidos
+        setColumns(selectedColumns);  // Atualize o estado com as colunas selecionadas
+    };
 
     return (
         <div className="flex flex-col w-full">
@@ -189,9 +155,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 <div className="flex mr-36 justify-center items-center">
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-
-                            <button className="flex flex-col justify-center items-center">
-
+                            <button onClick={handleModalSalvos} className="flex flex-col justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
                                 </svg>
@@ -219,11 +183,11 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button  className="flex flex-col justify-center items-center">
+                            <button onClick={handleModalCondicao} className="flex flex-col justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" name="mais" />
                                 </svg>
-                                <label htmlFor="mais">Condições</label>
+                                <label htmlFor="mais">Filtros</label>
                             </button>
                         </div>
                     </div>
@@ -235,7 +199,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
                                 <label htmlFor="mais">Editar</label>
-
                             </button>
                         </div>
                     </div>
@@ -261,38 +224,43 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                 </div>
             </div>
+            
             <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
                 <table className="w-full text-sm">
-                    <thead className="bg-gray-200">
-                        <tr>
-                            {selectedColumns.map((column, index) => (
-                                <th key={index} className="p-2 border-b">{column}</th>
-                            ))}
-                        </tr>
-                    </thead>
+                    {tableData.length > 0 && (
+                        <thead className="bg-teal-600 text-white">
+                            <tr>
+                                {columns.map((column, index) => (
+                                    <th key={index} className="p-2 border-b text-center">{column}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                    )}
                     <tbody>
                         {tableData.length > 0 ? (
                             tableData[0].values.map((_, rowIndex) => (
                                 <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                                    {selectedColumns.map((column, colIndex) => (
-                                        <td key={colIndex} className="p-2 border-b">{tableData[colIndex].values[rowIndex]}</td>
+                                    {columns.map((column, colIndex) => (
+                                        <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex].values[rowIndex]}</td>
                                     ))}
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={selectedColumns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
+                                <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
-            <ModalSql isOpen={isModalSqlOpen} onClose={closeModalSql} />
+
+            <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} />
+            <ModalCondicao isOpen={isModalOpenCondicao} onClose={closeModalCondicao} />
+            <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
         </div>
     );
 }
-
 
 export default GerarRelatorio;
