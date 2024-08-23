@@ -1,6 +1,6 @@
 import React from "react";
 
-function ModalSql({ isOpen, onClose, children }) {
+function ModalSql({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     // Estilos para a div específica
