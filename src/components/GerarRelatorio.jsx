@@ -1,13 +1,11 @@
-
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import ModalSql from "./modais/ModalSql";
-
 import { useNavigate } from 'react-router-dom';
 
 function GerarRelatorio({ selectedColumns, selectTable }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [tableData, setTableData] = useState([]);
     const navigate = useNavigate();
-    const canvasRef = useRef(null);
 
     const redirectToPDF = () => {
         navigate('./pdfme');
@@ -22,7 +20,7 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
     };
 
     const handleSaveQuery = () => {
-        console.log ('Consulta salva com sucesso!');
+        console.log('Consulta salva com sucesso!');
     };
 
     const fetchData = async (columns) => {
@@ -35,7 +33,6 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
             });
             const data = await response.json();
 
-
             return columns.map((column, index) => ({
                 column,
                 values: data.map(row => row[index]) // Acesse pelo índice
@@ -44,98 +41,48 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
             console.error('Erro ao buscar os dados:', error);
             return [];
         }
-
-
     };
-
-
 
     const handleGenerateReport = async () => {
-
-        console.log('Colunas selecionadas:', selectedColumns)
-        console.log('Tabelas selecionas:', selectTable)
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-
-        // Limpar o canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Configurações básicas do texto
-        ctx.font = '16px "Segoe UI", Arial';
-        ctx.fillStyle = 'black';
-
-
         const data = await fetchData(selectedColumns);
-        console.log('Dados recebidos para as colunas:', data);
-
-        if (data.length > 0) {
-
-            ctx.fillStyle = '#01aab5';
-            ctx.fillRect(10, 30, canvas.width - 20, 40);
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 18px "Segoe UI", Arial';
-
-
-            selectedColumns.forEach((column, index) => {
-                ctx.fillText(column, 20 + index * 200, 55);
-            });
-
-
-            ctx.font = '16px "Segoe UI", Arial';
-            data[0].values.forEach((_, rowIndex) => {
-                const yPosition = 90 + rowIndex * 40;
-
-
-                ctx.fillStyle = rowIndex % 2 === 0 ? '#F1F1F1' : '#FFFFFF';
-                ctx.fillRect(10, yPosition - 20, canvas.width - 20, 40);
-
-
-                selectedColumns.forEach((column, colIndex) => {
-                    const value = data[colIndex].values[rowIndex];
-                    ctx.fillStyle = 'black';
-                    ctx.fillText(value, 20 + colIndex * 200, yPosition); // Ajusta a posição com base no index
-                });
-            });
-
-            // Adicionar bordas à tabela
-            ctx.strokeStyle = '#CCCCCC';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(10, 30, canvas.width - 20, 40 + data[0].values.length * 40);
-
-        } else {
-            ctx.fillText('Nenhum dado encontrado.', 10, 40);
-        }
+        setTableData(data);
     };
+
+    useEffect(() => {
+        if (selectedColumns.length > 0 && selectTable) {
+            handleGenerateReport();
+        }
+    }, [selectedColumns, selectTable]);
 
     return (
         <div className="flex flex-col w-full">
             <div className="w-full flex flex-row justify-between mt-4">
                 <div className="flex flex-col justify-start items-start ml-36">
                     <h1 className="font-bold text-3xl">Ações</h1>
-                    <div className="flex mt-3"> 
+                    <div className="flex mt-3">
                         <button
                             className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm mr-2"
                             onClick={handleGenerateReport}
-                            >
-                        Gerar Relatório
+                        >
+                            Gerar Relatório
                         </button>
                         <button
                             className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
-                            onClick={handleSaveQuery} 
-                            >
-                        Salvar Consulta
+                            onClick={handleSaveQuery}
+                        >
+                            Salvar Consulta
                         </button>
                     </div>
                 </div>
                 <div className="flex mr-36 justify-center items-center">
-                <div className="mx-2">
+                    <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                        <button onClick={redirectToPDF}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
-                            </svg>
-                            <label htmlFor="mais">Salvos</label>
-                         </button>
+                            <button onClick={redirectToPDF}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
+                                </svg>
+                                <label htmlFor="mais">Salvos</label>
+                            </button>
                         </div>
                     </div>
                     <div className="mx-2">
@@ -171,7 +118,6 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
                                 <label htmlFor="mais">Editar</label>
-
                             </button>
                         </div>
                     </div>
@@ -182,7 +128,6 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Zm3.75 11.625a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                                 <label htmlFor="mais">Prévia</label>
-
                             </button>
                         </div>
                     </div>
@@ -196,8 +141,31 @@ function GerarRelatorio({ selectedColumns, selectTable }) {
                     </div>
                 </div>
             </div>
-            <div className="border-2 border-neutral-600 my-3 w-10/12 h-96 overflow-auto mx-auto">
-                <canvas id="tabelas" ref={canvasRef} className='w-full'></canvas>
+            <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
+                <table className="w-full text-sm">
+                    <thead className="bg-gray-200">
+                        <tr>
+                            {selectedColumns.map((column, index) => (
+                                <th key={index} className="p-2 border-b">{column}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {tableData.length > 0 ? (
+                            tableData[0].values.map((_, rowIndex) => (
+                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                                    {selectedColumns.map((column, colIndex) => (
+                                        <td key={colIndex} className="p-2 border-b">{tableData[colIndex].values[rowIndex]}</td>
+                                    ))}
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={selectedColumns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
             <ModalSql isOpen={isModalOpen} onClose={closeModal} />
         </div>
