@@ -1,7 +1,7 @@
 import React from "react";
 import View from "../PDF/pdfViewer";
 
-function ModalPdf({ isOpen, onClose }) {
+function ModalPdf({ isOpen, onClose, table }) {
   if (!isOpen) return null;
   
   return (
@@ -51,7 +51,7 @@ function ModalPdf({ isOpen, onClose }) {
         >
           Fechar
         </button>
-        <View /> {/* Componente que exibe o PDF */}
+        <View table={table} /> {/* Componente que exibe o PDF */}
       </div>
     </div>
   );

@@ -224,7 +224,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                 </div>
             </div>
-            
+
             <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
                 <table className="w-full text-sm">
                     {tableData.length > 0 && (
@@ -255,7 +255,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             </div>
 
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
-            <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} />
+            <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} />
             <ModalCondicao isOpen={isModalOpenCondicao} onClose={closeModalCondicao} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
