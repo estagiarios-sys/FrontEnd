@@ -11,7 +11,7 @@ function TabelaCampos({ onDataChange }) {
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch('http://localhost:8080/procurar/table', {
+        const response = await fetch('http://localhost:8080/find/table', {
           credentials: 'include'
         });
 
@@ -28,7 +28,7 @@ function TabelaCampos({ onDataChange }) {
 
     async function fetchRelationships() {
       try {
-        const response = await fetch('http://localhost:8080/procurar/relationship', {
+        const response = await fetch('http://localhost:8080/find/relationship', {
           credentials: 'include'
         });
 
@@ -41,6 +41,7 @@ function TabelaCampos({ onDataChange }) {
       } catch (error) {
         console.error('Erro ao buscar as relações:', error);
       }
+      
     }
 
     fetchJsonData();

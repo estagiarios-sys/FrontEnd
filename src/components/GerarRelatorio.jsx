@@ -63,7 +63,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     useEffect(() => {
         const fetchRelationshipData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/procurar/relationship');
+                const response = await fetch('http://localhost:8080/find/relationship');
                 const data = await response.json();
                 setRelationshipData(data);
             } catch (error) {
@@ -100,7 +100,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 }
             }
 
-            const url = `http://localhost:8080/procurar/table/${selectTable}?${queryParams.toString()}${joinParam ? `&joins=${encodeURIComponent(joinParam)}` : ''}`;
+            const url = `http://localhost:8080/find/table/${selectTable}?${queryParams.toString()}${joinParam ? `&joins=${encodeURIComponent(joinParam)}` : ''}`;
 
             const response = await fetch(url, {
                 method: 'GET',
