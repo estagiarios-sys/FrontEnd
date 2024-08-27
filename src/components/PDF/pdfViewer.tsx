@@ -48,20 +48,7 @@ const View: React.FC<ViewProps> = ({ table }) => {
               height: 8.5,
             },
     
-            qrcode: {
-              type: 'qrcode',
-              position: { x: 7.1, y: 268.5 },
-              width: 26.60,
-              height: 23
-            },
-    
-            barcodes: {
-              type: 'code128',
-              position: { x: 148.50, y: 272 },
-              width: 56,
-              height: 19.4
-            },
-
+           
             image: {
               type: 'image',
               position: {
@@ -95,7 +82,6 @@ const View: React.FC<ViewProps> = ({ table }) => {
               height: 0.8,
               color: '#000000'
             },
-    
             table: {
               type: 'table',
               position: {
@@ -111,6 +97,7 @@ const View: React.FC<ViewProps> = ({ table }) => {
                 borderWidth: 0.3,
                 borderColor: "#000000"
               },
+              
               headStyles: {
                 fontName: "Helvetica",
                 fontSize: 13,
@@ -157,10 +144,24 @@ const View: React.FC<ViewProps> = ({ table }) => {
                 }
               },
               columnStyles: {
-                minWidth: 10, // Defina uma largura mínima para as colunas, se necessário
+                minWidth: 10, 
                 maxWidth: 60,
               }
-            }
+            },
+            qrcode: {
+              type: 'qrcode',
+              position: { x: 7.1, y: 268.5 },
+              width: 26.60,
+              height: 23
+            },
+    
+            barcodes: {
+              type: 'code128',
+              position: { x: 148.50, y: 272 },
+              width: 56,
+              height: 19.4
+            },
+
           }
         ]
       };
