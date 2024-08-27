@@ -3,14 +3,14 @@ import ModalSql from "./modais/ModalSql";
 import ModalPdf from "./modais/ModalPdf";
 import ModalExpo from "./modais/ModalExpo";
 import ModalSalvos from "./modais/ModalSalvos";
-import ModalCondicao from "./modais/ModalCondicoes";
+import ModalFiltro from "./modais/ModalFiltro";
 import { useNavigate } from 'react-router-dom';
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
     const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false);
     const [isModalOpenSQl, setIsModalOpenSQL] = useState(false);
-    const [isModalOpenCondicao, setIsModalOpenCondicao] = useState(false);
+    const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false);
     const [isModalPdfOpen, setIsModalPdfOpen] = useState(false);
     const [isModalExpoOpen, setIsModalExpoOpen] = useState(false);
 
@@ -18,8 +18,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
 
-    const handleModalCondicao = () => {
-        setIsModalOpenCondicao(true);
+    const handleModalFiltro = () => {
+        setIsModalOpenFiltro(true);
     };
 
     const handleModalSalvos = () => {
@@ -50,8 +50,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         setIsModalPdfOpen(false);
     };
 
-    const closeModalCondicao = () => {
-        setIsModalOpenCondicao(false);
+    const closeModalFiltro = () => {
+        setIsModalOpenFiltro(false);
     };
 
     const closeModalSalvos = () => {
@@ -183,7 +183,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={handleModalCondicao} className="flex flex-col justify-center items-center">
+                            <button onClick={handleModalFiltro} className="flex flex-col justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" name="mais" />
                                 </svg>
@@ -257,7 +257,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} />
-            <ModalCondicao isOpen={isModalOpenCondicao} onClose={closeModalCondicao} />
+            <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
         </div>
     );

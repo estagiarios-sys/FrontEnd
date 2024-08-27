@@ -18,8 +18,13 @@ const relacaoOptions = [
 ];
 
 const ordenacaoOptions = [
-    { value: 'asc', label: 'x' },
-    { value: 'desc', label: 'y' },
+    { value: 'asc', label: 'Ascendente' },
+    { value: 'desc', label: 'Descendente' },
+];
+
+const valorOptions = [
+    { value: 'valor1', label: 'Valor 1' },
+    { value: 'valor2', label: 'Valor 2' },
 ];
 
 const CustomOption = (props) => (
@@ -40,7 +45,7 @@ const CustomSingleValue = (props) => (
     </components.SingleValue>
 );
 
-function ModalCondicao({ isOpen, onClose }) {
+function ModalFiltro({ isOpen, onClose }) {
     const [selectedCampos, setSelectedCampos] = useState([]); // Campos selecionados para adicionar
     const [addedCampos, setAddedCampos] = useState([]); // Campos já adicionados à seção "Campos Selecionados e Condições"
 
@@ -51,7 +56,7 @@ function ModalCondicao({ isOpen, onClose }) {
     const handleAddSelectedCampos = () => {
         const camposToAdd = selectedCampos.map(value => {
             const option = campoOptions.find(option => option.value === value);
-            return { value: option.value, label: option.label };
+            return { value: option.value, label: option.label, checked: false }; // Inicializa com 'checked: false'
         });
         setAddedCampos([...addedCampos, ...camposToAdd]);
         setSelectedCampos([]);
@@ -177,7 +182,7 @@ function ModalCondicao({ isOpen, onClose }) {
                                                 Campos
                                             </th>
                                             <th className="py-2 px-4 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-600">
-                                                Condição
+                                                Ordenação
                                             </th>
                                             <th className="py-2 px-4 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-600">
                                                 Valor
@@ -191,6 +196,7 @@ function ModalCondicao({ isOpen, onClose }) {
                                                     <input
                                                         type="checkbox"
                                                         className="form-checkbox h-5 w-5 text-red-600"
+                                                        checked={campo.checked || false} // Ensure the checkbox is correctly set
                                                         onChange={() => handleCheckboxChange(index)}
                                                     />
                                                 </td>
@@ -259,4 +265,4 @@ function ModalCondicao({ isOpen, onClose }) {
     );
 }
 
-export default ModalCondicao;
+export default ModalFiltro;
