@@ -1,43 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Select, { components } from 'react-select';
 
-const campoOptions = [
-    { value: 'campo1', label: 'Campo 1' },
-    { value: 'campo2', label: 'Campo 2' },
-    { value: 'campo3', label: 'Campo 3' },
-    { value: 'campo4', label: 'Campo 4' },
-    { value: 'campo5', label: 'Campo 5' },
-    { value: 'campo6', label: 'Campo 6' },
-    { value: 'campo7', label: 'Campo 7' },
-    { value: 'campo8', label: 'Campo 8' },
-];
-
-const relacaoOptions = [
-    { value: 'igual', label: 'Igual' },
-    { value: 'diferente', label: 'Diferente' },
-];
-
 const ordenacaoOptions = [
     { value: 'asc', label: 'Ascendente' },
     { value: 'desc', label: 'Descendente' },
 ];
-
-const valorOptions = [
-    { value: 'valor1', label: 'Valor 1' },
-    { value: 'valor2', label: 'Valor 2' },
-];
-
-const CustomOption = (props) => (
-    <components.Option {...props}>
-        <input
-            type="checkbox"
-            checked={props.isSelected}
-            onChange={() => null}
-            style={{ marginRight: '10px' }}
-        />
-        {props.label}
-    </components.Option>
-);
 
 const CustomSingleValue = (props) => (
     <components.SingleValue {...props}>
@@ -45,9 +12,14 @@ const CustomSingleValue = (props) => (
     </components.SingleValue>
 );
 
-function ModalFiltro({ isOpen, onClose }) {
+function ModalFiltro({ isOpen, onClose, columns }) {
     const [selectedCampos, setSelectedCampos] = useState([]); // Campos selecionados para adicionar
     const [addedCampos, setAddedCampos] = useState([]); // Campos já adicionados à seção "Campos Selecionados e Condições"
+    // Transformar columns em campoOptions
+    const campoOptions = columns.map(col => ({
+        value: col,
+        label: col, // Ou transforme `col` em algo mais legível, se necessário
+    })); 
 
     const handleCampoChange = (selectedOptions) => {
         setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
@@ -60,10 +32,6 @@ function ModalFiltro({ isOpen, onClose }) {
         });
         setAddedCampos([...addedCampos, ...camposToAdd]);
         setSelectedCampos([]);
-    };
-
-    const handleRemoveSelectedCampos = () => {
-        setAddedCampos(prevCampos => prevCampos.filter(campo => !selectedCampos.includes(campo.value)));
     };
 
     const handleRemoveAllCampos = () => {
@@ -130,7 +98,7 @@ function ModalFiltro({ isOpen, onClose }) {
                                 isMulti
                                 name="campos"
                                 options={campoOptions}
-                                components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
+                                components={{ SingleValue: CustomSingleValue }}
                                 className="basic-multi-select"
                                 classNamePrefix="Select"
                                 placeholder="Selecione..."
@@ -171,7 +139,7 @@ function ModalFiltro({ isOpen, onClose }) {
                     <div style={{ flex: 2, overflowY: 'auto', margin: '0px 0px 0px 30px' }}>
                         <div style={{ marginBottom: '20px' }}>
                             <h6 className="font-bold p-1">Campos Selecionados e Condições</h6>
-                            <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                            <div style={{ maxHeight: '322.4px', overflowY: 'auto' }}>
                                 <table className="min-w-full bg-white border border-gray-300" style={{ width: '100%' }}>
                                     <thead>
                                         <tr>
@@ -207,17 +175,19 @@ function ModalFiltro({ isOpen, onClose }) {
                                                     <Select
                                                         options={ordenacaoOptions}
                                                         className="basic-single"
-                                                        classNamePrefix="Select"
+                                                        classNamePrefix="Select" 
                                                         placeholder="Selecione..."
+                                                        menuPortalTarget={document.body}
                                                     />
                                                 </td>
                                                 <td className="py-2 px-4 border-b border-gray-300 text-sm">
                                                     <input
                                                         type="text"
-                                                        value={campo.valor || ''} // Use the value from your state or default to an empty string
-                                                        onChange={(e) => handleValorChange(index, e.target.value)} // Function to handle value changes
+                                                        value={campo.valor || ''} // Ensure the input value is correctly set
+                                                        onChange={(e) => handleValorChange(index, e.target.value)}
                                                         onKeyDown={(e) => handleValorKeyDown(index, e)}
-                                                        className="form-input w-3/4 border border-gray-300 rounded-md"
+                                                        className="border border-gray-300 rounded p-1 w-full"
+                                                        placeholder="Digite o valor"
                                                     />
                                                 </td>
                                             </tr>
@@ -228,7 +198,6 @@ function ModalFiltro({ isOpen, onClose }) {
                         </div>
                     </div>
                 </div>
-
                 <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 20px 20px 20px' }}>
                     <button
                         style={{
@@ -260,6 +229,7 @@ function ModalFiltro({ isOpen, onClose }) {
                         Salvar
                     </button>
                 </div>
+
             </div>
         </div>
     );

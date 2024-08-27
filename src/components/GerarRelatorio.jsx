@@ -84,36 +84,48 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
     const fetchData = async () => {
         try {
-            const queryParams = new URLSearchParams();
-            queryParams.append("columns", selectedColumns.join(","));
-
-            let joinParam = '';
-
+            // Construir o objeto JSON que será enviado na requisição
+            const jsonRequest = {
+                table: selectTable,
+                columns: selectedColumns,
+                conditions: [], // Adicione as condições conforme necessário
+                orderBy: '', // Adicione a ordenação conforme necessário
+                joins: [], // Adicione os joins conforme necessário
+            };
+        
             if (selectedRelacionada && relationshipData.length > 0) {
                 const tablePair = `${selectTable} e ${selectedRelacionada}`;
                 const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
                 if (relationship) {
                     console.log('Relacionamento encontrado:', relationship);
-                    joinParam = relationship.join;
+                    jsonRequest.joins.push(relationship.join);
                 } else {
                     console.log('Relacionamento não encontrado para:', tablePair);
                 }
             }
-
-            const url = `http://localhost:8080/find/table/${selectTable}?${queryParams.toString()}${joinParam ? `&joins=${encodeURIComponent(joinParam)}` : ''}`;
-
+    
+            const url = 'http://localhost:8080/find'; // Nova rota
+    
+            console.log('Enviando requisição para:', url);
+            console.log('JSON Request:', JSON.stringify(jsonRequest));
+    
             const response = await fetch(url, {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                body: JSON.stringify(jsonRequest),
             });
-
+    
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
-
-            const data = await response.json();
+    
+            const responseData = await response.json();
+    
+            const [sql, data] = responseData;
+    
+            console.log('SQL:', sql);
 
             return selectedColumns.map((column, index) => ({
                 column,
@@ -257,7 +269,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} />
-            <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} />
+            <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns}/>
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
         </div>
     );
