@@ -18,6 +18,9 @@ const View: React.FC<ViewProps> = ({ table }) => {
     const generatePDF = () => {
       const domContainer = document.getElementById('designer-container');
 
+      const columnCount = table.length;
+      const widthPercentage = 100 / columnCount;
+
       const template: Template = {
         basePdf: {
           width: 210, // Largura em milímetros (A4)
@@ -96,14 +99,14 @@ const View: React.FC<ViewProps> = ({ table }) => {
             table: {
               type: 'table',
               position: {
-                x: 28.7,
-                y: 37.85
+                x: 10, // Ajuste para centralizar melhor a tabela na página
+                y: 20
               },
-              width: 150,
-              height: 57.5,
+              width: 190, // Ajuste para garantir que a tabela se encaixe na página
+              height: 250, // Ajuste para evitar cortes
               showHead: true,
               head: table.map(col => col.column),
-              headWidthPercentages: [30, 30, 40],
+              headWidthPercentages: Array(columnCount).fill(widthPercentage),
               tableStyles: {
                 borderWidth: 0.3,
                 borderColor: "#000000"
@@ -153,7 +156,10 @@ const View: React.FC<ViewProps> = ({ table }) => {
                   left: 5
                 }
               },
-              columnStyles: {}
+              columnStyles: {
+                minWidth: 10, // Defina uma largura mínima para as colunas, se necessário
+                maxWidth: 60,
+              }
             }
           }
         ]
