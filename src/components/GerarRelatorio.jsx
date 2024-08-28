@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ModalSql from "./modais/ModalSql";
 import ModalPdf from "./modais/ModalPdf";
 import ModalExpo from "./modais/ModalExpo";
@@ -17,6 +17,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
+    const [condicoesString, setCondicoesString] = useState(''); // Novo estado
 
     const handleModalFiltro = () => {
         setIsModalOpenFiltro(true);
@@ -82,13 +83,17 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         console.log('Consulta salva com sucesso!');
     };
 
+    const handleSaveConditions = (conditions) => {
+        setCondicoesString(conditions);
+    };
+
     const fetchData = async () => {
         try {
             // Construir o objeto JSON que será enviado na requisição
             const jsonRequest = {
                 table: selectTable,
                 columns: selectedColumns,
-                conditions: [], // Adicione as condições conforme necessário
+                conditions: [condicoesString], // Adicione a condição aqui
                 orderBy: '', // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
             };
@@ -208,7 +213,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                             <button onClick={redirectToPDF} className="flex flex-col justify-center items-center">
 
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                    <path strokeLinecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
                                 <label htmlFor="mais">Editar</label>
                             </button>
@@ -239,38 +244,35 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             
             <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
                 <table className="w-full text-sm">
-                    {tableData.length > 0 && (
-                        <thead className="bg-teal-600 text-white">
-                            <tr>
-                                {columns.map((column, index) => (
-                                    <th key={index} className="p-2 border-b text-center">{column}</th>
+                    <thead className="bg-neutral-200 border-b-2 border-neutral-600">
+                        <tr>
+                            {columns.map((column, index) => (
+                                <th key={index} className="p-3 text-left">{column}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {tableData.map((row, rowIndex) => (
+                            <tr key={rowIndex}>
+                                {row.values.map((value, colIndex) => (
+                                    <td key={colIndex} className="p-3">{value}</td>
                                 ))}
                             </tr>
-                        </thead>
-                    )}
-                    <tbody>
-                        {tableData.length > 0 ? (
-                            tableData[0].values.map((_, rowIndex) => (
-                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                                    {columns.map((column, colIndex) => (
-                                        <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex].values[rowIndex]}</td>
-                                    ))}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
-                            </tr>
-                        )}
+                        ))}
                     </tbody>
                 </table>
             </div>
-
+            
+            <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} />
-            <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns}/>
-            <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
+            <ModalFiltro 
+                isOpen={isModalOpenFiltro} 
+                onClose={closeModalFiltro} 
+                columns={selectedColumns}
+                onSave={handleSaveConditions} // Passe a função para o modal
+            />
         </div>
     );
 }

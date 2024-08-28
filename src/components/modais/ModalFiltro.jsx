@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import Select, { components } from 'react-select';
 
 const ordenacaoOptions = [
-    { value: 'asc', label: 'Ascendente' },
-    { value: 'desc', label: 'Descendente' },
+    { value: '>', label: 'Maior' },
+    { value: '<', label: 'Menor' },
+    { value: '=', label: 'Igual' },
+    { value: '>=', label: 'Maior ou igual' },
+    { value: '<=', label: 'Menor ou igual' },
+    { value: '!=', label: 'Diferente' },
 ];
 
 const CustomSingleValue = (props) => (
@@ -12,14 +16,14 @@ const CustomSingleValue = (props) => (
     </components.SingleValue>
 );
 
-function ModalFiltro({ isOpen, onClose, columns }) {
-    const [selectedCampos, setSelectedCampos] = useState([]); // Campos selecionados para adicionar
-    const [addedCampos, setAddedCampos] = useState([]); // Campos já adicionados à seção "Campos Selecionados e Condições"
-    // Transformar columns em campoOptions
+function ModalFiltro({ isOpen, onClose, columns, onSave }) {
+    const [selectedCampos, setSelectedCampos] = useState([]);
+    const [addedCampos, setAddedCampos] = useState([]);
+    
     const campoOptions = columns.map(col => ({
         value: col,
-        label: col, // Ou transforme `col` em algo mais legível, se necessário
-    })); 
+        label: col,
+    }));
 
     const handleCampoChange = (selectedOptions) => {
         setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
@@ -28,7 +32,7 @@ function ModalFiltro({ isOpen, onClose, columns }) {
     const handleAddSelectedCampos = () => {
         const camposToAdd = selectedCampos.map(value => {
             const option = campoOptions.find(option => option.value === value);
-            return { value: option.value, label: option.label, checked: false }; // Inicializa com 'checked: false'
+            return { value: option.value, label: option.label, checked: false };
         });
         setAddedCampos([...addedCampos, ...camposToAdd]);
         setSelectedCampos([]);
@@ -60,8 +64,31 @@ function ModalFiltro({ isOpen, onClose, columns }) {
         if (e.key === 'Enter') {
             e.preventDefault();
             handleValorChange(index, e.target.value);
-            e.target.blur(); // Remove o foco do input
+            e.target.blur();
         }
+    };
+
+    const handleOrdenacaoChange = (index, selectedOption) => {
+        const updatedCampos = [...addedCampos];
+        updatedCampos[index].ordenacao = selectedOption ? selectedOption.value : '';
+        setAddedCampos(updatedCampos);
+    };
+
+    const handleSave = () => {
+        const condicoes = addedCampos.map((campo) => {
+            const valor = campo.valor || '';
+            const ordenacao = campo.ordenacao || '';
+            return `${campo.value} ${ordenacao} '${valor}'`;
+        });
+
+        const condicoesString = `${condicoes.join( ' AND ')}`;
+
+        // Chama a função onSave do componente pai com o condicoesString
+        if (onSave) {
+            onSave(condicoesString);
+        }
+
+        alert(condicoesString);
     };
 
     useEffect(() => {
@@ -104,7 +131,7 @@ function ModalFiltro({ isOpen, onClose, columns }) {
                                 placeholder="Selecione..."
                                 onChange={handleCampoChange}
                                 value={campoOptions.filter(option => selectedCampos.includes(option.value))}
-                                closeMenuOnSelect={false} // Mantém o menu aberto após selecionar uma opção
+                                closeMenuOnSelect={false}
                             />
                         </div>
                     </div>
@@ -164,7 +191,7 @@ function ModalFiltro({ isOpen, onClose, columns }) {
                                                     <input
                                                         type="checkbox"
                                                         className="form-checkbox h-5 w-5 text-red-600"
-                                                        checked={campo.checked || false} // Ensure the checkbox is correctly set
+                                                        checked={campo.checked || false}
                                                         onChange={() => handleCheckboxChange(index)}
                                                     />
                                                 </td>
@@ -175,15 +202,16 @@ function ModalFiltro({ isOpen, onClose, columns }) {
                                                     <Select
                                                         options={ordenacaoOptions}
                                                         className="basic-single"
-                                                        classNamePrefix="Select" 
+                                                        classNamePrefix="Select"
                                                         placeholder="Selecione..."
                                                         menuPortalTarget={document.body}
+                                                        onChange={(selectedOption) => handleOrdenacaoChange(index, selectedOption)}
                                                     />
                                                 </td>
                                                 <td className="py-2 px-4 border-b border-gray-300 text-sm">
                                                     <input
                                                         type="text"
-                                                        value={campo.valor || ''} // Ensure the input value is correctly set
+                                                        value={campo.valor || ''}
                                                         onChange={(e) => handleValorChange(index, e.target.value)}
                                                         onKeyDown={(e) => handleValorKeyDown(index, e)}
                                                         className="border border-gray-300 rounded p-1 w-full"
@@ -224,12 +252,11 @@ function ModalFiltro({ isOpen, onClose, columns }) {
                             fontSize: '16px',
                             cursor: 'pointer',
                         }}
-                        onClick={() => alert('Gravar clicado')}
+                        onClick={handleSave}
                     >
                         Salvar
                     </button>
                 </div>
-
             </div>
         </div>
     );
