@@ -48,7 +48,7 @@ const downloadCSV = (columns, tableData) => {
     document.body.removeChild(link);
 };
 
-function ModalExpo({ isOpen, onClose, columns, tableData }) {
+function ModalExpo({ isOpen, onClose, table }) {
     if (!isOpen) return null;
 
     return (
@@ -73,7 +73,7 @@ function ModalExpo({ isOpen, onClose, columns, tableData }) {
                     borderRadius: '5px',
                     position: 'relative',
                     width: '400px',
-                    height: '150px',
+                    height: '150px', // Definindo a altura como 500px
                 }}
             >
                 <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
@@ -111,7 +111,7 @@ function ModalExpo({ isOpen, onClose, columns, tableData }) {
                         gap: '60px',
                     }}
                 >
-                    <button onClick={generatePDF}
+                    <button onClick={() => generatePDF(table)}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -146,7 +146,6 @@ function ModalExpo({ isOpen, onClose, columns, tableData }) {
                     </button>
 
                     <button 
-                        onClick={() => downloadCSV(columns, tableData)}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',

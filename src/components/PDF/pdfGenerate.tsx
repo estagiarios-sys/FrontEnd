@@ -2,7 +2,33 @@ import { Template } from '@pdfme/common';
 import { generate } from '@pdfme/generator';
 import { text, barcodes, line, rectangle, ellipse, svg, tableBeta, image } from "@pdfme/schemas";
 
-export async function generatePDF() {
+interface TableData {
+  column: string; // Nome da coluna
+  values: string[]; // Valores da coluna
+}
+
+export async function generatePDF(tableData: TableData[]) {
+
+  function transformTableData(tableData: TableData[]) {
+    const headers: string[] = tableData.map((item: TableData) => item.column); // Nome das colunas
+    const values: string[][] = tableData[0].values.map((_, rowIndex: number) => 
+        tableData.map((col: TableData) => col.values[rowIndex])
+    ); // Transforma em linhas e colunas
+
+    return {
+        headers,
+        values
+    };
+}
+
+  const transformedData = transformTableData(tableData);
+
+  const columnCount = tableData.length;
+  const widthPercentage = 100 / columnCount;
+
+  const randomNum = Math.floor(1000 + Math.random() * 9000);
+  const opProduto = `op: ${randomNum}`;
+
   const template: Template = {
     basePdf: {
       width: 210, // Largura em milímetros (A4)
@@ -19,7 +45,7 @@ export async function generatePDF() {
           height: 15.2,
         },
 
-        op_produto: {
+        opProduto: {
           type: 'text',
           content: 'op: 555555',
           fontSize: 20,
@@ -40,14 +66,14 @@ export async function generatePDF() {
 
         qrcode: {
           type: 'qrcode',
-          position: { x: 7.1, y: 268.5 },
+          position: { x: 7.1, y: 230 },
           width: 26.60,
           height: 23
         },
 
         barcodes: {
           type: 'code128',
-          position: { x: 148.50, y: 272 },
+          position: { x: 148.50, y: 233 },
           width: 56,
           height: 19.4
         },
@@ -55,7 +81,7 @@ export async function generatePDF() {
         infos: {
           type: 'text',
           fontSize: 20,
-          position: { x: 56.7, y: 277.3 },
+          position: { x: 56.7, y: 227 },
           width: 87,
           height: 9.8,
         },
@@ -70,7 +96,7 @@ export async function generatePDF() {
 
         line_2: {
           type: 'line',
-          position: { x: 8.2, y: 266 },
+          position: { x: 8.2, y: 224 },
           width: 194,
           height: 0.8,
           color: '#000000'
@@ -84,10 +110,10 @@ export async function generatePDF() {
           },
           width: 150,
           height: 57.5,
-          content: "[[\"Alice\",\"New York\",\"Alice is a freelance web designer and developer\"],[\"Bob\",\"Paris\",\"Bob is a freelance illustrator and graphic designer\"]]",
+          content: JSON.stringify(transformedData.values),
           showHead: true,
-          head: ["Name", "City", "Description"],
-          headWidthPercentages: [30, 30, 40],
+          head: transformedData.headers,
+          headWidthPercentages: Array(columnCount).fill(widthPercentage),
           tableStyles: {
             borderWidth: 0.3,
             borderColor: "#000000"
@@ -145,12 +171,9 @@ export async function generatePDF() {
 
   const inputs = [
     {
-      table: [
-        ["Alice", "New York", "Alice is a freelance web designer and developer"],
-        ["Bob", "Paris", "Bob is a freelance illustrator and graphic designer"]
-      ],
-      titulo: 'Título Aqui',
-      op_produto: 'op: 555555',
+      table: transformedData.values, // Use o parâmetro tableData aqui
+      titulo: "titulo",   // Use o parâmetro titulo aqui
+      opProduto: opProduto, // Use o parâmetro opProduto aqui
       qrcode: 'https://systextil.com.br/',
       barcodes: 'https://systextil.com.br/',
       infos: 'Informações Genéricas...',
@@ -166,7 +189,7 @@ export async function generatePDF() {
 
     const pdf = await generate({
       template,
-      inputs,
+      inputs  ,
       plugins: {
         text,
         line,
@@ -182,7 +205,10 @@ export async function generatePDF() {
 
     // Exibir o PDF no navegador
     const blob = new Blob([pdf.buffer], { type: 'application/pdf' });
-    window.open(URL.createObjectURL(blob));
+    const url = URL.createObjectURL(blob);
+    console.log("Generated PDF Blob:", blob);
+    console.log("Generated PDF URL:", url);
+    window.open(url);  // Isso deveria abrir o PDF
 
     return pdf;
   } catch (error) {

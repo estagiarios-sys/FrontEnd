@@ -1,9 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Designer } from '@pdfme/ui';
 import { Template } from '@pdfme/common';
 import { text, image, barcodes, line, rectangle, ellipse, svg, tableBeta } from "@pdfme/schemas";
+import { useLocation } from 'react-router-dom';
 
 export default function Nova() {
+  
+  const designerRef = useRef<Designer | null>(null);
+  const [savedTemplate, setSavedTemplate] = useState<Template | null>(null);
+
   useEffect(() => {
 
     const domContainer = document.getElementById('designer-container');
@@ -138,11 +143,11 @@ export default function Nova() {
               width: 170,
               height: 53,
               content: JSON.stringify([
-                ["Alice", "New York", "Alice is a freelance web designer and developer"],
-                ["Bob", "Paris", "Bob is a freelance illustrator and graphic designer"]
+                ["%dataCollumn%", "%dataCollumn%", "%dataCollumn%"],
+                ["%dataCollumn%", "%dataCollumn%", "%dataCollumn%"]
               ]),
               showHead: true,
-              head: ["Name", "City", "Description"],
+              head: ["%tableName%", "%tableName%", "%tableName%"],
               headWidthPercentages: [30, 30, 40],
               tableStyles: {
                 borderWidth: 0.3,       //espessura da borda
@@ -204,17 +209,52 @@ export default function Nova() {
 
       const designer = new Designer({ domContainer, template, options: { lang: 'en', labels: { fieldsList: 'Lista de Elementos' } }, plugins })
 
+      
+      
+      designerRef.current = designer;
+
       designer.onSaveTemplate((updatedTemplate: Template) => {
-        console.log('Template atualizado:', updatedTemplate);
+        console.log('Template antes de ser salvo:', updatedTemplate); // Adicione este log
+        setSavedTemplate(updatedTemplate);
       });
+      
+      
+
+      setTimeout(() => {
+        const currentTemplate = designer.getTemplate();
+        designer.saveTemplate();
+      }, 3000);
+    
+      
 
     } else {
       console.error('Container do DOM não encontrado');
     }
   }, []);
 
+
+  
+  
+  useEffect(() => {
+    console.log('Estado atual de savedTemplate:', savedTemplate);
+  }, [savedTemplate]);
+
+  const handleManualSave = () => {
+    if (designerRef.current) {
+      const updatedTemplate = designerRef.current.getTemplate();
+      console.log('Template atualizado manualmente:', updatedTemplate);
+      setSavedTemplate(updatedTemplate);
+      console.log(updatedTemplate)
+      localStorage.setItem('savedTemplate', JSON.stringify(updatedTemplate));
+    }
+  };
+  
+
   return (
     <div>
+      
+      <button onClick={handleManualSave}>Salvar</button>
+
       <div id="designer-container" style={{ width: '100%', height: '100%' }}></div>
     </div>
   );

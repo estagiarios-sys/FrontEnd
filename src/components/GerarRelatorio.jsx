@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ModalSql from "./modais/ModalSql";
 import ModalPdf from "./modais/ModalPdf";
 import ModalExpo from "./modais/ModalExpo";
@@ -91,7 +91,11 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     }, []);
 
     const redirectToPDF = () => {
-        navigate('./pdfme');
+        navigate('./pdfme', {
+            state: {
+                tableData
+            }
+        });
     };
 
     const handleSaveQuery = () => {
@@ -158,14 +162,22 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     };
 
     const handleGenerateReport = async () => {
-        const data = await fetchData();
-        console.log('Dados recebidos para as colunas:', data);
-        setTableData(data);  // Atualize o estado com os dados recebidos
-        setColumns(selectedColumns);  // Atualize o estado com as colunas selecionadas
-        setIsView(true);
+        try {
+            const data = await fetchData();
+            console.log('Dados recebidos para as colunas:', data);
+            setTableData(data);  // Atualize o estado com os dados recebidos
+            setColumns(selectedColumns);  // Atualize o estado com as colunas selecionadas
+            
+            if (data && data.length > 0) {
+                setIsView(true);
+            } else {
+                setIsView(false);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar os dados:', error);
+            setIsView(false);
+        }
     };
-    
-
 
     return (
         <div className="flex flex-col w-full">
@@ -292,7 +304,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} />
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} columns={columns} tableData={tableData} />
+            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} />
         </div>
