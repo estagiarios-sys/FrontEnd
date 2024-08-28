@@ -13,11 +13,11 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false);
     const [isModalPdfOpen, setIsModalPdfOpen] = useState(false);
     const [isModalExpoOpen, setIsModalExpoOpen] = useState(false);
-
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
-    const [condicoesString, setCondicoesString] = useState(''); // Novo estado
+    const [condicoesString, setCondicoesString] = useState(''); 
+    const [isView, setIsView] = useState(false);
 
     const handleModalFiltro = () => {
         setIsModalOpenFiltro(true);
@@ -36,7 +36,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     };
 
     const handleModalPdf = () => {
-        setIsModalPdfOpen(true);
+        if (isView) {
+            setIsModalPdfOpen(true);
+        } else {
+            setIsModalPdfOpen(false);
+            alert('Selecione uma tabela para gerar o relatório!');
+        }
     };
 
     const closeModalExpo = () => {
@@ -97,7 +102,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 orderBy: '', // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
             };
-        
+
             if (selectedRelacionada && relationshipData.length > 0) {
                 const tablePair = `${selectTable} e ${selectedRelacionada}`;
                 const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
@@ -108,12 +113,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     console.log('Relacionamento não encontrado para:', tablePair);
                 }
             }
-    
+
             const url = 'http://localhost:8080/find'; // Nova rota
-    
+
             console.log('Enviando requisição para:', url);
             console.log('JSON Request:', JSON.stringify(jsonRequest));
-    
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -121,15 +126,15 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 },
                 body: JSON.stringify(jsonRequest),
             });
-    
+
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
-    
+
             const responseData = await response.json();
-    
+
             const [sql, data] = responseData;
-    
+
             console.log('SQL:', sql);
 
             return selectedColumns.map((column, index) => ({
@@ -147,7 +152,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         console.log('Dados recebidos para as colunas:', data);
         setTableData(data);  // Atualize o estado com os dados recebidos
         setColumns(selectedColumns);  // Atualize o estado com as colunas selecionadas
+        setIsView(true);
     };
+    
+
 
     return (
         <div className="flex flex-col w-full">
@@ -241,36 +249,38 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                 </div>
             </div>
-
             <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
                 <table className="w-full text-sm">
-                    <thead className="bg-neutral-200 border-b-2 border-neutral-600">
-                        <tr>
-                            {columns.map((column, index) => (
-                                <th key={index} className="p-3 text-left">{column}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tableData.map((row, rowIndex) => (
-                            <tr key={rowIndex}>
-                                {row.values.map((value, colIndex) => (
-                                    <td key={colIndex} className="p-3">{value}</td>
+                    {tableData.length > 0 && (
+                        <thead className="bg-teal-600 text-white">
+                            <tr>
+                                {columns.map((column, index) => (
+                                    <th key={index} className="p-2 border-b text-center">{column}</th>
                                 ))}
                             </tr>
-                        ))}
+                        </thead>
+                    )}
+                    <tbody>
+                        {tableData.length > 0 ? (
+                            tableData[0].values.map((_, rowIndex) => (
+                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                                    {columns.map((column, colIndex) => (
+                                        <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex].values[rowIndex]}</td>
+                                    ))}
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
-            <ModalFiltro 
-                isOpen={isModalOpenFiltro} 
-                onClose={closeModalFiltro} 
-                columns={selectedColumns}
-                onSave={handleSaveConditions} // Passe a função para o modal
-            />
+            <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} />
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} columns={columns} tableData={tableData}/>
+            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} columns={columns} tableData={tableData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
         </div>
     );
