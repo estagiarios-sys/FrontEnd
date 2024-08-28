@@ -40,6 +40,9 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
 
     const handleRemoveAllCampos = () => {
         setAddedCampos([]);
+        if (onSave) {
+            onSave("");
+        }
     };
 
     const handleCheckboxChange = (index) => {
@@ -52,6 +55,9 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
 
     const handleRemoveCheckedCampos = () => {
         setAddedCampos(prevCampos => prevCampos.filter(campo => !campo.checked));
+        if (onSave) {
+            onSave('');
+        }
     };
 
     const handleValorChange = (index, value) => {
@@ -78,7 +84,16 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         const condicoes = addedCampos.map((campo) => {
             const valor = campo.valor || '';
             const ordenacao = campo.ordenacao || '';
-            return `${campo.value} ${ordenacao} '${valor}'`;
+
+            console.log(campo);
+
+            if (campo.valor === undefined || campo.ordenacao === undefined || campo.valor === '' || campo.ordenacao === '') {
+                alert('Preencha todos os campos');
+                return;
+            }else{
+                alert('Filtro salvo com sucesso');
+                return `${campo.value} ${ordenacao} '${valor}'`;
+            }
         });
 
         const condicoesString = `${condicoes.join( ' AND ')}`;
@@ -87,8 +102,6 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         if (onSave) {
             onSave(condicoesString);
         }
-
-        alert(condicoesString);
     };
 
     useEffect(() => {

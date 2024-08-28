@@ -93,7 +93,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             const jsonRequest = {
                 table: selectTable,
                 columns: selectedColumns,
-                conditions: [condicoesString], // Adicione a condição aqui
+                conditions: condicoesString, // Adicione a condição aqui
                 orderBy: '', // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
             };
