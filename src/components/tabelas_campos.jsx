@@ -106,6 +106,18 @@ function TabelaCampos({ onDataChange }) {
       : [];
   }, [selectedTabela, relationships]);
 
+  useEffect(() => {
+    const handleClearSelectedCampos = () => {
+      setSelectedCampos([]);
+    };
+
+    window.addEventListener('clearSelectedCampos', handleClearSelectedCampos);
+
+    return () => {
+      window.removeEventListener('clearSelectedCampos', handleClearSelectedCampos);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col justify-start items-start ml-20">
       <div className="mt-5">

@@ -1,38 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Select, { components } from 'react-select';
 
-const campoOptions = [
-    { value: 'campo1', label: 'Campo 1' },
-    { value: 'campo2', label: 'Campo 2' },
-    { value: 'campo3', label: 'Campo 3' },
-    { value: 'campo4', label: 'Campo 4' },
-    { value: 'campo5', label: 'Campo 5' },
-    { value: 'campo6', label: 'Campo 6' },
-    { value: 'campo7', label: 'Campo 7' },
-    { value: 'campo8', label: 'Campo 8' },
-];
-
-const relacaoOptions = [
-    { value: 'igual', label: 'Igual' },
-    { value: 'diferente', label: 'Diferente' },
-];
-
 const ordenacaoOptions = [
-    { value: 'asc', label: 'x' },
-    { value: 'desc', label: 'y' },
+    { value: '>', label: 'Maior' },
+    { value: '<', label: 'Menor' },
+    { value: '=', label: 'Igual' },
+    { value: '>=', label: 'Maior ou igual' },
+    { value: '<=', label: 'Menor ou igual' },
+    { value: '!=', label: 'Diferente' },
 ];
-
-const CustomOption = (props) => (
-    <components.Option {...props}>
-        <input
-            type="checkbox"
-            checked={props.isSelected}
-            onChange={() => null}
-            style={{ marginRight: '10px' }}
-        />
-        {props.label}
-    </components.Option>
-);
 
 const CustomSingleValue = (props) => (
     <components.SingleValue {...props}>
@@ -40,9 +16,14 @@ const CustomSingleValue = (props) => (
     </components.SingleValue>
 );
 
-function ModalCondicao({ isOpen, onClose }) {
-    const [selectedCampos, setSelectedCampos] = useState([]); // Campos selecionados para adicionar
-    const [addedCampos, setAddedCampos] = useState([]); // Campos já adicionados à seção "Campos Selecionados e Condições"
+function ModalFiltro({ isOpen, onClose, columns, onSave }) {
+    const [selectedCampos, setSelectedCampos] = useState([]);
+    const [addedCampos, setAddedCampos] = useState([]);
+    
+    const campoOptions = columns.map(col => ({
+        value: col,
+        label: col,
+    }));
 
     const handleCampoChange = (selectedOptions) => {
         setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
@@ -51,18 +32,17 @@ function ModalCondicao({ isOpen, onClose }) {
     const handleAddSelectedCampos = () => {
         const camposToAdd = selectedCampos.map(value => {
             const option = campoOptions.find(option => option.value === value);
-            return { value: option.value, label: option.label };
+            return { value: option.value, label: option.label, checked: false };
         });
         setAddedCampos([...addedCampos, ...camposToAdd]);
         setSelectedCampos([]);
     };
 
-    const handleRemoveSelectedCampos = () => {
-        setAddedCampos(prevCampos => prevCampos.filter(campo => !selectedCampos.includes(campo.value)));
-    };
-
     const handleRemoveAllCampos = () => {
         setAddedCampos([]);
+        if (onSave) {
+            onSave("");
+        }
     };
 
     const handleCheckboxChange = (index) => {
@@ -75,6 +55,9 @@ function ModalCondicao({ isOpen, onClose }) {
 
     const handleRemoveCheckedCampos = () => {
         setAddedCampos(prevCampos => prevCampos.filter(campo => !campo.checked));
+        if (onSave) {
+            onSave('');
+        }
     };
 
     const handleValorChange = (index, value) => {
@@ -87,7 +70,37 @@ function ModalCondicao({ isOpen, onClose }) {
         if (e.key === 'Enter') {
             e.preventDefault();
             handleValorChange(index, e.target.value);
-            e.target.blur(); // Remove o foco do input
+            e.target.blur();
+        }
+    };
+
+    const handleOrdenacaoChange = (index, selectedOption) => {
+        const updatedCampos = [...addedCampos];
+        updatedCampos[index].ordenacao = selectedOption ? selectedOption.value : '';
+        setAddedCampos(updatedCampos);
+    };
+
+    const handleSave = () => {
+        const condicoes = addedCampos.map((campo) => {
+            const valor = campo.valor || '';
+            const ordenacao = campo.ordenacao || '';
+
+            console.log(campo);
+
+            if (campo.valor === undefined || campo.ordenacao === undefined || campo.valor === '' || campo.ordenacao === '') {
+                alert('Preencha todos os campos');
+                return;
+            }else{
+                alert('Filtro salvo com sucesso');
+                return `${campo.value} ${ordenacao} '${valor}'`;
+            }
+        });
+
+        const condicoesString = `${condicoes.join( ' AND ')}`;
+
+        // Chama a função onSave do componente pai com o condicoesString
+        if (onSave) {
+            onSave(condicoesString);
         }
     };
 
@@ -125,13 +138,13 @@ function ModalCondicao({ isOpen, onClose }) {
                                 isMulti
                                 name="campos"
                                 options={campoOptions}
-                                components={{ Option: CustomOption, SingleValue: CustomSingleValue }}
+                                components={{ SingleValue: CustomSingleValue }}
                                 className="basic-multi-select"
                                 classNamePrefix="Select"
                                 placeholder="Selecione..."
                                 onChange={handleCampoChange}
                                 value={campoOptions.filter(option => selectedCampos.includes(option.value))}
-                                closeMenuOnSelect={false} // Mantém o menu aberto após selecionar uma opção
+                                closeMenuOnSelect={false}
                             />
                         </div>
                     </div>
@@ -166,7 +179,7 @@ function ModalCondicao({ isOpen, onClose }) {
                     <div style={{ flex: 2, overflowY: 'auto', margin: '0px 0px 0px 30px' }}>
                         <div style={{ marginBottom: '20px' }}>
                             <h6 className="font-bold p-1">Campos Selecionados e Condições</h6>
-                            <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                            <div style={{ maxHeight: '322.4px', overflowY: 'auto' }}>
                                 <table className="min-w-full bg-white border border-gray-300" style={{ width: '100%' }}>
                                     <thead>
                                         <tr>
@@ -177,7 +190,7 @@ function ModalCondicao({ isOpen, onClose }) {
                                                 Campos
                                             </th>
                                             <th className="py-2 px-4 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-600">
-                                                Condição
+                                                Ordenação
                                             </th>
                                             <th className="py-2 px-4 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-600">
                                                 Valor
@@ -191,6 +204,7 @@ function ModalCondicao({ isOpen, onClose }) {
                                                     <input
                                                         type="checkbox"
                                                         className="form-checkbox h-5 w-5 text-red-600"
+                                                        checked={campo.checked || false}
                                                         onChange={() => handleCheckboxChange(index)}
                                                     />
                                                 </td>
@@ -203,15 +217,18 @@ function ModalCondicao({ isOpen, onClose }) {
                                                         className="basic-single"
                                                         classNamePrefix="Select"
                                                         placeholder="Selecione..."
+                                                        menuPortalTarget={document.body}
+                                                        onChange={(selectedOption) => handleOrdenacaoChange(index, selectedOption)}
                                                     />
                                                 </td>
                                                 <td className="py-2 px-4 border-b border-gray-300 text-sm">
                                                     <input
                                                         type="text"
-                                                        value={campo.valor || ''} // Use the value from your state or default to an empty string
-                                                        onChange={(e) => handleValorChange(index, e.target.value)} // Function to handle value changes
+                                                        value={campo.valor || ''}
+                                                        onChange={(e) => handleValorChange(index, e.target.value)}
                                                         onKeyDown={(e) => handleValorKeyDown(index, e)}
-                                                        className="form-input w-3/4 border border-gray-300 rounded-md"
+                                                        className="border border-gray-300 rounded p-1 w-full"
+                                                        placeholder="Digite o valor"
                                                     />
                                                 </td>
                                             </tr>
@@ -222,7 +239,6 @@ function ModalCondicao({ isOpen, onClose }) {
                         </div>
                     </div>
                 </div>
-
                 <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 20px 20px 20px' }}>
                     <button
                         style={{
@@ -249,7 +265,7 @@ function ModalCondicao({ isOpen, onClose }) {
                             fontSize: '16px',
                             cursor: 'pointer',
                         }}
-                        onClick={() => alert('Gravar clicado')}
+                        onClick={handleSave}
                     >
                         Salvar
                     </button>
@@ -259,4 +275,4 @@ function ModalCondicao({ isOpen, onClose }) {
     );
 }
 
-export default ModalCondicao;
+export default ModalFiltro;
