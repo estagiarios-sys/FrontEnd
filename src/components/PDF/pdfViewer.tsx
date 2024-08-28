@@ -25,14 +25,19 @@ const View: React.FC<ViewProps> = ({ table }) => {
       }
 
       let backgroundColor: string | undefined;
+      let tituloContent: string | undefined;
 
       if (savedTemplate) {
         try {
           const parsedTemplate = JSON.parse(savedTemplate) as Template;
-          // Use a type assertion to handle backgroundColor safely
+          // Use a type assertion to handle backgroundColor and title safely
           const headStyles = parsedTemplate.schemas[0]?.table?.headStyles as { [key: string]: any };
           if (headStyles?.backgroundColor) {
             backgroundColor = headStyles.backgroundColor;
+          }
+          const titulo = parsedTemplate.schemas[0]?.titulo as { [key: string]: any };
+          if (titulo?.content) {
+            tituloContent = titulo.content;
           }
         } catch (error) {
           console.error('Erro ao carregar o template salvo:', error);
@@ -47,6 +52,11 @@ const View: React.FC<ViewProps> = ({ table }) => {
         (template.schemas[0].table.headStyles as { [key: string]: any }).backgroundColor = backgroundColor;
       }
 
+      // Aplique o título ao template padrão, se ele existir
+      if (tituloContent && template.schemas[0]?.titulo) {
+        (template.schemas[0].titulo as { [key: string]: any }).content = tituloContent;
+      }
+
       const inputs = [
         {
           table: table[0].values.map((_, rowIndex) =>
@@ -54,7 +64,7 @@ const View: React.FC<ViewProps> = ({ table }) => {
           ),
           infos: 'Informações Genéricas...',
           op_produto: 'op: 1234',
-          titulo: 'Título Aqui',
+          titulo: tituloContent || 'Título Aqui', // Usar o título salvo ou o padrão
           qrcode: 'https://systextil.com.br/',
           barcodes: '1234567890',
         }
@@ -96,6 +106,7 @@ const View: React.FC<ViewProps> = ({ table }) => {
         {
           titulo: {
             type: 'text',
+            content: 'Título Aqui', // Valor padrão que pode ser sobrescrito
             fontSize: 47,
             position: { x: 64, y: 7.7 },
             width: 81.1,
