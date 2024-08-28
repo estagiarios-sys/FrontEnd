@@ -244,7 +244,7 @@ export default function Nova() {
       const updatedTemplate = designerRef.current.getTemplate();
       console.log('Template atualizado manualmente:', updatedTemplate);
       setSavedTemplate(updatedTemplate);
-      localStorage.setItem('savedTemplate', JSON.stringify(savedTemplate));
+      localStorage.setItem('savedTemplate', JSON.stringify(updatedTemplate));
     }
   };
   
