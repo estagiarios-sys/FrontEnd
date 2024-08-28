@@ -1,7 +1,7 @@
 import React from "react";
 import {generatePDF} from "../PDF/pdfGenerate";
 
-function ModalExpo({ isOpen, onClose }) {
+function ModalExpo({ isOpen, onClose, table }) {
     if (!isOpen) return null;
 
     return (
@@ -64,7 +64,7 @@ function ModalExpo({ isOpen, onClose }) {
                         gap: '60px', // Espaçamento entre os botões
                     }}
                 >
-                    <button onClick={generatePDF}
+                    <button onClick={() => generatePDF(table)}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',

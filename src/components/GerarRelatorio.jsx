@@ -75,8 +75,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     }, []);
 
     const redirectToPDF = () => {
-        navigate('./pdfme');
+        navigate('./pdfme', {
+            state: {
+                tableData
+            }
+        });
     };
+    
 
     const handleSaveQuery = () => {
         console.log('Consulta salva com sucesso!');
@@ -256,7 +261,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} />
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} />
+            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} />
             <ModalCondicao isOpen={isModalOpenCondicao} onClose={closeModalCondicao} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
         </div>
