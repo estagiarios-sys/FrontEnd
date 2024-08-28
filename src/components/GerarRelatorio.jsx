@@ -241,7 +241,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                 </div>
             </div>
-            
+
             <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-neutral-200 border-b-2 border-neutral-600">
@@ -262,17 +262,16 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </tbody>
                 </table>
             </div>
-            
-            <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
-            <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
-            <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} />
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} />
             <ModalFiltro 
                 isOpen={isModalOpenFiltro} 
                 onClose={closeModalFiltro} 
                 columns={selectedColumns}
                 onSave={handleSaveConditions} // Passe a função para o modal
             />
+            <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
+            <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} />
+            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} columns={columns} tableData={tableData}/>
+            <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
         </div>
     );
 }

@@ -1,7 +1,54 @@
 import React from "react";
-import {generatePDF} from "../PDF/pdfGenerate";
+import { generatePDF } from "../PDF/pdfGenerate";  // Supondo que `generatePDF` está sendo importado corretamente
 
-function ModalExpo({ isOpen, onClose }) {
+// Função para converter os dados em CSV
+const convertToCSV = (columns, tableData) => {
+    if (!columns || !tableData || tableData.length === 0) {
+        console.error("Columns or tableData are not properly defined.");
+        return '';
+    }
+
+    let csvContent = columns.join(",") + "\n"; // Adiciona o cabeçalho das colunas
+
+    const numRows = tableData[0]?.values?.length || 0;
+
+    for (let i = 0; i < numRows; i++) {
+        let row = [];
+        for (let j = 0; j < columns.length; j++) {
+            row.push(tableData[j]?.values[i] || ""); // Se `values` estiver indefinido, insere uma string vazia
+        }
+        csvContent += row.join(",") + "\n";
+    }
+
+    return csvContent;
+};
+
+// Verifique se a função `downloadCSV` só está definida uma vez
+const downloadCSV = (columns, tableData) => {
+    if (!columns || columns.length === 0 || !tableData || tableData.length === 0) {
+        alert("Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.");
+        return;
+    }
+
+    const csvContent = convertToCSV(columns, tableData);
+    
+    if (!csvContent || csvContent.trim() === "") {
+        alert("O arquivo CSV está vazio. Verifique se os dados foram carregados corretamente.");
+        return;
+    }
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "relatorio.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+function ModalExpo({ isOpen, onClose, columns, tableData }) {
     if (!isOpen) return null;
 
     return (
@@ -26,7 +73,7 @@ function ModalExpo({ isOpen, onClose }) {
                     borderRadius: '5px',
                     position: 'relative',
                     width: '400px',
-                    height: '150px', // Definindo a altura como 500px
+                    height: '150px',
                 }}
             >
                 <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
@@ -38,17 +85,17 @@ function ModalExpo({ isOpen, onClose }) {
                             position: 'absolute',
                             top: '6px',
                             right: '1px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.5)', // Fundo semi-transparente
-                            border: '1px solid #ccc', // Borda cinza clara
-                            borderRadius: '5px', // Forma arredondada
-                            width: '60px', // Largura do botão
-                            height: '30px', // Altura do botão
+                            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                            border: '1px solid #ccc',
+                            borderRadius: '5px',
+                            width: '60px',
+                            height: '30px',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            zIndex: 1001, // Garantindo que o botão esteja sobre o conteúdo
+                            zIndex: 1001,
                         }}
                     >
                         X
@@ -60,8 +107,8 @@ function ModalExpo({ isOpen, onClose }) {
                         flexDirection: 'row',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        marginTop: '20px', // Espaçamento superior
-                        gap: '60px', // Espaçamento entre os botões
+                        marginTop: '20px',
+                        gap: '60px',
                     }}
                 >
                     <button onClick={generatePDF}
@@ -98,8 +145,8 @@ function ModalExpo({ isOpen, onClose }) {
                         <span>Baixar PDF</span>
                     </button>
 
-
                     <button 
+                        onClick={() => downloadCSV(columns, tableData)}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
