@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 
 function ModalSalvos({ isOpen, onClose }) {
-    // Estado para armazenar os campos selecionados
     const [selectedCampos, setSelectedCampos] = useState([]);
     const [campoOptions, setCampoOptions] = useState([]);
 
-    // Fetch dos dados salvos da API
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
@@ -20,9 +18,8 @@ function ModalSalvos({ isOpen, onClose }) {
 
                 const data = await response.json();
 
-                // Transformar os dados para o formato esperado pelo Select
                 const options = data.map(item => ({
-                    value: item.queryName,
+                    value: item.query,
                     label: item.queryName
                 }));
 
@@ -35,7 +32,6 @@ function ModalSalvos({ isOpen, onClose }) {
         fetchSavedQueries();
     }, []);
 
-    // Adicionar ou remover a classe 'no-scroll' ao body quando o modal está aberto
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -48,7 +44,36 @@ function ModalSalvos({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
-    // Se o modal não estiver aberto, não renderize nada
+    // Função para enviar a query selecionada
+    async function handleCarregar() {
+        try {
+            // Cria o corpo da requisição com as queries selecionadas
+            const response = await fetch('http://localhost:8080/loadedQuery', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: selectedCampos,
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro ao carregar a consulta: ${response.statusText}`);
+            }
+
+            console.log('Consulta carregada com sucesso!');
+
+            const responseData = await response.json();
+
+            localStorage.setItem('loadedQuery', responseData);
+
+            console.log('Dados da consulta:', responseData);
+
+        } catch (error) {
+            console.error('Erro ao carregar a consulta:', error);
+        }
+    }
+
     if (!isOpen) return null;
 
     const contentContainerStyle = {
@@ -163,9 +188,9 @@ function ModalSalvos({ isOpen, onClose }) {
                             fontSize: '16px',
                             cursor: 'pointer',
                         }}
+                        onClick={handleCarregar}
                     >
                         Carregar
-                        
                     </button>
                 </div>
             </div>

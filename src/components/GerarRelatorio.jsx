@@ -153,6 +153,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             console.log('SQL:', sql);
 
+            localStorage.setItem('SQLGeradoFinal', sql);
+
             return selectedColumns.map((column, index) => ({
                 column,
                 values: data.map(row => row[index]) // Acessa pelo índice
