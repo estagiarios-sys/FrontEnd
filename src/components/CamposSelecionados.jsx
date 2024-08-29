@@ -1,5 +1,12 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import Select from 'react-select';
+
+const ordenacaoOptions = [
+  { value: 'NENHUM', label: 'NENHUM' },
+  { value: 'ASC', label: 'ASC' },
+  { value: 'DESC', label: 'DESC' },
+];
 
 function CamposSelecionados({
   selectedCampos = [], 
@@ -7,6 +14,16 @@ function CamposSelecionados({
   handleCheckboxChange,
   checkedCampos = [],
 }) {
+
+  const handleOrderBySave = (selectedOption, fieldName) => {
+    if (selectedOption.value !== 'NENHUM') {
+      const orderBy = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
+      localStorage.setItem('orderByString', orderBy); // Remova JSON.stringify
+    } else {
+      localStorage.setItem('orderByString', '');
+    }
+  };
+
   const showCheckboxColumn = selectedCampos.length > 0; // Verifica se a coluna "Nada" deve ser exibida
 
   return (
@@ -50,10 +67,14 @@ function CamposSelecionados({
                         )}
                         <td className="py-2 px-4 border-b border-gray-300 text-sm">{campo}</td>
                         <td className="py-2 px-4 border-b border-gray-300 text-sm">
-                          <select name="ordem" id="ordem">
-                            <option value="ASC">ASC</option>
-                            <option value="DESC">DESC</option>
-                          </select>
+                        <Select
+                            options={ordenacaoOptions}
+                            onChange={(selectedOption) => handleOrderBySave(selectedOption, campo)}
+                            placeholder="Selecione..."
+                            className="basic-single"
+                            classNamePrefix="select"
+                            isClearable
+                          />
                         </td>
                       </tr>
                     )}
