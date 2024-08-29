@@ -5,6 +5,7 @@ import { text, image, barcodes, line, rectangle, ellipse, svg, tableBeta } from 
 import ModalModal from 'components/modais/ModalModal';
 
 
+
 export default function Nova() {
   
   const designerRef = useRef<Designer | null>(null);
@@ -214,8 +215,6 @@ export default function Nova() {
 
       const designer = new Designer({ domContainer, template, options: { lang: 'en', labels: { fieldsList: 'Lista de Elementos' } }, plugins })
 
-      
-      
       designerRef.current = designer;
 
       designer.onSaveTemplate((updatedTemplate: Template) => {
@@ -223,18 +222,16 @@ export default function Nova() {
         setSavedTemplate(updatedTemplate);
       });
       
-      
-    
-      
+      setTimeout(() => {
+        const currentTemplate = designer.getTemplate();
+        designer.saveTemplate();
+      }, 3000); 
 
     } else {
       console.error('Container do DOM não encontrado');
     }
   }, []);
 
-
-  
-  
   useEffect(() => {
     console.log('Estado atual de savedTemplate:', savedTemplate);
   }, [savedTemplate]);
@@ -249,6 +246,7 @@ export default function Nova() {
       setIsModalOpen(true);
     }
   };
+
 
   const handleConfirmModal = (inputValue?: string) => {
     if (inputValue) {
@@ -278,6 +276,7 @@ export default function Nova() {
   return (
     <div>
       <button className='ml-0.5  h-8 border border-black rounded-md transition-colors duration-300 hover:border-blue-200' onClick={handleManualSave}>Salvar</button>
+
       <div id="designer-container" style={{ width: '100%', height: '100%' }}></div>
       
       {/* Componente ModalModal */}

@@ -3,7 +3,8 @@ import Select from 'react-select';
 import ModalModal from './ModalModal';
 import { FaEraser } from 'react-icons/fa'; // Importa o ícone de apagador
 
-function ModalModelo({ isOpen, onClose }) {
+
+function ModalModelo({ isOpen, onClose, onSelect }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
@@ -12,7 +13,7 @@ function ModalModelo({ isOpen, onClose }) {
 
     // Função para obter as chaves do localStorage e formatar para o Select
     const loadModels = () => {
-        const keys = Object.keys(localStorage); // Obtenha todas as chaves do localStorage
+        const keys = Object.keys(localStorage); 
         const modelOptions = keys.map((key) => ({
             value: key,
             label: key,
@@ -46,6 +47,13 @@ function ModalModelo({ isOpen, onClose }) {
             setSelectedItem(null); // Limpa a seleção
         }
         setIsModalModalOpen(false); // Fecha o modal de confirmação
+    };
+
+    const handleUseModel = () => {
+        if (selectedItem) {
+            onSelect(selectedItem.value);  // Passa a key selecionada para o componente pai
+            onClose(); // Fecha o modal
+        }
     };
 
     if (!isOpen) return null; // Se o modal não estiver aberto, não renderiza nada
@@ -125,7 +133,8 @@ function ModalModelo({ isOpen, onClose }) {
                         </button>
                         <button
                             className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-20 flex flex-col justify-center items-center "
-                            onClick={() => alert('Abrir clicado')}
+
+                            onClick={handleUseModel}  // Chama a função para usar o modelo selecionado
                         >
                             Usar
                         </button>

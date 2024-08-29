@@ -9,15 +9,17 @@ interface TableData {
 }
 
 interface ViewProps {
-  table: TableData[]; // Dados da tabela
+  table: TableData[]; 
+  templateKey: string | null;
 }
 
-const View: React.FC<ViewProps> = ({ table }) => {
+
+const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
 
   useEffect(() => {
     const generatePDF = () => {
       const domContainer = document.getElementById('designer-container');
-      const savedTemplate = localStorage.getItem('savedTemplate');
+      const savedTemplate = templateKey ? localStorage.getItem(templateKey) : null;
 
       if (!domContainer) {
         console.error('domContainer is null');
@@ -31,33 +33,35 @@ const View: React.FC<ViewProps> = ({ table }) => {
       if (savedTemplate) {
         try {
           const parsedTemplate = JSON.parse(savedTemplate) as Template;
-          // Use a type assertion to handle backgroundColor and title safely
+          
           const headStyles = parsedTemplate.schemas[0]?.table?.headStyles as { [key: string]: any };
           if (headStyles?.backgroundColor) {
             backgroundColor = headStyles.backgroundColor;
           }
+
           const titulo = parsedTemplate.schemas[0]?.titulo as { [key: string]: any };
           if (titulo?.content) {
             tituloContent = titulo.content;
           }
+
           const img = parsedTemplate.schemas[0]?.image as { [key: string]: any };
           if (img?.content) {
             imageContent = img.content;
           }
         } catch (error) {
-          console.error('Erro ao carregar o template salvo:', error);
+          console.error("Erro ao carregar o template salvo:", error);
         }
       }
 
-      // Agora crie o template padrão
+      // Crie o template padrão
       const template = getDefaultTemplate(table);
 
-      // Aplique o backgroundColor ao template padrão, se ele existir
+      // Aplique os valores extraídos do localStorage, se existirem
+
       if (backgroundColor && template.schemas[0]?.table?.headStyles) {
         (template.schemas[0].table.headStyles as { [key: string]: any }).backgroundColor = backgroundColor;
       }
 
-      // Aplique o título ao template padrão, se ele existir
       if (tituloContent && template.schemas[0]?.titulo) {
         (template.schemas[0].titulo as { [key: string]: any }).content = tituloContent;
       }
