@@ -65,7 +65,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                     <div className="w-full bg-green-600 flex justify-between items-center text-white p-3 rounded-t-lg">
                         <h5 className="font-bold text-lg">Modelos de Relatórios</h5>
                         <button
-                            className="bg-white text-black border border-gray-300 rounded-full w-8 h-8 flex items-center justify-center text-xl cursor-pointer"
+                            className=" text-black   rounded-full w-8 h-8 flex items-center justify-center text-xl cursor-pointer"
                             onClick={onClose}
                         >
                             &times;
