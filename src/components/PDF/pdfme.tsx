@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Designer } from '@pdfme/ui';
 import { Template } from '@pdfme/common';
 import { text, image, barcodes, line, rectangle, ellipse, svg, tableBeta } from "@pdfme/schemas";
-import { useLocation } from 'react-router-dom';
+
 
 export default function Nova() {
   
@@ -219,11 +219,6 @@ export default function Nova() {
       });
       
       
-
-      setTimeout(() => {
-        const currentTemplate = designer.getTemplate();
-        designer.saveTemplate();
-      }, 3000);
     
       
 
@@ -245,7 +240,8 @@ export default function Nova() {
       console.log('Template atualizado manualmente:', updatedTemplate);
       setSavedTemplate(updatedTemplate);
       console.log(updatedTemplate)
-      localStorage.setItem('savedTemplate', JSON.stringify(updatedTemplate));
+      const nome = prompt("Digite aqui o nome que deseja salvar no template")
+      localStorage.setItem(`${nome}`, JSON.stringify(updatedTemplate));
     }
   };
   

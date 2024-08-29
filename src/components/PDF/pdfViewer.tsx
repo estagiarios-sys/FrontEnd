@@ -26,6 +26,7 @@ const View: React.FC<ViewProps> = ({ table }) => {
 
       let backgroundColor: string | undefined;
       let tituloContent: string | undefined;
+      let imageContent: string | undefined;
 
       if (savedTemplate) {
         try {
@@ -38,6 +39,10 @@ const View: React.FC<ViewProps> = ({ table }) => {
           const titulo = parsedTemplate.schemas[0]?.titulo as { [key: string]: any };
           if (titulo?.content) {
             tituloContent = titulo.content;
+          }
+          const img = parsedTemplate.schemas[0]?.image as { [key: string]: any };
+          if (img?.content) {
+            imageContent = img.content;
           }
         } catch (error) {
           console.error('Erro ao carregar o template salvo:', error);
@@ -55,6 +60,10 @@ const View: React.FC<ViewProps> = ({ table }) => {
       // Aplique o título ao template padrão, se ele existir
       if (tituloContent && template.schemas[0]?.titulo) {
         (template.schemas[0].titulo as { [key: string]: any }).content = tituloContent;
+      }
+
+      if (imageContent && template.schemas[0]?.image) {
+        (template.schemas[0].image as { [key: string]: any }).content = imageContent;
       }
 
       const inputs = [

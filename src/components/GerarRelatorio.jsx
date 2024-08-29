@@ -304,7 +304,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} />
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} />
+            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} />
         </div>

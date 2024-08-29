@@ -48,7 +48,7 @@ const downloadCSV = (columns, tableData) => {
     document.body.removeChild(link);
 };
 
-function ModalExpo({ isOpen, onClose, table }) {
+function ModalExpo({ isOpen, onClose, table, selectedColumns }) {
     if (!isOpen) return null;
 
     return (
@@ -145,7 +145,7 @@ function ModalExpo({ isOpen, onClose, table }) {
                         <span>Baixar PDF</span>
                     </button>
 
-                    <button 
+                    <button onClick={() => downloadCSV(selectedColumns,table)}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
