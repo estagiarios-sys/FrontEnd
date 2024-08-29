@@ -106,6 +106,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         setCondicoesString(conditions);
     };
 
+    const staregeOrderBy = localStorage.getItem('orderByString');
+
     const fetchData = async () => {
         try {
             // Construir o objeto JSON que será enviado na requisição
@@ -113,7 +115,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 table: selectTable,
                 columns: selectedColumns,
                 conditions: condicoesString, // Adicione a condição aqui
-                orderBy: '', // Adicione a ordenação conforme necessário
+                orderBy: staregeOrderBy, // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
             };
 
