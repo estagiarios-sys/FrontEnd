@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Select from 'react-select';
 
 const ordenacaoOptions = [
-  { value: 'NENHUM', label: 'NENHUM' },
   { value: 'ASC', label: 'ASC' },
   { value: 'DESC', label: 'DESC' },
 ];
@@ -14,14 +13,14 @@ function CamposSelecionados({
   handleCheckboxChange,
   checkedCampos = [],
 }) {
+  const [selectedOrder, setSelectedOrder] = useState(null); // Estado para a seleção atual
 
   const handleOrderBySave = (selectedOption, fieldName) => {
-    if (selectedOption.value !== 'NENHUM') {
-      const orderBy = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
-      localStorage.setItem('orderByString', orderBy); // Remova JSON.stringify
-    } else {
-      localStorage.setItem('orderByString', '');
-    }
+    const newOrder = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
+    localStorage.setItem('orderByString', newOrder);
+
+    // Atualiza o estado com a nova seleção e limpa as outras seleções
+    setSelectedOrder(selectedOption ? { fieldName, value: selectedOption.value } : null);
   };
 
   const showCheckboxColumn = selectedCampos.length > 0; // Verifica se a coluna "Nada" deve ser exibida
@@ -67,8 +66,13 @@ function CamposSelecionados({
                         )}
                         <td className="py-2 px-4 border-b border-gray-300 text-sm">{campo}</td>
                         <td className="py-2 px-4 border-b border-gray-300 text-sm">
-                        <Select
+                          <Select
                             options={ordenacaoOptions}
+                            value={
+                              selectedOrder && selectedOrder.fieldName === campo
+                                ? { value: selectedOrder.value, label: selectedOrder.value }
+                                : null
+                            }
                             onChange={(selectedOption) => handleOrderBySave(selectedOption, campo)}
                             placeholder="Selecione..."
                             className="basic-single"

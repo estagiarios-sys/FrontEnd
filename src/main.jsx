@@ -30,6 +30,12 @@ function Main() {
   const handleIndividualLeftClick = () => {
     const camposParaRemover = selectedCampos.filter(campo => checkedCampos.includes(campo));
     const camposRestantes = selectedCampos.filter(campo => !checkedCampos.includes(campo));
+    const orderByString = localStorage.getItem('orderByString') || '';
+    
+    if (camposParaRemover.some(campo => orderByString.includes(campo))) {
+      localStorage.setItem('orderByString', '');
+      console.log('Removido o orderByString do localStorage, no left click');
+    }
     
     setAvailableCampos([...availableCampos, ...camposParaRemover]);
     setSelectedCampos(camposRestantes);
@@ -52,6 +58,7 @@ function Main() {
 
   // Move todos os campos selecionados para a lista de disponíveis e limpa a lista de selecionados
   const handleAllLeftClick = () => {
+    localStorage.setItem('orderByString', '');
     setAvailableCampos(prevAvailableCampos => [
       ...prevAvailableCampos,
       ...selectedCampos
