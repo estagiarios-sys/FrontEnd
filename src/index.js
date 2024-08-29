@@ -7,6 +7,7 @@ import Nova from './components/PDF/pdfme';
 
 
 function App() {
+  localStorage.setItem('orderByString', '');
   return (
     <Router>
       <Routes>

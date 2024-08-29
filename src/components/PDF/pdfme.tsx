@@ -4,6 +4,7 @@ import { Template } from '@pdfme/common';
 import { text, image, barcodes, line, rectangle, ellipse, svg, tableBeta } from "@pdfme/schemas";
 import { useLocation } from 'react-router-dom';
 
+
 export default function Nova() {
   
   const designerRef = useRef<Designer | null>(null);
@@ -209,8 +210,6 @@ export default function Nova() {
 
       const designer = new Designer({ domContainer, template, options: { lang: 'en', labels: { fieldsList: 'Lista de Elementos' } }, plugins })
 
-      
-      
       designerRef.current = designer;
 
       designer.onSaveTemplate((updatedTemplate: Template) => {
@@ -218,23 +217,16 @@ export default function Nova() {
         setSavedTemplate(updatedTemplate);
       });
       
-      
-
       setTimeout(() => {
         const currentTemplate = designer.getTemplate();
         designer.saveTemplate();
-      }, 3000);
-    
-      
+      }, 3000); 
 
     } else {
       console.error('Container do DOM não encontrado');
     }
   }, []);
 
-
-  
-  
   useEffect(() => {
     console.log('Estado atual de savedTemplate:', savedTemplate);
   }, [savedTemplate]);
@@ -244,16 +236,15 @@ export default function Nova() {
       const updatedTemplate = designerRef.current.getTemplate();
       console.log('Template atualizado manualmente:', updatedTemplate);
       setSavedTemplate(updatedTemplate);
-      localStorage.setItem('savedTemplate', JSON.stringify(updatedTemplate));
+      console.log(updatedTemplate)
+      const nome = prompt("Digite aqui o nome que deseja salvar no template")
+      localStorage.setItem(`${nome}`, JSON.stringify(updatedTemplate));
     }
   };
   
-
   return (
     <div>
-      
       <button onClick={handleManualSave}>Salvar</button>
-
       <div id="designer-container" style={{ width: '100%', height: '100%' }}></div>
     </div>
   );

@@ -13,6 +13,7 @@ interface ViewProps {
   templateKey: string | null;
 }
 
+
 const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
 
   useEffect(() => {
@@ -56,6 +57,7 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
       const template = getDefaultTemplate(table);
 
       // Aplique os valores extraídos do localStorage, se existirem
+
       if (backgroundColor && template.schemas[0]?.table?.headStyles) {
         (template.schemas[0].table.headStyles as { [key: string]: any }).backgroundColor = backgroundColor;
       }

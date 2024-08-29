@@ -3,6 +3,7 @@ import Select from 'react-select';
 import ModalModal from './ModalModal';
 import { FaEraser } from 'react-icons/fa'; // Importa o ícone de apagador
 
+
 function ModalModelo({ isOpen, onClose, onSelect }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
@@ -132,6 +133,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                         </button>
                         <button
                             className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-20 flex flex-col justify-center items-center "
+
                             onClick={handleUseModel}  // Chama a função para usar o modelo selecionado
                         >
                             Usar
