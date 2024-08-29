@@ -9,149 +9,146 @@ import ModalModelo from "./modais/ModalModelo";
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
-    const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false);
-    const [isModalOpenSQl, setIsModalOpenSQL] = useState(false);
-    const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false);
-    const [isModalPdfOpen, setIsModalPdfOpen] = useState(false);
-    const [isModalExpoOpen, setIsModalExpoOpen] = useState(false);
-    const [relationshipData, setRelationshipData] = useState([]);
-    const [tableData, setTableData] = useState([]);
-    const [columns, setColumns] = useState([]);
-    const [condicoesString, setCondicoesString] = useState(''); 
-    const [isView, setIsView] = useState(false);
-    const [isModalModeloOpen, setIsModalModeloOpen] = useState(false);
+const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false);
+const [isModalOpenSQl, setIsModalOpenSQL] = useState(false);
+const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false);
+const [isModalPdfOpen, setIsModalPdfOpen] = useState(false);
+const [isModalExpoOpen, setIsModalExpoOpen] = useState(false);
+const [relationshipData, setRelationshipData] = useState([]);
+const [tableData, setTableData] = useState([]);
+const [columns, setColumns] = useState([]);
+const [condicoesString, setCondicoesString] = useState(''); 
+const [isView, setIsView] = useState(false);
+const [isModalModeloOpen, setIsModalModeloOpen] = useState(false);
+const [selectedTemplateKey, setSelectedTemplateKey] = useState(null);
 
-    const handleModalFiltro = () => {
-        setIsModalOpenFiltro(true);
-    };
 
-    const handleModalSalvos = () => {
-        setIsModalOpenSalvos(true);
-    };
+const handleSelectTemplate = (key) => {
+    setSelectedTemplateKey(key);
+    setIsModalModeloOpen(false);
+};
 
-    const handleModalExpo = () => {
-        setIsModalExpoOpen(true);
-    };
+const handleModalFiltro = () => {
+    setIsModalOpenFiltro(true);
+};
 
-    const handleModalSql = () => {
-        setIsModalOpenSQL(true);
-    };
+const handleModalSalvos = () => {
+    setIsModalOpenSalvos(true);
+};
 
-    const handleModalPdf = () => {
-        if (isView) {
-            setIsModalPdfOpen(true);
-        } else {
-            setIsModalPdfOpen(false);
-            alert('Selecione uma tabela para gerar o relatório!');
+const handleModalExpo = () => {
+    setIsModalExpoOpen(true);
+};
+
+const handleModalSql = () => {
+    setIsModalOpenSQL(true);
+};
+
+const handleModalPdf = () => {
+    if (isView) {
+        setIsModalPdfOpen(true);
+    } else {
+        setIsModalPdfOpen(false);
+        alert('Selecione uma tabela para gerar o relatório!');
+    }
+};
+
+const handleModalModelo = () => {
+    setIsModalModeloOpen(true);
+};
+
+const closeModalExpo = () => {
+    setIsModalExpoOpen(false);
+};
+
+const closeModalSql = () => {
+    setIsModalOpenSQL(false);
+};
+  
+
+const closeModalPdf = () => {
+    setIsModalPdfOpen(false);
+};
+
+const closeModalFiltro = () => {
+    setIsModalOpenFiltro(false);
+};
+
+
+const closeModalSalvos = () => {
+    setIsModalOpenSalvos(false);
+};
+
+const closeModalModelo = () => {
+    setIsModalModeloOpen(false);
+};
+
+const navigate = useNavigate();
+
+useEffect(() => {
+    const fetchRelationshipData = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/find/relationship');
+            const data = await response.json();
+            setRelationshipData(data);
+        } catch (error) {
+            console.error('Erro ao buscar os relacionamentos:', error);
         }
     };
 
-    const handleModalModelo = () => {
-        setIsModalModeloOpen(true);
-    };
+    fetchRelationshipData();
+}, []);
 
-    const closeModalExpo = () => {
-        setIsModalExpoOpen(false);
-    };
+const redirectToPDF = () => {
+    navigate('./pdfme', {
+        state: {
+            tableData
+        }
+    });
+};
 
-    const closeModalSql = () => {
-        setIsModalOpenSQL(false);
-    };
+const handleSaveQuery = () => {
+    console.log('Consulta salva com sucesso!');
+};
 
-    const closeModalPdf = () => {
-        setIsModalPdfOpen(false);
-    };
+const handleSaveConditions = (conditions) => {
+    setCondicoesString(conditions);
+};
 
-    const closeModalFiltro = () => {
-        setIsModalOpenFiltro(false);
-    };
-
-    const closeModalSalvos = () => {
-        setIsModalOpenSalvos(false);
-    };
-
-    const closeModalModelo = () => {
-        setIsModalModeloOpen(false);
-    };
-
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchRelationshipData = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/find/relationship');
-                const data = await response.json();
-                setRelationshipData(data);
-            } catch (error) {
-                console.error('Erro ao buscar os relacionamentos:', error);
-            }
+const fetchData = async () => {
+    try {
+        // Construir o objeto JSON que será enviado na requisição
+        const jsonRequest = {
+            table: selectTable,
+            columns: selectedColumns,
+            conditions: condicoesString, // Adicione a condição aqui
+            orderBy: '', // Adicione a ordenação conforme necessário
+            joins: [], // Adicione os joins conforme necessário
         };
 
-        fetchRelationshipData();
-    }, []);
-
-    const redirectToPDF = () => {
-        navigate('./pdfme', {
-            state: {
-                tableData
+        if (selectedRelacionada && relationshipData.length > 0) {
+            const tablePair = `${selectTable} e ${selectedRelacionada}`;
+            const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
+            if (relationship) {
+                console.log('Relacionamento encontrado:', relationship);
+                jsonRequest.joins.push(relationship.join);
+            } else {
+                console.log('Relacionamento não encontrado para:', tablePair);
             }
+        }
+        const url = 'http://localhost:8080/find'; // Nova rota
+
+        console.log('Enviando requisição para:', url);
+        console.log('JSON Request:', JSON.stringify(jsonRequest));
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jsonRequest),
         });
-    };
 
-    const handleSaveQuery = () => {
-        console.log('Consulta salva com sucesso!');
-    };
-
-    const handleSaveConditions = (conditions) => {
-        setCondicoesString(conditions);
-    };
-
-    const staregeOrderBy = localStorage.getItem('orderByString');
-
-    const fetchData = async () => {
-        try {
-            // Construir o objeto JSON que será enviado na requisição
-            const jsonRequest = {
-                table: selectTable,
-                columns: selectedColumns,
-                conditions: condicoesString, // Adicione a condição aqui
-                orderBy: staregeOrderBy, // Adicione a ordenação conforme necessário
-                joins: [], // Adicione os joins conforme necessário
-            };
-
-            if (selectedRelacionada && relationshipData.length > 0) {
-                const tablePair = `${selectTable} e ${selectedRelacionada}`;
-                const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
-                if (relationship) {
-                    console.log('Relacionamento encontrado:', relationship);
-                    jsonRequest.joins.push(relationship.join);
-                } else {
-                    console.log('Relacionamento não encontrado para:', tablePair);
-                }
-            }
-
-            const url = 'http://localhost:8080/find'; // Nova rota
-
-            console.log('Enviando requisição para:', url);
-            console.log('JSON Request:', JSON.stringify(jsonRequest));
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(jsonRequest),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
-            }
-
-            const responseData = await response.json();
-
-            const [sql, data] = responseData;
-
-            console.log('SQL:', sql);
 
             localStorage.setItem('SQLGeradoFinal', sql);
 
@@ -162,49 +159,68 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             return [];
-        }
-    };
+          
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
 
-    const handleGenerateReport = async () => {
-        try {
-            const data = await fetchData();
-            console.log('Dados recebidos para as colunas:', data);
-            setTableData(data);  // Atualize o estado com os dados recebidos
-            setColumns(selectedColumns);  // Atualize o estado com as colunas selecionadas
-            
-            if (data && data.length > 0) {
-                setIsView(true);
-            } else {
-                setIsView(false);
-            }
-        } catch (error) {
-            console.error('Erro ao buscar os dados:', error);
+        }
+
+        const responseData = await response.json();
+
+        const [sql, data] = responseData;
+
+        console.log('SQL:', sql);
+
+        return selectedColumns.map((column, index) => ({
+            column,
+            values: data.map(row => row[index]) // Acessa pelo índice
+        }));
+    } catch (error) {
+        console.error('Erro ao buscar os dados:', error);
+        return [];
+    }
+};
+
+const handleGenerateReport = async () => {
+    try {
+        const data = await fetchData();
+        console.log('Dados recebidos para as colunas:', data);
+        setTableData(data);  // Atualize o estado com os dados recebidos
+        setColumns(selectedColumns);  // Atualize o estado com as colunas selecionadas
+        
+        if (data && data.length > 0) {
+            setIsView(true);
+        } else {
             setIsView(false);
         }
-    };
+    } catch (error) {
+        console.error('Erro ao buscar os dados:', error);
+        setIsView(false);
+    }
+};
 
-    return (
-        <div className="flex flex-col w-full">
-            <div className="w-full flex flex-row justify-between mt-4">
-                <div className="flex flex-col justify-start items-start ml-36">
-                    <h1 className="font-bold text-3xl">Ações</h1>
-                    <div className="flex mt-3">
-                        <button
-                            className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm mr-2"
-                            onClick={handleGenerateReport}
-                        >
-                            Gerar Relatório
-                        </button>
-                        <button
-                            className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
-                            onClick={handleSaveQuery}
-                        >
-                            Salvar Consulta
-                        </button>
-                    </div>
+return (
+    <div className="flex flex-col w-full">
+        <div className="w-full flex flex-row justify-between mt-4">
+            <div className="flex flex-col justify-start items-start ml-36">
+                <h1 className="font-bold text-3xl">Ações</h1>
+                <div className="flex mt-3">
+                    <button
+                        className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm mr-2"
+                        onClick={handleGenerateReport}
+                    >
+                        Gerar Relatório
+                    </button>
+                    <button
+                        className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
+                        onClick={handleSaveQuery}
+                    >
+                        Salvar Consulta
+                    </button>
                 </div>
-                <div className="flex mr-36 justify-center items-center">
-                    <div className="mx-2">
+            </div>
+            <div className="flex mr-36 justify-center items-center">
+            <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={handleModalSalvos} className="flex flex-col justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
@@ -275,44 +291,44 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                             </button>
                         </div>
                     </div>
-                </div>
             </div>
-            <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
-                <table className="w-full text-sm">
-                    {tableData.length > 0 && (
-                        <thead className="bg-teal-600 text-white">
-                            <tr>
-                                {columns.map((column, index) => (
-                                    <th key={index} className="p-2 border-b text-center">{column}</th>
+        </div>
+        <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
+            <table className="w-full text-sm">
+                {tableData.length > 0 && (
+                    <thead className="bg-teal-600 text-white">
+                        <tr>
+                            {columns.map((column, index) => (
+                                <th key={index} className="p-2 border-b text-center">{column}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                )}
+                <tbody>
+                    {tableData.length > 0 ? (
+                        tableData[0].values.map((_, rowIndex) => (
+                            <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                                {columns.map((column, colIndex) => (
+                                    <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex].values[rowIndex]}</td>
                                 ))}
                             </tr>
-                        </thead>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
+                        </tr>
                     )}
-                    <tbody>
-                        {tableData.length > 0 ? (
-                            tableData[0].values.map((_, rowIndex) => (
-                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                                    {columns.map((column, colIndex) => (
-                                        <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex].values[rowIndex]}</td>
-                                    ))}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-            <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
-            <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
-            <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} />
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} />
-            <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
-            <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} />
+                </tbody>
+            </table>
         </div>
-    );
+        <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
+        <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
+        <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} templateKey={selectedTemplateKey} /> {/* Passa a chave do template selecionado */}
+        <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} />
+        <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
+        <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
+    </div>
+);
 }
 
 export default GerarRelatorio;

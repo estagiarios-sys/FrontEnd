@@ -1,21 +1,31 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Select from 'react-select';
 import ModalModal from './ModalModal';
 import { FaEraser } from 'react-icons/fa'; // Importa o ícone de apagador
 
-function ModalModelo({ isOpen, onClose }) {
+
+function ModalModelo({ isOpen, onClose, onSelect }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [isCleaning, setIsCleaning] = useState(false); // Estado para animação de limpeza
-    const models = useMemo(() => [
-        { value: "Modelo 1", label: "Modelo 1" },
-        { value: "Modelo 2", label: "Modelo 2" },
-        { value: "Modelo 3", label: "Modelo 3" },
-        { value: "Modelo 4", label: "Modelo 4" },
-        { value: "Modelo 5", label: "Modelo 5" },
-        { value: "Systextil", label: "Systextil" }
-    ], []);
+    const [models, setModels] = useState([]);
+
+    // Função para obter as chaves do localStorage e formatar para o Select
+    const loadModels = () => {
+        const keys = Object.keys(localStorage); 
+        const modelOptions = keys.map((key) => ({
+            value: key,
+            label: key,
+        }));
+        setModels(modelOptions);
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            loadModels(); // Carrega as opções do modelo quando o modal é aberto
+        }
+    }, [isOpen]);
 
     const handleLimpar = () => {
         setIsCleaning(true); // Ativa a animação de limpeza
@@ -31,8 +41,19 @@ function ModalModelo({ isOpen, onClose }) {
     };
 
     const handleConfirm = () => {
-        setSelectedItem(null);
+        if (selectedItem) {
+            localStorage.removeItem(selectedItem.value); // Remove o item do localStorage
+            loadModels(); // Recarrega os modelos após a exclusão
+            setSelectedItem(null); // Limpa a seleção
+        }
         setIsModalModalOpen(false); // Fecha o modal de confirmação
+    };
+
+    const handleUseModel = () => {
+        if (selectedItem) {
+            onSelect(selectedItem.value);  // Passa a key selecionada para o componente pai
+            onClose(); // Fecha o modal
+        }
     };
 
     if (!isOpen) return null; // Se o modal não estiver aberto, não renderiza nada
@@ -44,7 +65,7 @@ function ModalModelo({ isOpen, onClose }) {
                     <div className="w-full bg-green-600 flex justify-between items-center text-white p-3 rounded-t-lg">
                         <h5 className="font-bold text-lg">Modelos de Relatórios</h5>
                         <button
-                            className="bg-white text-black border border-gray-300 rounded-full w-8 h-8 flex items-center justify-center text-xl cursor-pointer"
+                            className=" text-black   rounded-full w-8 h-8 flex items-center justify-center text-xl cursor-pointer"
                             onClick={onClose}
                         >
                             &times;
@@ -54,7 +75,7 @@ function ModalModelo({ isOpen, onClose }) {
                         <Select
                             value={selectedItem}
                             onChange={setSelectedItem}
-                            options={models}
+                            options={models} // Use as opções carregadas do localStorage
                             placeholder="Selecione um modelo"
                             styles={{
                                 container: (provided) => ({
@@ -111,10 +132,11 @@ function ModalModelo({ isOpen, onClose }) {
                             Excluir
                         </button>
                         <button
-                            className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-20"
-                            onClick={() => alert('Abrir clicado')}
+                            className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-20 flex flex-col justify-center items-center "
+
+                            onClick={handleUseModel}  // Chama a função para usar o modelo selecionado
                         >
-                            Abrir
+                            Usar
                         </button>
                     </div>
                 </div>
