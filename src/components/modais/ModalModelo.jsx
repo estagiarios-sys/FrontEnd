@@ -13,7 +13,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
 
     // Função para obter as chaves do localStorage e formatar para o Select
     const loadModels = () => {
-        const keys = Object.keys(localStorage); 
+        const keys = Object.keys(localStorage).filter(key => key !== 'orderByString'); 
         const modelOptions = keys.map((key) => ({
             value: key,
             label: key,

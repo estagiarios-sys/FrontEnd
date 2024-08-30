@@ -1,4 +1,4 @@
-import type { Template } from '@pdfme/common';
+import { Template } from '@pdfme/common';
 import React, { useEffect } from 'react';
 import { Viewer } from '@pdfme/ui';
 import { barcodes, text, tableBeta, line, rectangle, ellipse, svg, image } from "@pdfme/schemas";
