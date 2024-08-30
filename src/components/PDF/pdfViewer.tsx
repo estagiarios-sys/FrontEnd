@@ -1,4 +1,4 @@
-import { Template } from '@pdfme/common';
+import type { Template } from '@pdfme/common';
 import React, { useEffect } from 'react';
 import { Viewer } from '@pdfme/ui';
 import { barcodes, text, tableBeta, line, rectangle, ellipse, svg, image } from "@pdfme/schemas";
@@ -13,7 +13,6 @@ interface ViewProps {
   templateKey: string | null;
 }
 
-
 const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
 
   useEffect(() => {
@@ -26,28 +25,14 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
         return;
       }
 
-      let backgroundColor: string | undefined;
-      let tituloContent: string | undefined;
-      let imageContent: string | undefined;
+      let updatedSchemas: any;
 
       if (savedTemplate) {
         try {
           const parsedTemplate = JSON.parse(savedTemplate) as Template;
           
-          const headStyles = parsedTemplate.schemas[0]?.table?.headStyles as { [key: string]: any };
-          if (headStyles?.backgroundColor) {
-            backgroundColor = headStyles.backgroundColor;
-          }
-
-          const titulo = parsedTemplate.schemas[0]?.titulo as { [key: string]: any };
-          if (titulo?.content) {
-            tituloContent = titulo.content;
-          }
-
-          const img = parsedTemplate.schemas[0]?.image as { [key: string]: any };
-          if (img?.content) {
-            imageContent = img.content;
-          }
+          updatedSchemas = parsedTemplate.schemas[0];
+          
         } catch (error) {
           console.error("Erro ao carregar o template salvo:", error);
         }
@@ -56,18 +41,13 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
       // Crie o template padrão
       const template = getDefaultTemplate(table);
 
-      // Aplique os valores extraídos do localStorage, se existirem
-
-      if (backgroundColor && template.schemas[0]?.table?.headStyles) {
-        (template.schemas[0].table.headStyles as { [key: string]: any }).backgroundColor = backgroundColor;
-      }
-
-      if (tituloContent && template.schemas[0]?.titulo) {
-        (template.schemas[0].titulo as { [key: string]: any }).content = tituloContent;
-      }
-
-      if (imageContent && template.schemas[0]?.image) {
-        (template.schemas[0].image as { [key: string]: any }).content = imageContent;
+      // Aplique as alterações de posição ou redimensionamento dos objetos (exceto tabela)
+      if (updatedSchemas) {
+        Object.keys(updatedSchemas).forEach(key => {
+          if (key !== 'table') {
+            template.schemas[0][key] = updatedSchemas[key];
+          }
+        });
       }
 
       const inputs = [
@@ -77,7 +57,7 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
           ),
           infos: 'Informações Genéricas...',
           op_produto: 'op: 1234',
-          titulo: tituloContent || 'Título Aqui', // Usar o título salvo ou o padrão
+          titulo: updatedSchemas?.titulo?.content || 'Título Aqui',
           qrcode: 'https://systextil.com.br/',
           barcodes: '1234567890',
         }
@@ -95,6 +75,9 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
             Table: tableBeta,
             qrcode: barcodes.qrcode,
             barcode: barcodes.code128,
+            rectangle,
+            ellipse,
+            svg
           }
         });
       } catch (error) {
