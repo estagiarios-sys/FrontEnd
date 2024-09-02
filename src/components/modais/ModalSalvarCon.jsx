@@ -1,36 +1,46 @@
 import React, { useEffect, useState } from "react";
-import Select from 'react-select';
 
-function ModalSalvos({ isOpen, onClose }) {
-    const [selectedCampos, setSelectedCampos] = useState([]);
-    const [campoOptions, setCampoOptions] = useState([]);
+function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
+    const [inputValue, setInputValue] = useState(''); // Estado para armazenar o valor do input
 
-    useEffect(() => {
-        async function fetchSavedQueries() {
-            try {
-                const response = await fetch('http://localhost:8080/find/saved-query', {
-                    credentials: 'include'
-                });
+    const handleInputChange1 = (event) => {
+        setInputValue(event.target.value); // Atualiza o estado com o valor digitado para key1
+    };
 
-                if (!response.ok) {
-                    throw new Error(`Erro na requisição: ${response.statusText}`);
-                }
+    const saveQuery = async () => {
+        try {
+            const dataToSave = {
+                queryName: inputValue, // Usa o valor do input para key1
+                query: sqlQuery, // Usa o JSON convertido para key2
+            };
 
-                const data = await response.json();
+            console.log(sqlQuery);
 
-                const options = data.map(item => ({
-                    value: item.query,
-                    label: item.queryName
-                }));
+            const query = JSON.stringify(dataToSave);
 
-                setCampoOptions(options);
-            } catch (error) {
-                console.error('Erro ao buscar as consultas salvas:', error);
+            console.log(query);
+
+            const response = await fetch('http://localhost:8080/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: query,
+            });
+
+            console.log(query);
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        }
 
-        fetchSavedQueries();
-    }, []);
+            const result = await response.json();
+            console.log('Success:', result);
+            alert('Consulta Salva');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -44,12 +54,7 @@ function ModalSalvos({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
-    async function handleCarregar() {
-        localStorage.setItem('loadedQuery', selectedCampos[0]);
-        const test = localStorage.getItem('loadedQuery');
-        console.log(test);
-    }
-
+    // Se o modal não estiver aberto, não renderize nada
     if (!isOpen) return null;
 
     const contentContainerStyle = {
@@ -110,22 +115,16 @@ function ModalSalvos({ isOpen, onClose }) {
                     </button>
                 </div>
                 <div style={contentContainerStyle}>
-                    <div className="w-11/12 bg-neutral-300 rounded-md p-4">
-                        <h5 className="font-bold mb-4">Nome do Relatório</h5>
-                        <Select
-                            isMulti
-                            name="campos"
-                            options={campoOptions}
-                            className="basic-multi-select w-full"
-                            classNamePrefix="Select"
-                            placeholder="Selecione os Campos..."
-                            onChange={(selectedOptions) => {
-                                setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
-                            }}
-                            value={campoOptions.filter(option => selectedCampos.includes(option.value))}
-                        />
-                    </div>
-                </div>
+            <div className="w-11/12 bg-neutral-300 rounded-md p-4">
+                <h5 className="font-bold mb-4">Nome da Consulta</h5>
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={handleInputChange1}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                />
+            </div>
+        </div>
                 {/* Botões de Cancelar e Salvar */}
                 <div
                     style={{
@@ -164,9 +163,10 @@ function ModalSalvos({ isOpen, onClose }) {
                             fontSize: '16px',
                             cursor: 'pointer',
                         }}
-                        onClick={handleCarregar}
+                        onClick={saveQuery}
                     >
-                        Carregar
+                        Salvar
+                        
                     </button>
                 </div>
             </div>
@@ -174,4 +174,4 @@ function ModalSalvos({ isOpen, onClose }) {
     );
 }
 
-export default ModalSalvos;
+export default ModalSalvarCon;

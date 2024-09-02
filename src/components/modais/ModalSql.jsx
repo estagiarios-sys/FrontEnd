@@ -14,6 +14,8 @@ function ModalSql({ isOpen, onClose }) {
         marginTop: '20px', // mt-2 em Tailwind
     };
 
+    const SQL = localStorage.getItem('SQLGeradoFinal');
+
     return (
         <div
             style={{
@@ -66,7 +68,7 @@ function ModalSql({ isOpen, onClose }) {
                 </div>
                 <div style={contentContainerStyle}>
                     <div className="w-11/12 h-5/6 bg-neutral-300 rounded-md">
-                        <h5 className="m-6">Select * FROM Clientes</h5>
+                        <h5 className="m-6">{SQL}</h5>
                     </div>
                 </div>
             </div>

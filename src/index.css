@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#info {
+    position: relative;
+}
+
+#info .info-texto {
+    visibility: hidden;
+    width: auto;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Posição acima do botão */
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza horizontalmente */
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap; /* Evita quebra de linha no texto */
+    font-size: 10px;
+}
+
+#info:hover .info-texto {
+    visibility: visible;
+    opacity: 1;
+}
