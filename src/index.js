@@ -9,6 +9,7 @@ import Nova from './components/PDF/pdfme';
 function App() {
   localStorage.setItem('orderByString', '');
   localStorage.setItem('SQLGeradoFinal', 'Nenhum SQL gerado no momento');
+  localStorage.removeItem('loadedQuery');
   return (
     <Router>
       <Routes>

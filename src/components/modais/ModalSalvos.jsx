@@ -44,34 +44,10 @@ function ModalSalvos({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
-    // Função para enviar a query selecionada
     async function handleCarregar() {
-        try {
-            // Cria o corpo da requisição com as queries selecionadas
-            const response = await fetch('http://localhost:8080/loadedQuery', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: selectedCampos,
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro ao carregar a consulta: ${response.statusText}`);
-            }
-
-            console.log('Consulta carregada com sucesso!');
-
-            const responseData = await response.json();
-
-            localStorage.setItem('loadedQuery', responseData);
-
-            console.log('Dados da consulta:', responseData);
-
-        } catch (error) {
-            console.error('Erro ao carregar a consulta:', error);
-        }
+        localStorage.setItem('loadedQuery', selectedCampos[0]);
+        const test = localStorage.getItem('loadedQuery');
+        console.log(test);
     }
 
     if (!isOpen) return null;

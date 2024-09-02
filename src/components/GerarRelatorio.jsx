@@ -106,17 +106,16 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         setCondicoesString(conditions);
     };
 
-    const staregeOrderBy = localStorage.getItem('orderByString');
+    const orderByString = localStorage.getItem('orderByString');
 
     const fetchData = async () => {
         try {
-            // Construir o objeto JSON que será enviado na requisição
             const jsonRequest = {
                 table: selectTable,
                 columns: selectedColumns,
-                conditions: condicoesString, // Adicione a condição aqui
-                orderBy: staregeOrderBy, // Adicione a ordenação conforme necessário
-                joins: [], // Adicione os joins conforme necessário
+                conditions: condicoesString, 
+                orderBy: orderByString,
+                joins: [],
             };
 
             if (selectedRelacionada && relationshipData.length > 0) {
@@ -130,10 +129,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 }
             }
 
-            const url = 'http://localhost:8080/find'; // Nova rota
-
-            console.log('Enviando requisição para:', url);
-            console.log('JSON Request:', JSON.stringify(jsonRequest));
+            const url = 'http://localhost:8080/find';
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -151,13 +147,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             const [sql, data] = responseData;
 
-            console.log('SQL:', sql);
-
             localStorage.setItem('SQLGeradoFinal', sql);
+
+            setColumns(selectedColumns);
 
             return selectedColumns.map((column, index) => ({
                 column,
-                values: data.map(row => row[index]) // Acessa pelo índice
+                values: data.map(row => row[index])
             }));
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
@@ -165,18 +161,66 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         }
     };
 
+    const fetchLoadQuery = async () => {
+        try {
+            const url = 'http://localhost:8080/find/loadedQuery';
+            const loadedQuery = localStorage.getItem('loadedQuery');
+    
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: loadedQuery,
+            });
+            localStorage.removeItem('loadedQuery');
+    
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
+            }
+    
+            const responseData = await response.json();
+    
+            const { columnsBanco, foundObjects } = responseData;
+    
+            if (!Array.isArray(foundObjects) || !Array.isArray(columnsBanco)) {
+                throw new Error('Estrutura de resposta inválida');
+            }
+
+            const transformedData = columnsBanco.map((column, index) => {
+                return {
+                    column,
+                    values: foundObjects.map(row => row[index])
+                };
+            });
+    
+            setColumns(columnsBanco);
+            
+            return transformedData;
+    
+        } catch (error) {
+            console.error('Erro ao buscar os dados:', error);
+            return [];
+        }
+    };    
+
     const handleGenerateReport = async () => {
         try {
-            const data = await fetchData();
-            console.log('Dados recebidos para as colunas:', data);
-            setTableData(data);  // Atualize o estado com os dados recebidos
-            setColumns(selectedColumns);  // Atualize o estado com as colunas selecionadas
-            
+            let data;
+            if (localStorage.getItem('loadedQuery')) {
+                data = await fetchLoadQuery();
+                setTableData(data); 
+            } else {
+                data = await fetchData();
+                setTableData(data);
+            }
+
             if (data && data.length > 0) {
                 setIsView(true);
             } else {
                 setIsView(false);
             }
+           
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
