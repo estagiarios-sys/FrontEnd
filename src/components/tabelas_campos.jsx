@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Select from 'react-select';
+import './genericos/infoClick.css';
+import './genericos/infoHover.css';
 
 function TabelaCampos({ onDataChange }) {
   const [jsonData, setJsonData] = useState({});
@@ -7,6 +9,10 @@ function TabelaCampos({ onDataChange }) {
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
   const [selectedCampos, setSelectedCampos] = useState([]);
+  const [mostrarInfo, setMostrarInfo] = useState(false);
+
+  const dicaRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     async function fetchJsonData() {
@@ -37,11 +43,11 @@ function TabelaCampos({ onDataChange }) {
         }
 
         const data = await response.json();
-        setRelationships(data); 
+        setRelationships(data);
       } catch (error) {
         console.error('Erro ao buscar as relações:', error);
       }
-      
+
     }
 
     fetchJsonData();
@@ -93,16 +99,16 @@ function TabelaCampos({ onDataChange }) {
   const relacionadaOptions = useMemo(() => {
     return selectedTabela
       ? [...new Set(
-          relationships
-            .filter(rel => rel.tabelas.includes(selectedTabela))
-            .flatMap(relacionada => 
-              relacionada.tabelas.split(' e ')
-                .filter(tabela => tabela !== selectedTabela)
-            )
-        )].map(value => ({
-          value,
-          label: value,
-        }))
+        relationships
+          .filter(rel => rel.tabelas.includes(selectedTabela))
+          .flatMap(relacionada =>
+            relacionada.tabelas.split(' e ')
+              .filter(tabela => tabela !== selectedTabela)
+          )
+      )].map(value => ({
+        value,
+        label: value,
+      }))
       : [];
   }, [selectedTabela, relationships]);
 
@@ -118,11 +124,30 @@ function TabelaCampos({ onDataChange }) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dicaRef.current &&
+        !dicaRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setMostrarInfo(false); // Fecha o tooltip ao clicar fora
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col justify-start items-start ml-20">
       <div className="mt-5">
         <label htmlFor="tabelas">Tabela</label>
-        <div>
+        <div className="containerClick">
           <Select
             name="tabelas"
             options={tabelaOptions}
@@ -131,17 +156,25 @@ function TabelaCampos({ onDataChange }) {
             placeholder="Selecione uma tabela..."
             onChange={(selectedOption) => {
               setSelectedTabela(selectedOption ? selectedOption.value : '');
-              setSelectedRelacionada('');  
+              setSelectedRelacionada('');
               setSelectedCampos([]);
             }}
             value={tabelaOptions.find(option => option.value === selectedTabela)}
           />
+          <div id='info-click' className={mostrarInfo ? 'right show' : 'right'} ref={dicaRef}>
+            <button id="info-click-button" onClick={() => setMostrarInfo(prev => !prev)} ref={buttonRef}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.1" stroke="currentColor" className="size-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+              </svg>
+            </button>
+            <div className='info-texto'>GASGMASKÇGSA</div>
+          </div>
         </div>
       </div>
 
       <div className="mt-5">
         <label htmlFor="relacionadas">Relacionadas</label>
-        <div>
+        <div className="containerHover">
           <Select
             name="relacionadas"
             options={relacionadaOptions}
@@ -153,6 +186,12 @@ function TabelaCampos({ onDataChange }) {
             }}
             value={relacionadaOptions.find(option => option.value === selectedRelacionada)}
           />
+          <div id='info-hover' class= 'right'>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.1" stroke="currentColor" className="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+            </svg>
+            <div className='info-texto'>TESTE</div>
+          </div>
         </div>
       </div>
 
