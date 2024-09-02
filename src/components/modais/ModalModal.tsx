@@ -18,7 +18,7 @@ const modalTypes: Record<string, { title: string; confirmText: string; cancelTex
     },
     ALERTA: {
         title: "Atenção",
-        confirmText: "Ok",
+        confirmText: "Sim",
         cancelText: null, // Sem botão de cancelar
         isAlert: true,
     },

@@ -3,13 +3,13 @@ import Select from 'react-select';
 import ModalModal from './ModalModal';
 import { FaEraser } from 'react-icons/fa'; // Importa o ícone de apagador
 
-
 function ModalModelo({ isOpen, onClose, onSelect }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [isCleaning, setIsCleaning] = useState(false); // Estado para animação de limpeza
     const [models, setModels] = useState([]);
+    const [error, setError] = useState(''); // Estado para mensagem de erro
 
     // Função para obter as chaves do localStorage e formatar para o Select
     const loadModels = () => {
@@ -36,8 +36,13 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
     };
 
     const handleApagar = () => {
+        if (!selectedItem) {
+            setError('Não há nada selecionado'); // Define a mensagem de erro
+            return;
+        }
         setModalMessage('Você tem certeza de que deseja apagar este item?');
         setIsModalModalOpen(true);
+        setError(''); // Limpa a mensagem de erro, se houver
     };
 
     const handleConfirm = () => {
@@ -65,7 +70,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                     <div className="w-full bg-green-600 flex justify-between items-center text-white p-3 rounded-t-lg">
                         <h5 className="font-bold text-lg">Modelos de Relatórios</h5>
                         <button
-                            className=" text-black   rounded-full w-8 h-8 flex items-center justify-center text-xl cursor-pointer"
+                            className=" text-black rounded-full w-8 h-8 flex items-center justify-center text-xl cursor-pointer"
                             onClick={onClose}
                         >
                             &times;
@@ -124,6 +129,9 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                             <FaEraser size={24} color={isCleaning ? '#ff6347' : '#000'} />
                         </button>
                     </div>
+                    {error && (
+                        <p className="text-red-500 text-sm mt-2 mx-3">{error}</p> // Exibe a mensagem de erro
+                    )}
                     <div className="flex justify-end space-x-2 p-4 mt-4">
                         <button
                             className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 w-20"
@@ -132,8 +140,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                             Excluir
                         </button>
                         <button
-                            className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-20 flex flex-col justify-center items-center "
-
+                            className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-20 flex flex-col justify-center items-center"
                             onClick={handleUseModel}  // Chama a função para usar o modelo selecionado
                         >
                             Usar
