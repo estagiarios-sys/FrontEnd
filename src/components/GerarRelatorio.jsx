@@ -6,6 +6,7 @@ import ModalSalvos from "./modais/ModalSalvos";
 import ModalFiltro from "./modais/ModalFiltro";
 import { useNavigate } from 'react-router-dom';
 import ModalModelo from "./modais/ModalModelo";
+import ModalSalvarCon from "./modais/ModalSalvarCon";
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
@@ -20,6 +21,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     const [condicoesString, setCondicoesString] = useState(''); 
     const [isView, setIsView] = useState(false);
     const [isModalModeloOpen, setIsModalModeloOpen] = useState(false);
+    const [isModalSalvarConOpen, setIsModalSalvarCon] = useState(false);
+    const [sqlQuery, setSqlQuery] = useState('');
 
     const handleModalFiltro = () => {
         setIsModalOpenFiltro(true);
@@ -50,6 +53,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         setIsModalModeloOpen(true);
     };
 
+    const handleModalSalvarCon = () => {
+        setIsModalSalvarCon(true);
+    }
+
     const closeModalExpo = () => {
         setIsModalExpoOpen(false);
     };
@@ -74,6 +81,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         setIsModalModeloOpen(false);
     };
 
+    const closeModalSalvarCon = () => {
+        setIsModalSalvarCon(false);
+    }
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -96,10 +107,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 tableData
             }
         });
-    };
-
-    const handleSaveQuery = () => {
-        console.log('Consulta salva com sucesso!');
     };
 
     const handleSaveConditions = (conditions) => {
@@ -148,6 +155,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             const [sql, data] = responseData;
 
             localStorage.setItem('SQLGeradoFinal', sql);
+
+	        setSqlQuery(sql);
 
             setColumns(selectedColumns);
 
@@ -220,7 +229,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             } else {
                 setIsView(false);
             }
-           
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
@@ -241,7 +249,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                         </button>
                         <button
                             className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
-                            onClick={handleSaveQuery}
+                            onClick={handleModalSalvarCon}
                         >
                             Salvar Consulta
                         </button>
@@ -355,6 +363,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} />
+            <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}/>
         </div>
     );
 }
