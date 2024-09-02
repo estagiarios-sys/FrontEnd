@@ -6,6 +6,7 @@ import ModalSalvos from "./modais/ModalSalvos";
 import ModalFiltro from "./modais/ModalFiltro";
 import { useNavigate } from 'react-router-dom';
 import ModalModelo from "./modais/ModalModelo";
+import ModalSalvarCon from "./modais/ModalSalvarCon";
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
@@ -21,6 +22,8 @@ const [condicoesString, setCondicoesString] = useState('');
 const [isView, setIsView] = useState(false);
 const [isModalModeloOpen, setIsModalModeloOpen] = useState(false);
 const [selectedTemplateKey, setSelectedTemplateKey] = useState(null);
+const [isModalSalvarConOpen, setIsModalSalvarCon] = useState(false);
+const [sqlQuery, setSqlQuery] = useState('');
 
 
 const handleSelectTemplate = (key) => {
@@ -44,14 +47,18 @@ const handleModalSql = () => {
     setIsModalOpenSQL(true);
 };
 
-const handleModalPdf = () => {
-    if (isView) {
-        setIsModalPdfOpen(true);
-    } else {
-        setIsModalPdfOpen(false);
-        alert('Selecione uma tabela para gerar o relatório!');
+ const handleModalPdf = () => {
+        if (isView) {
+            setIsModalPdfOpen(true);
+        } else {
+            setIsModalPdfOpen(false);
+            alert('Selecione uma tabela para gerar o relatório!');
+        }
+    };
+
+    const handleModalSalvarCon = () => {
+        setIsModalSalvarCon(true);
     }
-};
 
 const handleModalModelo = () => {
     setIsModalModeloOpen(true);
@@ -78,6 +85,10 @@ const closeModalFiltro = () => {
 const closeModalSalvos = () => {
     setIsModalOpenSalvos(false);
 };
+
+const closeModalSalvarCon = () => {
+    setIsModalSalvarCon(false);
+}
 
 const closeModalModelo = () => {
     setIsModalModeloOpen(false);
@@ -107,13 +118,12 @@ const redirectToPDF = () => {
     });
 };
 
-const handleSaveQuery = () => {
-    console.log('Consulta salva com sucesso!');
-};
 
 const handleSaveConditions = (conditions) => {
     setCondicoesString(conditions);
 };
+
+const orderByString = localStorage.getItem('orderByString');
 
 const fetchData = async () => {
     try {
@@ -122,7 +132,7 @@ const fetchData = async () => {
             table: selectTable,
             columns: selectedColumns,
             conditions: condicoesString, // Adicione a condição aqui
-            orderBy: '', // Adicione a ordenação conforme necessário
+            orderBy: orderByString, // Adicione a ordenação conforme necessário
             joins: [], // Adicione os joins conforme necessário
         };
 
@@ -158,6 +168,10 @@ const fetchData = async () => {
         const [sql, data] = responseData;
 
         console.log('SQL:', sql);
+	
+ 	setSqlQuery(sql);
+	
+	setColumns(selectedColumns);
 
         return selectedColumns.map((column, index) => ({
             column,
@@ -169,24 +183,70 @@ const fetchData = async () => {
     }
 };
 
+const fetchLoadQuery = async () => {
+        try {
+            const url = 'http://localhost:8080/find/loadedQuery';
+            const loadedQuery = localStorage.getItem('loadedQuery');
+    
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: loadedQuery,
+            });
+            localStorage.removeItem('loadedQuery');
+    
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
+            }
+    
+            const responseData = await response.json();
+    
+            const { columnsBanco, foundObjects } = responseData;
+    
+            if (!Array.isArray(foundObjects) || !Array.isArray(columnsBanco)) {
+                throw new Error('Estrutura de resposta inválida');
+            }
+
+            const transformedData = columnsBanco.map((column, index) => {
+                return {
+                    column,
+                    values: foundObjects.map(row => row[index])
+                };
+            });
+    
+            setColumns(columnsBanco);
+            
+            return transformedData;
+    
+        } catch (error) {
+            console.error('Erro ao buscar os dados:', error);
+            return [];
+        }
+    };    
+
 const handleGenerateReport = async () => {
-    try {
-        const data = await fetchData();
-        console.log('Dados recebidos para as colunas:', data);
-        setTableData(data);  // Atualize o estado com os dados recebidos
-        setColumns(selectedColumns);  // Atualize o estado com as colunas selecionadas
-        
-        if (data && data.length > 0) {
-            setIsView(true);
-        } else {
+        try {
+            let data;
+            if (localStorage.getItem('loadedQuery')) {
+                data = await fetchLoadQuery();
+                setTableData(data); 
+            } else {
+                data = await fetchData();
+                setTableData(data);
+            }
+
+            if (data && data.length > 0) {
+                setIsView(true);
+            } else {
+                setIsView(false);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar os dados:', error);
             setIsView(false);
         }
-    } catch (error) {
-        console.error('Erro ao buscar os dados:', error);
-        setIsView(false);
-    }
-};
-
+    };
 return (
     <div className="flex flex-col w-full">
         <div className="w-full flex flex-row justify-between mt-4">
@@ -201,14 +261,14 @@ return (
                     </button>
                     <button
                         className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
-                        onClick={handleSaveQuery}
+                        onClick={handleModalSalvarCon}
                     >
                         Salvar Consulta
                     </button>
                 </div>
             </div>
-            <div className="flex mr-36 justify-center items-center">
-            <div className="mx-2">
+            	<div className="flex mr-36 justify-center items-center">
+            		<div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={handleModalSalvos} className="flex flex-col justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
@@ -315,7 +375,8 @@ return (
         <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} templateKey={selectedTemplateKey} />
         <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
         <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
-    </div>
+	<ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}/>    
+</div>
 );
 }
 

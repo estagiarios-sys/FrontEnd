@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import Select from 'react-select';
+import CustomSelect from './genericos/CustomSelect';
 
 const ordenacaoOptions = [
   { value: 'ASC', label: 'ASC' },
@@ -14,6 +14,7 @@ function CamposSelecionados({
   checkedCampos = [],
 }) {
   const [selectedOrder, setSelectedOrder] = useState(null); // Estado para a seleção atual
+  const selectRefs = useRef({}); // Referências para os componentes CustomSelect
 
   const handleOrderBySave = (selectedOption, fieldName) => {
     const newOrder = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
@@ -21,6 +22,13 @@ function CamposSelecionados({
 
     // Atualiza o estado com a nova seleção e limpa as outras seleções
     setSelectedOrder(selectedOption ? { fieldName, value: selectedOption.value } : null);
+  };
+
+  const handleTdClick = (campo) => {
+    // Simula o clique no CustomSelect para abrir o menu
+    if (selectRefs.current[campo]) {
+      selectRefs.current[campo].openMenu(); // Abre o menu do CustomSelect
+    }
   };
 
   const showCheckboxColumn = selectedCampos.length > 0; // Verifica se a coluna "Nada" deve ser exibida
@@ -65,8 +73,12 @@ function CamposSelecionados({
                           </td>
                         )}
                         <td className="py-2 px-4 border-b border-gray-300 text-sm">{campo}</td>
-                        <td className="py-2 px-4 border-b border-gray-300 text-sm">
-                          <Select
+                        <td
+                          className="py-2 px-4 border-b border-gray-300 text-sm"
+                          onClick={() => handleTdClick(campo)}
+                        >
+                          <CustomSelect
+                            ref={(ref) => (selectRefs.current[campo] = ref)}
                             options={ordenacaoOptions}
                             value={
                               selectedOrder && selectedOrder.fieldName === campo
