@@ -9,52 +9,45 @@ interface TableData {
 }
 
 interface ViewProps {
-  table: TableData[]; // Dados da tabela
+  table: TableData[]; 
+  templateKey: string | null;
 }
 
-const View: React.FC<ViewProps> = ({ table }) => {
+const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
 
   useEffect(() => {
     const generatePDF = () => {
       const domContainer = document.getElementById('designer-container');
-      const savedTemplate = localStorage.getItem('savedTemplate');
+      const savedTemplate = templateKey ? localStorage.getItem(templateKey) : null;
 
       if (!domContainer) {
         console.error('domContainer is null');
         return;
       }
 
-      let backgroundColor: string | undefined;
-      let tituloContent: string | undefined;
+      let updatedSchemas: any;
 
       if (savedTemplate) {
         try {
           const parsedTemplate = JSON.parse(savedTemplate) as Template;
-          // Use a type assertion to handle backgroundColor and title safely
-          const headStyles = parsedTemplate.schemas[0]?.table?.headStyles as { [key: string]: any };
-          if (headStyles?.backgroundColor) {
-            backgroundColor = headStyles.backgroundColor;
-          }
-          const titulo = parsedTemplate.schemas[0]?.titulo as { [key: string]: any };
-          if (titulo?.content) {
-            tituloContent = titulo.content;
-          }
+          
+          updatedSchemas = parsedTemplate.schemas[0];
+          
         } catch (error) {
-          console.error('Erro ao carregar o template salvo:', error);
+          console.error("Erro ao carregar o template salvo:", error);
         }
       }
 
-      // Agora crie o template padrão
+      // Crie o template padrão
       const template = getDefaultTemplate(table);
 
-      // Aplique o backgroundColor ao template padrão, se ele existir
-      if (backgroundColor && template.schemas[0]?.table?.headStyles) {
-        (template.schemas[0].table.headStyles as { [key: string]: any }).backgroundColor = backgroundColor;
-      }
-
-      // Aplique o título ao template padrão, se ele existir
-      if (tituloContent && template.schemas[0]?.titulo) {
-        (template.schemas[0].titulo as { [key: string]: any }).content = tituloContent;
+      // Aplique as alterações de posição ou redimensionamento dos objetos (exceto tabela)
+      if (updatedSchemas) {
+        Object.keys(updatedSchemas).forEach(key => {
+          if (key !== 'table') {
+            template.schemas[0][key] = updatedSchemas[key];
+          }
+        });
       }
 
       const inputs = [
@@ -64,7 +57,7 @@ const View: React.FC<ViewProps> = ({ table }) => {
           ),
           infos: 'Informações Genéricas...',
           op_produto: 'op: 1234',
-          titulo: tituloContent || 'Título Aqui', // Usar o título salvo ou o padrão
+          titulo: updatedSchemas?.titulo?.content || 'Título Aqui',
           qrcode: 'https://systextil.com.br/',
           barcodes: '1234567890',
         }
@@ -82,6 +75,9 @@ const View: React.FC<ViewProps> = ({ table }) => {
             Table: tableBeta,
             qrcode: barcodes.qrcode,
             barcode: barcodes.code128,
+            rectangle,
+            ellipse,
+            svg
           }
         });
       } catch (error) {
