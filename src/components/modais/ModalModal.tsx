@@ -23,7 +23,7 @@ const modalTypes: Record<string, { title: string; confirmText: string; cancelTex
         isAlert: true,
     },
     DIGITAR_NOME: {
-        title: "Digite um Nome",
+        title: "Salvar Template",
         confirmText: "Confirmar",
         cancelText: "Cancelar",
         isAlert: false,

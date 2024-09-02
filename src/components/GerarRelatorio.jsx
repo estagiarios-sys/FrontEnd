@@ -312,7 +312,7 @@ return (
         <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
         <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
         <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} templateKey={selectedTemplateKey} /> {/* Passa a chave do template selecionado */}
-        <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} />
+        <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} templateKey={selectedTemplateKey} />
         <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
         <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
     </div>
