@@ -274,7 +274,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                         </button>
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
-                            onClick={handleSaveQuery}
+                            onClick={handleModalSalvarCon}
                         >
                             Salvar Consulta
                         </button>
