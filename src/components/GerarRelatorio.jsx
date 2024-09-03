@@ -137,9 +137,11 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             const jsonRequest = {
                 table: selectTable,
                 columns: selectedColumns,
-                conditions: condicoesString,
-                orderBy: orderByString,
-                joins: [],
+
+                conditions: condicoesString, // Adicione a condição aqui
+                orderBy: orderByString, // Adicione a ordenação conforme necessário
+                joins: [], // Adicione os joins conforme necessário
+
             };
     
             if (selectedRelacionada && relationshipData.length > 0) {
@@ -220,11 +222,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             const responseData = await response.json();
 
-
             const { columnsNickName, foundObjects } = responseData;
 
             if (!Array.isArray(foundObjects) || !Array.isArray(columnsNickName)) {
-
 
                 throw new Error('Estrutura de resposta inválida');
             }
@@ -262,6 +262,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             } else {
                 setIsView(false);
             }
+
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
@@ -274,13 +275,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     <h1 className="font-bold text-3xl">Ações</h1>
                     <div className="flex mt-3">
                         <button
-                            className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm mr-2"
+                            className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
                             onClick={handleGenerateReport}
                         >
                             Gerar Relatório
                         </button>
                         <button
-                            className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
+                            className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
                             onClick={handleModalSalvarCon}
                         >
                             Salvar Consulta

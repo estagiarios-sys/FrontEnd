@@ -128,3 +128,22 @@
     align-items: center;
     justify-content: center;
 }
+
+:root {
+    --custom-blue-dark: #0E8F98;
+    --custom-blue: #0A7F8E; /* Substitua com a cor desejada para o estado ativo */
+}
+
+.icon-info-click {
+    width: 1.25rem; /* w-5 */
+    height: 1.25rem; /* h-5 */
+    color: #07C6D4; /* Cor padrão */
+}
+
+.icon-info-click:hover {
+    color: var(--custom-blue-dark); /* Cor ao passar o mouse */
+}
+
+.icon-info-click:active {
+    color: var(--custom-blue); /* Cor ao clicar */
+}

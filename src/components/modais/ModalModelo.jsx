@@ -65,7 +65,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
 
     return (
         <>
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-1000">
                 <div className="bg-white p-4 rounded-lg relative w-[440px] max-w-full shadow-lg">
                     <div className="w-full bg-green-600 flex justify-between items-center text-white p-3 rounded-t-lg">
                         <h5 className="font-bold text-lg">Modelos de Relatórios</h5>
