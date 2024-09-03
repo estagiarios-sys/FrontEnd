@@ -8,7 +8,7 @@ function TabelaCampos({ onDataChange }) {
   const [jsonData, setJsonData] = useState({});
   const [relationships, setRelationships] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
-  const [selectedRelacionada, setSelectedRelacionada] = useState('');
+  const [selectedRelacionada, setSelectedRelacionada] = useState([]);
   const [selectedCampos, setSelectedCampos] = useState([]);
   const [mostrarInfo, setMostrarInfo] = useState(false);
   const [menuIsOpen, setMenuIsOpen] = useState(false);
@@ -49,7 +49,6 @@ function TabelaCampos({ onDataChange }) {
       } catch (error) {
         console.error('Erro ao buscar as relações:', error);
       }
-
     }
 
     fetchJsonData();
@@ -69,29 +68,31 @@ function TabelaCampos({ onDataChange }) {
 
   const campoOptions = useMemo(() => {
     const options = [];
-
+  
     if (selectedTabela && jsonData[selectedTabela]) {
       jsonData[selectedTabela].forEach(campo => {
         options.push({ value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
       });
     }
-
-    if (selectedRelacionada && selectedTabela) {
-      relationships
-        .filter(rel => rel.tabelas.includes(selectedTabela) && rel.tabelas.includes(selectedRelacionada))
-        .forEach(rel => {
-          const [table1, table2] = rel.tabelas.split(' e ');
-          const relatedTable = table1 === selectedTabela ? table2 : table1;
-
-          if (jsonData[relatedTable]) {
-            jsonData[relatedTable].forEach(campo => {
-              options.push({ value: `${relatedTable}.${campo}`, label: `${relatedTable} - ${campo}` });
+  
+    if (selectedRelacionada && selectedRelacionada.length > 0 && selectedTabela) {
+      selectedRelacionada.forEach(relacionadaTabela => {
+        relationships
+          .filter(rel => rel.tabelas.includes(selectedTabela) && rel.tabelas.includes(relacionadaTabela))
+          .forEach(rel => {
+            const tabelas = rel.tabelas.split(' e '); 
+  
+            tabelas.forEach(table => {
+              if (table !== selectedTabela && jsonData[table]) {
+                jsonData[table].forEach(campo => {
+                  options.push({ value: `${table}.${campo}`, label: `${table} - ${campo}` });
+                });
+              }
             });
-          }
-        });
+          });
+      });
     }
-
-    // Remove duplicatas dos campos
+  
     return [...new Set(options.map(option => option.value))].map(value => {
       const [table, campo] = value.split('.');
       return { value, label: `${table} - ${campo}` };
@@ -164,7 +165,7 @@ function TabelaCampos({ onDataChange }) {
             placeholder="Selecione uma tabela..."
             onChange={(selectedOption) => {
               setSelectedTabela(selectedOption ? selectedOption.value : '');
-              setSelectedRelacionada('');
+              setSelectedRelacionada([]);
               setSelectedCampos([]);
             }}
             value={tabelaOptions.find(option => option.value === selectedTabela)}
@@ -183,15 +184,17 @@ function TabelaCampos({ onDataChange }) {
         <label htmlFor="relacionadas">Relacionadas</label>
         <div className="containerHover">
           <Select
+            isMulti
             name="relacionadas"
             options={relacionadaOptions}
             className="basic-single w-60"
             classNamePrefix="Select"
             placeholder="Selecione uma relação..."
-            onChange={(selectedOption) => {
-              setSelectedRelacionada(selectedOption ? selectedOption.value : '');
+            onChange={(selectedOptions) => {
+              setSelectedRelacionada(selectedOptions ? selectedOptions.map(option => option.value) : []);
             }}
-            value={relacionadaOptions.find(option => option.value === selectedRelacionada)}
+            value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))}
+            closeMenuOnSelect={false}
           />
           <div id='info-hover' class='right'>
             <svg class="icon-info-hover" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
