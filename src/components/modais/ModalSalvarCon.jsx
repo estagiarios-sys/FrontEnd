@@ -36,7 +36,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
 
             const result = await response.json();
             console.log('Success:', result);
-            alert('Consulta Salva');
         } catch (error) {
             console.error('Error:', error);
         }
