@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Select from 'react-select';
+import ModalModal from './ModalModal';
 
 function ModalSalvos({ isOpen, onClose }) {
     const [selectedCampos, setSelectedCampos] = useState([]);
     const [campoOptions, setCampoOptions] = useState([]);
+    const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [excludeCampo, setExcludeCampo] = useState([]);
 
     useEffect(() => {
         async function fetchSavedQueries() {
@@ -31,6 +35,39 @@ function ModalSalvos({ isOpen, onClose }) {
 
         fetchSavedQueries();
     }, []);
+    
+    async function deleteSavedQuery() {
+        try {
+            const response = await fetch(`http://localhost:8080/delete/${excludeCampo[0]}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro na requisição: ${response.statusText}`);
+            }
+    
+            console.log('Consulta excluída com sucesso');
+            console.log(excludeCampo[0]);
+    
+            // Atualiza as opções removendo o item excluído
+            setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo[0]));
+            setSelectedCampos([]); // Limpa a seleção
+    
+        } catch (error) {
+            console.error('Erro ao excluir a consulta salva:', error);
+        } finally {
+            setIsModalModalOpen(false); // Fecha o modal de confirmação
+        }
+    }
+    
+    const handleApagar = () => {
+        if (selectedCampos.length > 0) {
+            setModalMessage('Você tem certeza de que deseja apagar este item?');
+            setIsModalModalOpen(true);
+        } else {
+            alert('Selecione uma consulta para apagar.');
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -121,12 +158,14 @@ function ModalSalvos({ isOpen, onClose }) {
                             placeholder="Selecione os Campos..."
                             onChange={(selectedOptions) => {
                                 setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
+                                setExcludeCampo(selectedOptions ? selectedOptions.map(option => option.label) : []);
                             }}
                             value={campoOptions.filter(option => selectedCampos.includes(option.value))}
                         />
                     </div>
                 </div>
-                {/* Botões de Cancelar e Salvar */}
+                {/* Botões de Excluir, Cancelar e Salvar */}
+                
                 <div
                     style={{
                         display: 'flex',
@@ -139,6 +178,21 @@ function ModalSalvos({ isOpen, onClose }) {
                         backgroundColor: '#fff',
                     }}
                 >
+                    <button
+                        style={{
+                            backgroundColor: '#dc2626',
+                            border: 'none',
+                            borderRadius: '5px',
+                            color: '#fff',
+                            padding: '10px 20px',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            marginRight: '184px',
+                        }}
+                        onClick={handleApagar}
+                    >
+                        Excluir
+                    </button>
                     <button
                         style={{
                             backgroundColor: '#6c757d',
@@ -170,7 +224,20 @@ function ModalSalvos({ isOpen, onClose }) {
                     </button>
                 </div>
             </div>
+            <ModalModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsModalModalOpen(false)}
+                onConfirm={deleteSavedQuery}
+                confirmText="Excluir"
+                message={modalMessage}
+                title="Confirmação"
+                buttonColors={{
+                    confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
+                    cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
+                }}
+            />
         </div>
+        
     );
 }
 
