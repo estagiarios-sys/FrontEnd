@@ -173,7 +173,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             setColumns(colunasAtualizada);
 
-            return selectedColumns.map((column, index) => ({
+            return colunasAtualizada.map((column, index) => ({
                 column,
                 values: data.map(row => row[index]) // Acessa pelo índice
             }));
