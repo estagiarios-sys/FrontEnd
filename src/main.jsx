@@ -18,7 +18,7 @@ function Main() {
   const handleDataChange = (data) => {
     setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo)));
     setSelectedTabela(data.tabela);
-    setSelectedRelacionada(data.relacionada);
+    setSelectedRelacionada(data.relacionada || []); // Agora espera um array de relacionadas
   };
 
   // Adiciona o primeiro campo disponível à lista de campos selecionados
