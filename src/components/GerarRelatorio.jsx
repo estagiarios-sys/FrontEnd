@@ -169,6 +169,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             console.log('SQL:', sql);
 
+            localStorage.setItem('SQLGeradoFinal', sql);
+
             setSqlQuery(sql);
 
             setColumns(colunasAtualizada);
