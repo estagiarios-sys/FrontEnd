@@ -49,6 +49,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         setIsModalOpenSQL(true);
     };
 
+
     const handleModalPdfView = () => {
         if (isView) {
             setIsModalPdfOpenView(true);
@@ -171,15 +172,17 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             const responseData = await response.json();
 
-            const [sql, data] = responseData;
+            const [sql, colunasAtualizada, data] = responseData;
 
             console.log('SQL:', sql);
 
+            localStorage.setItem('SQLGeradoFinal', sql);
+
             setSqlQuery(sql);
 
-            setColumns(selectedColumns);
+            setColumns(colunasAtualizada);
 
-            return selectedColumns.map((column, index) => ({
+            return colunasAtualizada.map((column, index) => ({
                 column,
                 values: data.map(row => row[index]) // Acessa pelo índice
             }));
@@ -209,20 +212,23 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             const responseData = await response.json();
 
-            const { columnsBanco, foundObjects } = responseData;
 
-            if (!Array.isArray(foundObjects) || !Array.isArray(columnsBanco)) {
+            const { columnsNickName, foundObjects } = responseData;
+
+            if (!Array.isArray(foundObjects) || !Array.isArray(columnsNickName)) {
+
+
                 throw new Error('Estrutura de resposta inválida');
             }
 
-            const transformedData = columnsBanco.map((column, index) => {
+            const transformedData = columnsNickName.map((column, index) => {
                 return {
                     column,
                     values: foundObjects.map(row => row[index])
                 };
             });
 
-            setColumns(columnsBanco);
+            setColumns(columnsNickName);
 
             return transformedData;
 
