@@ -103,7 +103,7 @@ function Main() {
           <div className='mt-36'>
             <button 
               onClick={handleIndividualLeftClick}
-              className='rounded-full bg-neutral-300 w-10 h-10 my-3 justify-center items-center flex'
+              className='rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -113,7 +113,7 @@ function Main() {
           <div>
             <button
               onClick={handleIndividualRightClick}
-              className='rounded-full bg-neutral-300 w-10 h-10 my-3 justify-center items-center flex'
+              className='rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -123,7 +123,7 @@ function Main() {
           <div>
             <button
               onClick={handleAllLeftClick}
-              className='rounded-full bg-red-700 w-10 h-10 my-3 justify-center items-center flex'
+              className='rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -133,7 +133,7 @@ function Main() {
           <div>
             <button
               onClick={handleAllRightClick}
-              className='rounded-full bg-red-700 w-10 h-10 my-3 justify-center items-center flex'
+              className='rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />

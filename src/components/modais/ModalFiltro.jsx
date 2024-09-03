@@ -150,14 +150,13 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '0 20px' }}>
-                        <button id="info"
+                        <button
                             onClick={handleRemoveCheckedCampos}
                             className='rounded-full bg-neutral-300 w-10 h-10 my-3 flex justify-center items-center'
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                             </svg>
-                            <div className="info-texto">Eduardo Viado 7</div>
                         </button>
                         <button
                             onClick={handleAddSelectedCampos}
