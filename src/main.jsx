@@ -10,6 +10,10 @@ function Main() {
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
   const [checkedCampos, setCheckedCampos] = useState([]);
 
+  const handleSelectedCamposChange = (updatedCampos) => {
+    setSelectedCampos(updatedCampos);
+  };
+
   // Atualiza o estado quando os dados são alterados no componente TabelaCampos
   const handleDataChange = (data) => {
     setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo)));
@@ -144,6 +148,7 @@ function Main() {
             onDragEnd={onDragEnd}
             checkedCampos={checkedCampos}
             handleCheckboxChange={handleCheckboxChange}
+            onSelectedCamposChange={handleSelectedCamposChange}
           />
         </div>
       </div>

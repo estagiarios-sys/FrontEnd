@@ -2,12 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Designer } from '@pdfme/ui';
 import { Template } from '@pdfme/common';
 import { text, image, barcodes, line, rectangle, ellipse, svg, tableBeta } from "@pdfme/schemas";
-import { useLocation } from 'react-router-dom';
+import ModalModal from 'components/modais/ModalModal';
+
+
 
 export default function Nova() {
   
   const designerRef = useRef<Designer | null>(null);
   const [savedTemplate, setSavedTemplate] = useState<Template | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar a abertura do modal
+  const [modalMessage, setModalMessage] = useState(""); // Estado para a mensagem do modal
+  const [templateName, setTemplateName] = useState(""); // Estado para armazenar o nome do template
+
 
   useEffect(() => {
 
@@ -209,8 +215,6 @@ export default function Nova() {
 
       const designer = new Designer({ domContainer, template, options: { lang: 'en', labels: { fieldsList: 'Lista de Elementos' } }, plugins })
 
-      
-      
       designerRef.current = designer;
 
       designer.onSaveTemplate((updatedTemplate: Template) => {
@@ -218,23 +222,16 @@ export default function Nova() {
         setSavedTemplate(updatedTemplate);
       });
       
-      
-
       setTimeout(() => {
         const currentTemplate = designer.getTemplate();
         designer.saveTemplate();
-      }, 3000);
-    
-      
+      }, 3000); 
 
     } else {
       console.error('Container do DOM não encontrado');
     }
   }, []);
 
-
-  
-  
   useEffect(() => {
     console.log('Estado atual de savedTemplate:', savedTemplate);
   }, [savedTemplate]);
@@ -242,21 +239,56 @@ export default function Nova() {
   const handleManualSave = () => {
     if (designerRef.current) {
       const updatedTemplate = designerRef.current.getTemplate();
-      console.log('Template atualizado manualmente:', updatedTemplate);
       setSavedTemplate(updatedTemplate);
-      console.log(updatedTemplate)
-      localStorage.setItem('savedTemplate', JSON.stringify(updatedTemplate));
+      
+      // Abre o modal para perguntar o nome do template
+      setModalMessage("Digite o nome para salvar o template:");
+      setIsModalOpen(true);
     }
   };
-  
+
+
+  const handleConfirmModal = (inputValue?: string) => {
+    if (inputValue) {
+      // Salva o template no localStorage
+      localStorage.setItem(inputValue, JSON.stringify(savedTemplate));
+      console.log('Template salvo com o nome:', inputValue);
+      
+      // Atualiza a mensagem do modal para mostrar um sucesso
+      setModalMessage("Template salvo com sucesso!");
+      setIsModalOpen(false);
+      
+      // Limpa o nome do template
+      setTemplateName("");
+    } else {
+      alert("Por favor, digite um nome válido para o template.");
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleNameChange = (inputValue: string) => {
+    setTemplateName(inputValue);
+  };
 
   return (
     <div>
-      
-      <button onClick={handleManualSave}>Salvar</button>
+      <button className='ml-0.5  h-8 border border-black rounded-md transition-colors duration-300 hover:border-blue-200' onClick={handleManualSave}>Salvar</button>
 
       <div id="designer-container" style={{ width: '100%', height: '100%' }}></div>
+      
+      {/* Componente ModalModal */}
+      <ModalModal 
+        isOpen={isModalOpen} 
+        onClose={handleModalClose} 
+        onConfirm={handleConfirmModal} 
+        message={modalMessage} 
+        modalType="DIGITAR_NOME" 
+        // Passa a função de atualização do nome
+        onNameChange={handleNameChange}
+      />
     </div>
   );
 }
-
