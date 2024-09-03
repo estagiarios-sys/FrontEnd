@@ -3,47 +3,58 @@ import React, { useState, ChangeEvent } from "react";
 interface ModalProps {
     isOpen?: boolean;
     onClose?: () => void;
-    onConfirm?: (inputValue?: string) => void;
+    onConfirm?: () => void;
     message?: string;
-    modalType?: "APAGAR" | "ALERTA" | "DIGITAR_NOME";
-    onNameChange?: (value: string) => void; // Adicionando prop onNameChange
+    modalType?: "APAGAR" | "ALERTA" | "DIGITAR_NOME" | "SUCESSO";
+    onNameChange?: (value: string) => void;
+    confirmText?: string;  // Nova propriedade opcional para o texto do botão de confirmação
 }
 
-const modalTypes: Record<string, { title: string; confirmText: string; cancelText: string | null; isAlert: boolean }> = {
+const modalTypes: Record<string, { title: string; defaultConfirmText: string; cancelText: string | null; isAlert: boolean }> = {
     APAGAR: {
         title: "Confirmar Exclusão",
-        confirmText: "Confirmar",
+        defaultConfirmText: "Confirmar",
         cancelText: "Cancelar",
         isAlert: false,
     },
     ALERTA: {
         title: "Atenção",
-        confirmText: "Sim",
-        cancelText: null, // Sem botão de cancelar
+        defaultConfirmText: "Sim",
+        cancelText: null,
         isAlert: true,
     },
     DIGITAR_NOME: {
         title: "Salvar Template",
-        confirmText: "Confirmar",
+        defaultConfirmText: "Confirmar",
         cancelText: "Cancelar",
         isAlert: false,
     },
+    SUCESSO: {
+        title: "Sucesso",
+        defaultConfirmText: "OK",
+        cancelText: null,
+        isAlert: true,
+    },
 };
 
-const ModalModal: React.FC<ModalProps> = ({ 
-    isOpen = false, 
-    onClose = () => {}, 
-    onConfirm = () => {}, 
-    message = "", 
-    modalType = "ALERTA", 
-    onNameChange = () => {} // Função padrão para evitar erros
+const ModalModal: React.FC<ModalProps> = ({
+    isOpen = false,
+    onClose = () => {},
+    onConfirm = () => {},
+    message = "",
+    modalType = "ALERTA",
+    onNameChange = () => {},
+    confirmText // Agora pode receber o texto do botão diretamente
 }) => {
     const [inputValue, setInputValue] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
 
     if (!isOpen) return null;
 
-    const { title, confirmText, cancelText, isAlert } = modalTypes[modalType] || modalTypes.ALERTA;
+    const { title, defaultConfirmText, cancelText, isAlert } = modalTypes[modalType] || modalTypes.ALERTA;
+
+    // Usa o confirmText passado, ou o defaultConfirmText se confirmText não for fornecido
+    const finalConfirmText = confirmText || defaultConfirmText;
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
@@ -55,8 +66,8 @@ const ModalModal: React.FC<ModalProps> = ({
             setError("O nome não pode estar vazio.");
             return; // Não fecha o modal
         }
-        setError(null); // Limpa a mensagem de erro
-        onConfirm(inputValue); 
+        setError(null);
+        onConfirm();
         onClose();
     };
 
@@ -96,7 +107,7 @@ const ModalModal: React.FC<ModalProps> = ({
                                 className="text-white font-semibold py-2 px-4 rounded-lg bg-green-600 hover:bg-green-700 focus:ring-green-500"
                                 onClick={handleConfirm}
                             >
-                                {confirmText}
+                                {finalConfirmText}
                             </button>
                             {cancelText && (
                                 <button
@@ -116,7 +127,7 @@ const ModalModal: React.FC<ModalProps> = ({
                                 onClose();
                             }}
                         >
-                            {confirmText}
+                            {finalConfirmText}
                         </button>
                     )}
                 </div>

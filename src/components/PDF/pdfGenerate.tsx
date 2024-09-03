@@ -8,6 +8,7 @@ interface TableData {
 }
 
 export async function generatePDF(tableData: TableData[], templateKey: string | null) {
+
   function transformTableData(tableData: TableData[]) {
     const headers: string[] = tableData.map((item: TableData) => item.column); // Nome das colunas
     const values: string[][] = tableData[0].values.map((_, rowIndex: number) => 
@@ -21,10 +22,8 @@ export async function generatePDF(tableData: TableData[], templateKey: string | 
   }
 
   const transformedData = transformTableData(tableData);
-
   const columnCount = tableData.length;
   const widthPercentage = 100 / columnCount;
-
   const randomNum = Math.floor(1000 + Math.random() * 9000);
   const opProduto = `op: ${randomNum}`;
 

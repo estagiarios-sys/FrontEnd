@@ -1,54 +1,82 @@
-import React from "react";
-import { generatePDF } from "../PDF/pdfGenerate";  // Supondo que `generatePDF` está sendo importado corretamente
-
-// Função para converter os dados em CSV
-const convertToCSV = (columns, tableData) => {
-    if (!columns || !tableData || tableData.length === 0) {
-        console.error("Columns or tableData are not properly defined.");
-        return '';
-    }
-
-    let csvContent = columns.join(",") + "\n"; // Adiciona o cabeçalho das colunas
-
-    const numRows = tableData[0]?.values?.length || 0;
-
-    for (let i = 0; i < numRows; i++) {
-        let row = [];
-        for (let j = 0; j < columns.length; j++) {
-            row.push(tableData[j]?.values[i] || ""); // Se `values` estiver indefinido, insere uma string vazia
-        }
-        csvContent += row.join(",") + "\n";
-    }
-
-    return csvContent;
-};
-
-// Verifique se a função `downloadCSV` só está definida uma vez
-const downloadCSV = (columns, tableData) => {
-    if (!columns || columns.length === 0 || !tableData || tableData.length === 0) {
-        alert("Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.");
-        return;
-    }
-
-    const csvContent = convertToCSV(columns, tableData);
-    
-    if (!csvContent || csvContent.trim() === "") {
-        alert("O arquivo CSV está vazio. Verifique se os dados foram carregados corretamente.");
-        return;
-    }
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "relatorio.csv");
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
+import React, { useState } from "react";
+import { generatePDF as generatePDFExternal } from "../PDF/pdfGenerate";  // Supondo que `generatePDF` está sendo importado corretamente
+import ModalModal from "./ModalModal";
 
 function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
+    const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState("");
+
+    const handleModalModalAviso = (message) => {
+        setModalMessage(message);
+        setIsModalModalAvisoOpen(true);
+    };
+
+    const closeModalModalAviso = () => {
+        setIsModalModalAvisoOpen(false);
+    };
+
+    // Função para verificar se os dados estão presentes antes de gerar o PDF
+    const generatePDF = (table, templateKey) => {
+        
+        if (!table || table.length === 0) {
+            handleModalModalAviso("Por favor, selecione uma tabela e certifique-se de que há dados para exportar.");
+            return;
+        }
+        if (!templateKey) {
+            handleModalModalAviso("Por favor, selecione um template antes de exportar.");
+            return;
+        }
+
+        generatePDFExternal(table, templateKey); // Chama a função externa para gerar o PDF
+    };
+
+    // Função para converter os dados em CSV
+    const convertToCSV = (columns, tableData) => {
+        if (!columns || !tableData || tableData.length === 0) {
+            console.error("Columns or tableData are not properly defined.");
+            return '';
+        }
+
+        let csvContent = columns.join(",") + "\n"; // Adiciona o cabeçalho das colunas
+
+        const numRows = tableData[0]?.values?.length || 0;
+
+        for (let i = 0; i < numRows; i++) {
+            let row = [];
+            for (let j = 0; j < columns.length; j++) {
+                row.push(tableData[j]?.values[i] || ""); // Se `values` estiver indefinido, insere uma string vazia
+            }
+            csvContent += row.join(",") + "\n";
+        }
+
+        return csvContent;
+    };
+
+    // Verifique se a função `downloadCSV` só está definida uma vez
+    const downloadCSV = (columns, tableData) => {
+        if (!columns || columns.length === 0 || !tableData || tableData.length === 0) {
+            handleModalModalAviso("Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.");
+            return;
+        }
+
+        const csvContent = convertToCSV(columns, tableData);
+
+        if (!csvContent || csvContent.trim() === "") {
+            handleModalModalAviso("O arquivo CSV está vazio. Verifique se os dados foram carregados corretamente.");
+            return;
+        }
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "relatorio.csv");
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -95,7 +123,6 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            zIndex: 1001,
                         }}
                     >
                         X
@@ -145,7 +172,7 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
                         <span>Baixar PDF</span>
                     </button>
 
-                    <button onClick={() => downloadCSV(selectedColumns,table)}
+                    <button onClick={() => downloadCSV(selectedColumns, table)}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -178,6 +205,14 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
                     </button>
                 </div>
             </div>
+
+            <ModalModal
+                isOpen={isModalModalAvisoOpen}
+                onClose={closeModalModalAviso}
+                message={modalMessage}
+                modalType="ALERTA"
+                confirmText="Fechar"
+            />
         </div>
     );
 }
