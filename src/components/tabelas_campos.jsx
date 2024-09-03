@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Select from 'react-select';
+import './genericos/infoClick.css';
+import './genericos/infoHover.css';
+import './genericos/lista.css';
 
 function TabelaCampos({ onDataChange }) {
   const [jsonData, setJsonData] = useState({});
@@ -7,6 +10,11 @@ function TabelaCampos({ onDataChange }) {
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
   const [selectedCampos, setSelectedCampos] = useState([]);
+  const [mostrarInfo, setMostrarInfo] = useState(false);
+  const [menuIsOpen, setMenuIsOpen] = useState(false);
+
+  const dicaRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     async function fetchJsonData() {
@@ -37,11 +45,11 @@ function TabelaCampos({ onDataChange }) {
         }
 
         const data = await response.json();
-        setRelationships(data); 
+        setRelationships(data);
       } catch (error) {
         console.error('Erro ao buscar as relações:', error);
       }
-      
+
     }
 
     fetchJsonData();
@@ -93,16 +101,16 @@ function TabelaCampos({ onDataChange }) {
   const relacionadaOptions = useMemo(() => {
     return selectedTabela
       ? [...new Set(
-          relationships
-            .filter(rel => rel.tabelas.includes(selectedTabela))
-            .flatMap(relacionada => 
-              relacionada.tabelas.split(' e ')
-                .filter(tabela => tabela !== selectedTabela)
-            )
-        )].map(value => ({
-          value,
-          label: value,
-        }))
+        relationships
+          .filter(rel => rel.tabelas.includes(selectedTabela))
+          .flatMap(relacionada =>
+            relacionada.tabelas.split(' e ')
+              .filter(tabela => tabela !== selectedTabela)
+          )
+      )].map(value => ({
+        value,
+        label: value,
+      }))
       : [];
   }, [selectedTabela, relationships]);
 
@@ -118,11 +126,36 @@ function TabelaCampos({ onDataChange }) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dicaRef.current &&
+        !dicaRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setMostrarInfo(false); // Fecha o tooltip ao clicar fora
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleChange = (selectedOptions) => {
+    setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
+    // Mantém o menu aberto após a seleção
+    setMenuIsOpen(true);
+  };
+
   return (
     <div className="flex flex-col justify-start items-start ml-20">
       <div className="mt-5">
         <label htmlFor="tabelas">Tabela</label>
-        <div>
+        <div className="containerClick">
           <Select
             name="tabelas"
             options={tabelaOptions}
@@ -131,17 +164,25 @@ function TabelaCampos({ onDataChange }) {
             placeholder="Selecione uma tabela..."
             onChange={(selectedOption) => {
               setSelectedTabela(selectedOption ? selectedOption.value : '');
-              setSelectedRelacionada('');  
+              setSelectedRelacionada('');
               setSelectedCampos([]);
             }}
             value={tabelaOptions.find(option => option.value === selectedTabela)}
           />
+          <div id='info-click' className={mostrarInfo ? 'right show' : 'right'} ref={dicaRef}>
+            <button id="info-click-button" onClick={() => setMostrarInfo(prev => !prev)} ref={buttonRef}>
+              <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div className='info-texto'>GASGMASKÇGSA</div>
+          </div>
         </div>
       </div>
 
       <div className="mt-5">
         <label htmlFor="relacionadas">Relacionadas</label>
-        <div>
+        <div className="containerHover">
           <Select
             name="relacionadas"
             options={relacionadaOptions}
@@ -153,6 +194,13 @@ function TabelaCampos({ onDataChange }) {
             }}
             value={relacionadaOptions.find(option => option.value === selectedRelacionada)}
           />
+          <div id='info-hover' class='right'>
+            <svg class="icon-info-hover" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+              <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
+            </svg>
+
+            <div className='info-texto'>TESTE</div>
+          </div>
         </div>
       </div>
 
@@ -162,14 +210,15 @@ function TabelaCampos({ onDataChange }) {
           <Select
             isMulti
             name="campos"
-            options={campoOptions} // Já sem duplicatas
+            options={campoOptions}
             className="basic-multi-select w-60"
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."
-            onChange={(selectedOptions) => {
-              setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
-            }}
+            onChange={handleChange}
             value={campoOptions.filter(option => selectedCampos.includes(option.value))}
+            menuIsOpen={menuIsOpen} // Controla a visibilidade do menu
+            onMenuOpen={() => setMenuIsOpen(true)} // Abre o menu
+            onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
           />
         </div>
       </div>

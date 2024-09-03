@@ -17,7 +17,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
-    const [condicoesString, setCondicoesString] = useState(''); 
+    const [condicoesString, setCondicoesString] = useState('');
     const [isView, setIsView] = useState(false);
     const [isModalModeloOpen, setIsModalModeloOpen] = useState(false);
 
@@ -113,7 +113,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             const jsonRequest = {
                 table: selectTable,
                 columns: selectedColumns,
-                conditions: condicoesString, 
+                conditions: condicoesString,
                 orderBy: orderByString,
                 joins: [],
             };
@@ -165,7 +165,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         try {
             const url = 'http://localhost:8080/find/loadedQuery';
             const loadedQuery = localStorage.getItem('loadedQuery');
-    
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -174,15 +174,15 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 body: loadedQuery,
             });
             localStorage.removeItem('loadedQuery');
-    
+
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
-    
+
             const responseData = await response.json();
-    
+
             const { columnsBanco, foundObjects } = responseData;
-    
+
             if (!Array.isArray(foundObjects) || !Array.isArray(columnsBanco)) {
                 throw new Error('Estrutura de resposta inválida');
             }
@@ -193,23 +193,23 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     values: foundObjects.map(row => row[index])
                 };
             });
-    
+
             setColumns(columnsBanco);
-            
+
             return transformedData;
-    
+
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             return [];
         }
-    };    
+    };
 
     const handleGenerateReport = async () => {
         try {
             let data;
             if (localStorage.getItem('loadedQuery')) {
                 data = await fetchLoadQuery();
-                setTableData(data); 
+                setTableData(data);
             } else {
                 data = await fetchData();
                 setTableData(data);
@@ -220,7 +220,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             } else {
                 setIsView(false);
             }
-           
+
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
@@ -234,13 +234,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     <h1 className="font-bold text-3xl">Ações</h1>
                     <div className="flex mt-3">
                         <button
-                            className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm mr-2"
+                            className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
                             onClick={handleGenerateReport}
                         >
                             Gerar Relatório
                         </button>
                         <button
-                            className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
+                            className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
                             onClick={handleSaveQuery}
                         >
                             Salvar Consulta
@@ -270,12 +270,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                        <button onClick={handleModalModelo} className="flex flex-col justify-center items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
-                            <label htmlFor="mais">Modelos</label>
-                        </button>
+                            <button onClick={handleModalModelo} className="flex flex-col justify-center items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                                <label htmlFor="mais">Modelos</label>
+                            </button>
                         </div>
                     </div>
                     <div className="mx-2">
