@@ -1,29 +1,31 @@
 import React, { useState, useRef, useEffect } from "react";
 import ModalSql from "./modais/ModalSql";
-import ModalPdf from "./modais/ModalPdf";
+import ModalPdfView from "./modais/ModalPdfView";
 import ModalExpo from "./modais/ModalExpo";
 import ModalSalvos from "./modais/ModalSalvos";
 import ModalFiltro from "./modais/ModalFiltro";
 import { useNavigate } from 'react-router-dom';
 import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
+import ModalModal from "./modais/ModalModal";
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
-    const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false);
-    const [isModalOpenSQl, setIsModalOpenSQL] = useState(false);
-    const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false);
-    const [isModalPdfOpen, setIsModalPdfOpen] = useState(false);
-    const [isModalExpoOpen, setIsModalExpoOpen] = useState(false);
-    const [relationshipData, setRelationshipData] = useState([]);
+    const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false); // Modal para exibir as views salvas
+    const [isModalOpenSQl, setIsModalOpenSQL] = useState(false); // Modal para exibir o SQL
+    const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false); // Modal para exibir o filtros de selects
+    const [isModalPdfOpenView, setIsModalPdfOpenView] = useState(false); // Modal para exibir o PDF_View
+    const [isModalExpoOpen, setIsModalExpoOpen] = useState(false); // Modal para exibir o Exportar e suas opções
+    const [relationshipData, setRelationshipData] = useState([]); 
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [condicoesString, setCondicoesString] = useState('');
     const [isView, setIsView] = useState(false);
-    const [isModalModeloOpen, setIsModalModeloOpen] = useState(false);
+    const [isModalModeloOpen, setIsModalModeloOpen] = useState(false); // Modal para exibir os modelos de pdf
     const [selectedTemplateKey, setSelectedTemplateKey] = useState(null);
     const [isModalSalvarConOpen, setIsModalSalvarCon] = useState(false);
     const [sqlQuery, setSqlQuery] = useState('');
+    const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false); // ModalModal para exibir avisos
 
 
     const handleSelectTemplate = (key) => {
@@ -47,12 +49,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
         setIsModalOpenSQL(true);
     };
 
-    const handleModalPdf = () => {
+
+    const handleModalPdfView = () => {
         if (isView) {
-            setIsModalPdfOpen(true);
+            setIsModalPdfOpenView(true);
         } else {
-            setIsModalPdfOpen(false);
-            alert('Selecione uma tabela para gerar o relatório!');
+            setIsModalPdfOpenView(false);
+            setIsModalModalAvisoOpen(true);
         }
     };
 
@@ -73,8 +76,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     };
 
 
-    const closeModalPdf = () => {
-        setIsModalPdfOpen(false);
+    const closeModalPdfView = () => {
+        setIsModalPdfOpenView(false);
+    };
+
+    const closeModalModalAviso = () => {
+        setIsModalModalAvisoOpen(false);
     };
 
     const closeModalFiltro = () => {
@@ -205,9 +212,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             const responseData = await response.json();
 
+
             const { columnsNickName, foundObjects } = responseData;
 
             if (!Array.isArray(foundObjects) || !Array.isArray(columnsNickName)) {
+
+
                 throw new Error('Estrutura de resposta inválida');
             }
 
@@ -323,7 +333,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={handleModalPdf} className="flex flex-col justify-center items-center">
+                            <button onClick={handleModalPdfView} className="flex flex-col justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Zm3.75 11.625a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
@@ -373,11 +383,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             </div>
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
-            <ModalPdf isOpen={isModalPdfOpen} onClose={closeModalPdf} table={tableData} templateKey={selectedTemplateKey} /> {/* Passa a chave do template selecionado */}
+            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} table={tableData} templateKey={selectedTemplateKey} /> {/* Passa a chave do template selecionado */}
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} templateKey={selectedTemplateKey} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery} />
+            <ModalModal isOpen={isModalModalAvisoOpen} onClose={closeModalModalAviso} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
         </div>
     );
 }

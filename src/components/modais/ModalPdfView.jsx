@@ -1,7 +1,7 @@
 import React from "react";
 import View from "../PDF/pdfViewer";
 
-function ModalPdf({ isOpen, onClose, table, templateKey }) {
+function ModalPdfView({ isOpen, onClose, table, templateKey }) {
   if (!isOpen) return null;
   
   return (
@@ -57,4 +57,4 @@ function ModalPdf({ isOpen, onClose, table, templateKey }) {
   );
 }
 
-export default ModalPdf;
+export default ModalPdfView;
