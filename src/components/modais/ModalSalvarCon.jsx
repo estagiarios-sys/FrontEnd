@@ -1,27 +1,86 @@
 import React, { useEffect, useState } from "react";
+import ModalModal from './ModalModal';
 
 function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
-    const [inputValue, setInputValue] = useState(''); // Estado para armazenar o valor do input
+    const [inputValue, setInputValue] = useState('');
+    const [isConfirmModalSaveOpen, setIsModalModalSaveOpen] = useState(false);
+    const [isConfirmModalUpdateOpen, setIsModalModalUpdateOpen] = useState(false);
+    const [isConfirmModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
 
     const handleInputChange1 = (event) => {
-        setInputValue(event.target.value); // Atualiza o estado com o valor digitado para key1
+        setInputValue(event.target.value);
     };
 
+    const handleModalModalSave = () => {
+        setModalMessage('Consulta salva!');
+        setIsModalModalSaveOpen(true);
+    };
+
+    const handleModalModalUpdate = () => {
+        setModalMessage('Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
+        setIsModalModalUpdateOpen(true);
+    };
+
+    const handleModalModalAviso = () => {
+        setIsModalModalAvisoOpen(true);
+    }
+
     const saveQuery = async () => {
+        if (inputValue.length === 0 && sqlQuery.length === 0) {
+            setModalMessage('Faça uma consulta para salvar.');
+            handleModalModalAviso();
+            return;
+        } else if (inputValue.length > 0 && sqlQuery.length === 0) {
+            setModalMessage('Faça uma consulta para salvar.');
+            handleModalModalAviso();
+            return;
+        } else if(inputValue.length === 0 && sqlQuery.length > 0) {
+            setModalMessage('Digite um nome para salvar a consulta.');
+            handleModalModalAviso();
+            return;
+        }
         try {
             const dataToSave = {
-                queryName: inputValue, // Usa o valor do input para key1
-                query: sqlQuery, // Usa o JSON convertido para key2
+                queryName: inputValue,
+                query: sqlQuery,
             };
+    
+            const query = JSON.stringify(dataToSave);
+    
+            const response = await fetch('http://localhost:8080/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: query,
+            });
+    
+            console.log(query);
+    
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const result = await response.json();
+            console.log('Success:', result);
+            handleModalModalSave();
+        } catch (error) {
+            handleModalModalUpdate();
+        }
+    };    
 
-            console.log(sqlQuery);
+    const updateQuery = async () => {
+        try {
+            const dataToSave = {
+                queryName: inputValue,
+                query: sqlQuery,
+            };
 
             const query = JSON.stringify(dataToSave);
 
-            console.log(query);
-
-            const response = await fetch('http://localhost:8080/save', {
-                method: 'POST',
+            const response = await fetch('http://localhost:8080/update/saved-query', {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -36,6 +95,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
 
             const result = await response.json();
             console.log('Success:', result);
+            onClose(); // Fecha o modal após a atualização
         } catch (error) {
             console.error('Error:', error);
         }
@@ -53,7 +113,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
         };
     }, [isOpen]);
 
-    // Se o modal não estiver aberto, não renderize nada
     if (!isOpen) return null;
 
     const contentContainerStyle = {
@@ -95,7 +154,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                     <h5 className="font-bold mx-2">Consultas Salvas</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={onClose}
+                        onClick={() => {onClose(); setInputValue('')}}
                         style={{
                             backgroundColor: 'rgba(255, 255, 255, 0.5)',
                             border: '1px solid #ccc',
@@ -114,16 +173,15 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                     </button>
                 </div>
                 <div style={contentContainerStyle}>
-            <div className="w-11/12 bg-neutral-300 rounded-md p-4">
-                <h5 className="font-bold mb-4">Nome da Consulta</h5>
-                <input
-                    type="text"
-                    value={inputValue}
-                    onChange={handleInputChange1}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                />
-            </div>
-        </div>
+                    <div className="w-11/12 bg-neutral-300 rounded-md p-4">
+                        <h5 className="font-bold mb-4">Nome da Consulta</h5>
+                        <input
+                            type="text"
+                            onChange={handleInputChange1}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                    </div>
+                </div>
                 {/* Botões de Cancelar e Salvar */}
                 <div
                     style={{
@@ -148,7 +206,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                             cursor: 'pointer',
                             marginRight: '10px',
                         }}
-                        onClick={onClose}
+                        onClick={() => {onClose(); setInputValue('')}}
                     >
                         Cancelar
                     </button>
@@ -165,10 +223,42 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                         onClick={saveQuery}
                     >
                         Salvar
-                        
                     </button>
                 </div>
             </div>
+            <ModalModal modalType="SUCESSO"
+                isOpen={isConfirmModalSaveOpen}
+                onClose={() => setIsModalModalSaveOpen(false)}
+                onConfirm={onClose}
+                confirmText="Ok"
+                message={modalMessage}
+                title="Confirmação"
+                buttonColors={{
+                    ok: "bg-gray-600 hover:bg-red-700 focus:ring-gray-600",
+                }}
+            />
+            <ModalModal modalType="ALERTA"
+                isOpen={isConfirmModalUpdateOpen}
+                onClose={() => setIsModalModalUpdateOpen(false)}
+                onConfirm={updateQuery}
+                confirmText="Substituir"
+                message={modalMessage}
+                title="Confirmação"
+                buttonColors={{
+                    ok: "bg-red-600 hover:bg-red-700 focus:ring-gray-600",
+                }}
+            />
+            <ModalModal modalType="ALERTA"
+                isOpen={isConfirmModalAvisoOpen}
+                onClose={() => setIsModalModalAvisoOpen(false)}
+                onConfirm={() => setIsModalModalAvisoOpen(false)}
+                confirmText="Ok"
+                message={modalMessage}
+                title="Aviso"
+                buttonColors={{
+                    ok: "bg-yellow-600 hover:bg-yellow-700 focus:ring-gray-600",
+                }}
+            />
         </div>
     );
 }
