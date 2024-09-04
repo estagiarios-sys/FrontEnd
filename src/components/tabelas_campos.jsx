@@ -10,7 +10,10 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState([]);
   const [selectedCampos, setSelectedCampos] = useState([]);
-  const [mostrarInfo, setMostrarInfo] = useState(false);
+  const [mostrarInfo1, setMostrarInfo1] = useState(false);
+  const [mostrarInfo2, setMostrarInfo2] = useState(false);
+  const [mostrarInfo3, setMostrarInfo3] = useState(false);
+
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
   const dicaRef = useRef(null);
@@ -135,7 +138,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
         buttonRef.current &&
         !buttonRef.current.contains(event.target)
       ) {
-        setMostrarInfo(false); // Fecha o tooltip ao clicar fora
+        setMostrarInfo1(false);
+        setMostrarInfo2(false);
+        setMostrarInfo3(false);
       }
     };
 
@@ -171,8 +176,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
             }}
             value={tabelaOptions.find(option => option.value === selectedTabela)}
           />
-          <div id='info-click' className={mostrarInfo ? 'right show' : 'right'} ref={dicaRef}>
-            <button id="info-click-button" onClick={() => setMostrarInfo(prev => !prev)} ref={buttonRef}>
+          <div id='info-click' className={mostrarInfo1 ? 'right show' : 'right'} ref={dicaRef}>
+            <button id="info-click-button" onClick={() => setMostrarInfo1(prev => !prev)} ref={buttonRef}>
               <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
               </svg>
@@ -198,11 +203,13 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
             value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))}
             closeMenuOnSelect={false}
           />
-          <div id='info-hover' class='right'>
-            <svg class="icon-info-hover" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-              <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
-            </svg>
-            <div className='info-texto'>Selecione as tabelas relacionadas que serão consultadas</div>
+          <div id='info-click' className={mostrarInfo2 ? 'right show' : 'right'} ref={dicaRef}>
+            <button id="info-click-button" onClick={() => setMostrarInfo2(prev => !prev)} ref={buttonRef}>
+              <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div className='info-texto'>Selecione a tabela que será relacionada com a principal</div>
           </div>
         </div>
       </div>
@@ -222,11 +229,13 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
             onMenuOpen={() => setMenuIsOpen(true)} // Abre o menu
             onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
           />
-          <div id='info-hover' class= 'right'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.1" stroke="currentColor" className="size-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-            </svg>
-            <div className='info-texto'>Selecione os campos que serão consultadas</div>
+          <div id='info-click' className={mostrarInfo3? 'right show' : 'right'} ref={dicaRef}>
+            <button id="info-click-button" onClick={() => setMostrarInfo3(prev => !prev)} ref={buttonRef}>
+              <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div className='info-texto'>Selecione os campos que serão utilizados na consulta</div>
           </div>
         </div>
       </div>
