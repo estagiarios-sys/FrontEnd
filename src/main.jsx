@@ -8,7 +8,7 @@ function Main() {
   const [availableCampos, setAvailableCampos] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
-  const [checkedCampos, setCheckedCampos] = useState([]);
+  const [checkedCampos, setCheckedCampos] = useState([]); 
 
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
@@ -97,7 +97,7 @@ function Main() {
       <div className="flex justify-around items-start">
         <div>
           <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-          <TabelaCampos onDataChange={handleDataChange} />
+          <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} />
         </div>
         <div>
           <div className='mt-36'>
