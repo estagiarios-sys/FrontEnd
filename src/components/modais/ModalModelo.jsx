@@ -56,16 +56,24 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
 
     const handleUseModel = () => {
         if (selectedItem) {
-            onSelect(selectedItem.value);  // Passa a key selecionada para o componente pai
+            onSelect(selectedItem.value);
+            setModalMessage('Modelo gerado com sucesso');
+            setIsModalModalOpen(true);  // Passa a key selecionada para o componente pai
             onClose(); // Fecha o modal
+        }else{
+            setModalMessage('Selecione um Modelo para Salvar');
+            setIsModalModalOpen(true);
+            
         }
+        
+        setError('');
     };
 
     if (!isOpen) return null; // Se o modal não estiver aberto, não renderiza nada
 
     return (
         <>
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-1000">
                 <div className="bg-white p-4 rounded-lg relative w-[440px] max-w-full shadow-lg">
                     <div className="w-full bg-green-600 flex justify-between items-center text-white p-3 rounded-t-lg">
                         <h5 className="font-bold text-lg">Modelos de Relatórios</h5>
@@ -152,13 +160,12 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsModalModalOpen(false)}
                 onConfirm={handleConfirm}
-                confirmText="Excluir"
+                confirmText="OK"
                 message={modalMessage}
                 title="Confirmação"
-                buttonColors={{
-                    confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
-                    cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
-                }}
+               
+                
+
             />
         </>
     );

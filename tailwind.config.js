@@ -5,6 +5,24 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        // Vermelho
+        'custom-red': '#FF0B34',
+        'custom-red-light': '#FF4D6D',
+        'custom-red-lighter': '#FF8A8A',
+        'custom-red-dark': '#9C152C',
+
+        // Rosa
+        'custom-pink': '#AE1495',
+        'custom-pink-light': '#C94FB2',
+        'custom-pink-lighter': '#E084CF',
+
+        // Azul
+        'custom-blue': '#07C6D4',
+        'custom-blue-light': '#47D7E0',
+        'custom-blue-lighter': '#87E6EB',
+        'custom-blue-dark': '#0E8F98',
+      },
       keyframes: {
         fadeIn: {
           '0%': { opacity: 0 },

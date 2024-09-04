@@ -8,7 +8,7 @@ function Main() {
   const [availableCampos, setAvailableCampos] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
-  const [checkedCampos, setCheckedCampos] = useState([]);
+  const [checkedCampos, setCheckedCampos] = useState([]); 
 
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
@@ -18,7 +18,7 @@ function Main() {
   const handleDataChange = (data) => {
     setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo)));
     setSelectedTabela(data.tabela);
-    setSelectedRelacionada(data.relacionada);
+    setSelectedRelacionada(data.relacionada || []); // Agora espera um array de relacionadas
   };
 
   // Adiciona o primeiro campo disponível à lista de campos selecionados
@@ -97,13 +97,13 @@ function Main() {
       <div className="flex justify-around items-start">
         <div>
           <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-          <TabelaCampos onDataChange={handleDataChange} />
+          <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} />
         </div>
         <div>
           <div className='mt-36'>
             <button id='info'
               onClick={handleIndividualLeftClick}
-              className='rounded-full bg-neutral-300 w-10 h-10 my-3 justify-center items-center flex'
+              className='rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -114,7 +114,7 @@ function Main() {
           <div>
             <button id='info'
               onClick={handleIndividualRightClick}
-              className='rounded-full bg-neutral-300 w-10 h-10 my-3 justify-center items-center flex'
+              className='rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -125,7 +125,7 @@ function Main() {
           <div>
             <button id='info'
               onClick={handleAllLeftClick}
-              className='rounded-full bg-red-700 w-10 h-10 my-3 justify-center items-center flex'
+              className='rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -136,7 +136,7 @@ function Main() {
           <div>
             <button id='info'
               onClick={handleAllRightClick}
-              className='rounded-full bg-red-700 w-10 h-10 my-3 justify-center items-center flex'
+              className='rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />

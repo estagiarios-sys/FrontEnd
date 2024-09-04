@@ -134,30 +134,40 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
     const fetchData = async () => {
         try {
-            // Construir o objeto JSON que será enviado na requisição
             const jsonRequest = {
                 table: selectTable,
                 columns: selectedColumns,
                 conditions: condicoesString, // Adicione a condição aqui
                 orderBy: orderByString, // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
+
             };
-
+    
             if (selectedRelacionada && relationshipData.length > 0) {
-                const tablePair = `${selectTable} e ${selectedRelacionada}`;
-                const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
-                if (relationship) {
-                    console.log('Relacionamento encontrado:', relationship);
-                    jsonRequest.joins.push(relationship.join);
-                } else {
-                    console.log('Relacionamento não encontrado para:', tablePair);
-                }
+                const tabelasSelecionadas = [selectTable, ...selectedRelacionada];
+    
+                tabelasSelecionadas.forEach((tabelaPrincipal) => {
+                    selectedRelacionada.forEach((tabelaRelacionada) => {
+                        if (tabelaPrincipal !== tabelaRelacionada) {
+                            const tablePair = `${tabelaPrincipal} e ${tabelaRelacionada}`;
+                            const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
+    
+                            if (relationship) {
+                                console.log('Relacionamento encontrado:', relationship);
+                                jsonRequest.joins.push(relationship.join);
+                            } else {
+                                console.log('Relacionamento não encontrado para:', tablePair);
+                            }
+                        }
+                    });
+                });
             }
-            const url = 'http://localhost:8080/find'; // Nova rota
-
+    
+            const url = 'http://localhost:8080/find';
+    
             console.log('Enviando requisição para:', url);
             console.log('JSON Request:', JSON.stringify(jsonRequest));
-
+    
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -165,32 +175,31 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 },
                 body: JSON.stringify(jsonRequest),
             });
-
+    
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
-
+    
             const responseData = await response.json();
-
+    
             const [sql, colunasAtualizada, data] = responseData;
-
+    
             console.log('SQL:', sql);
-
+    
             localStorage.setItem('SQLGeradoFinal', sql);
-
+    
             setSqlQuery(sql);
-
             setColumns(colunasAtualizada);
-
+    
             return colunasAtualizada.map((column, index) => ({
                 column,
-                values: data.map(row => row[index]) // Acessa pelo índice
+                values: data.map(row => row[index]),
             }));
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             return [];
         }
-    };
+    };    
 
     const fetchLoadQuery = async () => {
         try {
@@ -212,11 +221,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
 
             const responseData = await response.json();
 
-
             const { columnsNickName, foundObjects } = responseData;
 
             if (!Array.isArray(foundObjects) || !Array.isArray(columnsNickName)) {
-
 
                 throw new Error('Estrutura de resposta inválida');
             }
@@ -254,6 +261,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             } else {
                 setIsView(false);
             }
+
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
@@ -266,13 +274,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     <h1 className="font-bold text-3xl">Ações</h1>
                     <div className="flex mt-3">
                         <button
-                            className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm mr-2"
+                            className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
                             onClick={handleGenerateReport}
                         >
                             Gerar Relatório
                         </button>
                         <button
-                            className="p-2 px-5 border-2 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500 rounded-sm"
+                            className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
                             onClick={handleModalSalvarCon}
                         >
                             Salvar Consulta

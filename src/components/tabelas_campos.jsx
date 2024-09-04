@@ -2,14 +2,16 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Select from 'react-select';
 import './genericos/infoClick.css';
 import './genericos/infoHover.css';
+import './genericos/lista.css';
 
-function TabelaCampos({ onDataChange }) {
+function TabelaCampos({ onDataChange, handleAllLeftClick }) {
   const [jsonData, setJsonData] = useState({});
   const [relationships, setRelationships] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
-  const [selectedRelacionada, setSelectedRelacionada] = useState('');
+  const [selectedRelacionada, setSelectedRelacionada] = useState([]);
   const [selectedCampos, setSelectedCampos] = useState([]);
   const [mostrarInfo, setMostrarInfo] = useState(false);
+  const [menuIsOpen, setMenuIsOpen] = useState(false);
 
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
@@ -47,7 +49,6 @@ function TabelaCampos({ onDataChange }) {
       } catch (error) {
         console.error('Erro ao buscar as relações:', error);
       }
-
     }
 
     fetchJsonData();
@@ -67,29 +68,31 @@ function TabelaCampos({ onDataChange }) {
 
   const campoOptions = useMemo(() => {
     const options = [];
-
+  
     if (selectedTabela && jsonData[selectedTabela]) {
       jsonData[selectedTabela].forEach(campo => {
         options.push({ value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
       });
     }
-
-    if (selectedRelacionada && selectedTabela) {
-      relationships
-        .filter(rel => rel.tabelas.includes(selectedTabela) && rel.tabelas.includes(selectedRelacionada))
-        .forEach(rel => {
-          const [table1, table2] = rel.tabelas.split(' e ');
-          const relatedTable = table1 === selectedTabela ? table2 : table1;
-
-          if (jsonData[relatedTable]) {
-            jsonData[relatedTable].forEach(campo => {
-              options.push({ value: `${relatedTable}.${campo}`, label: `${relatedTable} - ${campo}` });
+  
+    if (selectedRelacionada && selectedRelacionada.length > 0 && selectedTabela) {
+      selectedRelacionada.forEach(relacionadaTabela => {
+        relationships
+          .filter(rel => rel.tabelas.includes(selectedTabela) && rel.tabelas.includes(relacionadaTabela))
+          .forEach(rel => {
+            const tabelas = rel.tabelas.split(' e '); 
+  
+            tabelas.forEach(table => {
+              if (table !== selectedTabela && jsonData[table]) {
+                jsonData[table].forEach(campo => {
+                  options.push({ value: `${table}.${campo}`, label: `${table} - ${campo}` });
+                });
+              }
             });
-          }
-        });
+          });
+      });
     }
-
-    // Remove duplicatas dos campos
+  
     return [...new Set(options.map(option => option.value))].map(value => {
       const [table, campo] = value.split('.');
       return { value, label: `${table} - ${campo}` };
@@ -143,6 +146,12 @@ function TabelaCampos({ onDataChange }) {
     };
   }, []);
 
+  const handleChange = (selectedOptions) => {
+    setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
+    // Mantém o menu aberto após a seleção
+    setMenuIsOpen(true);
+  };
+
   return (
     <div className="flex flex-col justify-start items-start ml-20">
       <div className="mt-5">
@@ -156,59 +165,62 @@ function TabelaCampos({ onDataChange }) {
             placeholder="Selecione uma tabela..."
             onChange={(selectedOption) => {
               setSelectedTabela(selectedOption ? selectedOption.value : '');
-              setSelectedRelacionada('');
+              setSelectedRelacionada([]);
               setSelectedCampos([]);
+              handleAllLeftClick();
             }}
             value={tabelaOptions.find(option => option.value === selectedTabela)}
           />
           <div id='info-click' className={mostrarInfo ? 'right show' : 'right'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo(prev => !prev)} ref={buttonRef}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.1" stroke="currentColor" className="size-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+              <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
               </svg>
             </button>
             <div className='info-texto'>Selecione a tabela que será consultada</div>
           </div>
         </div>
       </div>
-
       <div className="mt-5">
         <label htmlFor="relacionadas">Relacionadas</label>
         <div className="containerHover">
           <Select
+            isMulti
             name="relacionadas"
             options={relacionadaOptions}
             className="basic-single w-60"
             classNamePrefix="Select"
             placeholder="Selecione uma relação..."
-            onChange={(selectedOption) => {
-              setSelectedRelacionada(selectedOption ? selectedOption.value : '');
+            onChange={(selectedOptions) => {
+              setSelectedRelacionada(selectedOptions ? selectedOptions.map(option => option.value) : []);
+              handleAllLeftClick();
             }}
-            value={relacionadaOptions.find(option => option.value === selectedRelacionada)}
+            value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))}
+            closeMenuOnSelect={false}
           />
-          <div id='info-hover' class= 'right'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.1" stroke="currentColor" className="size-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+          <div id='info-hover' class='right'>
+            <svg class="icon-info-hover" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+              <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
             </svg>
             <div className='info-texto'>Selecione as tabelas relacionadas que serão consultadas</div>
           </div>
         </div>
       </div>
-
       <div className="mt-5">
         <label htmlFor="campos">Campos</label>
         <div className="containerHover">
           <Select
             isMulti
             name="campos"
-            options={campoOptions} // Já sem duplicatas
+            options={campoOptions}
             className="basic-multi-select w-60"
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."
-            onChange={(selectedOptions) => {
-              setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
-            }}
+            onChange={handleChange}
             value={campoOptions.filter(option => selectedCampos.includes(option.value))}
+            menuIsOpen={menuIsOpen} // Controla a visibilidade do menu
+            onMenuOpen={() => setMenuIsOpen(true)} // Abre o menu
+            onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
           />
           <div id='info-hover' class= 'right'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.1" stroke="currentColor" className="size-5">

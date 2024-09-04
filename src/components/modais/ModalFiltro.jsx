@@ -150,7 +150,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '0 20px' }}>
-                        <button id="info"
+                        <button
                             onClick={handleRemoveCheckedCampos}
                             className='rounded-full bg-neutral-300 w-10 h-10 my-3 flex justify-center items-center'
                         >

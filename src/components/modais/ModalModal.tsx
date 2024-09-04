@@ -58,13 +58,13 @@ const ModalModal: React.FC<ModalProps> = ({
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
-        onNameChange(e.target.value); // Chama onNameChange quando o input muda
+        onNameChange(e.target.value);
     };
 
     const handleConfirm = () => {
         if (modalType === "DIGITAR_NOME" && !inputValue.trim()) {
             setError("O nome não pode estar vazio.");
-            return; // Não fecha o modal
+            return;
         }
         setError(null);
         onConfirm();
