@@ -4,7 +4,7 @@ import './genericos/infoClick.css';
 import './genericos/infoHover.css';
 import './genericos/lista.css';
 
-function TabelaCampos({ onDataChange }) {
+function TabelaCampos({ onDataChange, handleAllLeftClick }) {
   const [jsonData, setJsonData] = useState({});
   const [relationships, setRelationships] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
@@ -167,6 +167,7 @@ function TabelaCampos({ onDataChange }) {
               setSelectedTabela(selectedOption ? selectedOption.value : '');
               setSelectedRelacionada([]);
               setSelectedCampos([]);
+              handleAllLeftClick();
             }}
             value={tabelaOptions.find(option => option.value === selectedTabela)}
           />
@@ -192,6 +193,7 @@ function TabelaCampos({ onDataChange }) {
             placeholder="Selecione uma relação..."
             onChange={(selectedOptions) => {
               setSelectedRelacionada(selectedOptions ? selectedOptions.map(option => option.value) : []);
+              handleAllLeftClick();
             }}
             value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))}
             closeMenuOnSelect={false}
