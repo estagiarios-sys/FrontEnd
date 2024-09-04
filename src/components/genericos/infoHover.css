@@ -64,7 +64,7 @@
 
 /* Balão para a esquerda */
 #info-hover.left .info-texto {
-    right: 100%; /* Ajustado para dar espaço à seta */
+    right: 120%; /* Ajustado para dar espaço à seta */
     top: 50%;
     transform: translateY(-50%);
 }
