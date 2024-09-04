@@ -258,36 +258,33 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                             </div>
                         </div>
                     </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 20px 20px 20px' }}>
-                        <button
-                            style={{
-                                backgroundColor: '#6c757d',
-                                border: 'none',
-                                color: '#fff',
-                                borderRadius: '5px',
-                                padding: '10px 20px',
-                                fontSize: '16px',
-                                cursor: 'pointer',
-                                marginRight: '10px',
-                            }}
-                            onClick={onClose}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '0 20px' }}>
+                        <button id="info-hover"
+                            onClick={handleRemoveCheckedCampos}
+                            className='left rounded-full bg-neutral-300 w-10 h-10 my-3 flex justify-center items-center'
                         >
-                            Cancelar
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                            </svg>
+                            <div className="info-texto">Remover campos selecionados</div>
                         </button>
-                        <button
-                            style={{
-                                backgroundColor: '#28a745',
-                                border: 'none',
-                                color: '#fff',
-                                borderRadius: '5px',
-                                padding: '10px 20px',
-                                fontSize: '16px',
-                                cursor: 'pointer',
-                            }}
-                            onClick={handleSave}
+                        <button id="info-hover"
+                            onClick={handleAddSelectedCampos}
+                            className='left rounded-full bg-neutral-300 w-10 h-10 my-3 flex justify-center items-center'
                         >
-                            Salvar
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                            </svg>
+                            <div className="info-texto">Adicionar campos selecionados</div>
+                        </button>
+                        <button id="info-hover"
+                            onClick={handleRemoveAllCampos}
+                            className='left rounded-full bg-red-700 w-10 h-10 my-3 flex justify-center items-center'
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                            </svg>
+                            <div className="info-texto">Remover todos os campos</div>
                         </button>
                     </div>
                 </div>

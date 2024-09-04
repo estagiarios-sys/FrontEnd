@@ -56,9 +56,17 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
 
     const handleUseModel = () => {
         if (selectedItem) {
-            onSelect(selectedItem.value);  // Passa a key selecionada para o componente pai
+            onSelect(selectedItem.value);
+            setModalMessage('Modelo gerado com sucesso');
+            setIsModalModalOpen(true);  // Passa a key selecionada para o componente pai
             onClose(); // Fecha o modal
+        }else{
+            setModalMessage('Selecione um Modelo para Salvar');
+            setIsModalModalOpen(true);
+            
         }
+        
+        setError('');
     };
 
     if (!isOpen) return null; // Se o modal não estiver aberto, não renderiza nada
@@ -152,13 +160,12 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsModalModalOpen(false)}
                 onConfirm={handleConfirm}
-                confirmText="Excluir"
+                confirmText="OK"
                 message={modalMessage}
                 title="Confirmação"
-                buttonColors={{
-                    confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
-                    cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
-                }}
+               
+                
+
             />
             
         </>

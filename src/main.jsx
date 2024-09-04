@@ -8,7 +8,7 @@ function Main() {
   const [availableCampos, setAvailableCampos] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
-  const [checkedCampos, setCheckedCampos] = useState([]);
+  const [checkedCampos, setCheckedCampos] = useState([]); 
 
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
@@ -97,47 +97,51 @@ function Main() {
       <div className="flex justify-around items-start">
         <div>
           <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-          <TabelaCampos onDataChange={handleDataChange} />
+          <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} />
         </div>
         <div>
           <div className='mt-36'>
-            <button 
+            <button id='info-hover'
               onClick={handleIndividualLeftClick}
-              className='rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
+              className='left rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
               </svg>
+              <div className="info-texto">Remover campos selecionados</div>
             </button>
           </div>
           <div>
-            <button
+            <button id='info-hover'
               onClick={handleIndividualRightClick}
-              className='rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
+              className='left rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
               </svg>
+              <div className="info-texto">Adicionar primeiro campo selecionado</div>
             </button>
           </div>
           <div>
-            <button
+            <button id='info-hover'
               onClick={handleAllLeftClick}
-              className='rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
+              className='left rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
               </svg>
+              <div className="info-texto">Remover todos os campos</div>
             </button>
           </div>
           <div>
-            <button
+            <button id='info-hover'
               onClick={handleAllRightClick}
-              className='rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
+              className='left rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
               </svg>
+              <div className="info-texto">Adicionar todos os campos selecionados</div>
             </button>
           </div>
         </div>
