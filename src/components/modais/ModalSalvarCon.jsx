@@ -1,10 +1,14 @@
-
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ModalModal from './ModalModal';
 
 function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
     const [inputValue, setInputValue] = useState('');
+
+    const [isConfirmModalSaveOpen, setIsModalModalSaveOpen] = useState(false);
+    const [isConfirmModalUpdateOpen, setIsModalModalUpdateOpen] = useState(false);
+    const [isConfirmModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [error, setError] = useState(null);
 
@@ -13,14 +17,77 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
         if (error) {
             setError(null); // Limpa a mensagem de erro ao digitar
         }
+
     };
 
+    const handleModalModalSave = () => {
+        setModalMessage('Consulta salva!');
+        setIsModalModalSaveOpen(true);
+    };
+
+    const handleModalModalUpdate = () => {
+        setModalMessage('Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
+        setIsModalModalUpdateOpen(true);
+    };
+
+    const handleModalModalAviso = () => {
+        setIsModalModalAvisoOpen(true);
+    }
+
     const saveQuery = async () => {
+
+        if (inputValue.length === 0 && sqlQuery.length === 0) {
+            setModalMessage('Faça uma consulta para salvar.');
+            handleModalModalAviso();
+            return;
+        } else if (inputValue.length > 0 && sqlQuery.length === 0) {
+            setModalMessage('Faça uma consulta para salvar.');
+            handleModalModalAviso();
+            return;
+        } else if(inputValue.length === 0 && sqlQuery.length > 0) {
+            setModalMessage('Digite um nome para salvar a consulta.');
+            handleModalModalAviso();
+            return;
+        }
+
         if (!inputValue.trim()) {
             setError("O nome não pode estar vazio."); // Define a mensagem de erro
             return;
         }
 
+
+        try {
+            const dataToSave = {
+                queryName: inputValue,
+                query: sqlQuery,
+            };
+    
+            const query = JSON.stringify(dataToSave);
+    
+            const response = await fetch('http://localhost:8080/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: query,
+            });
+    
+            console.log(query);
+    
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const result = await response.json();
+            console.log('Success:', result);
+            handleModalModalSave();
+        } catch (error) {
+            handleModalModalUpdate();
+        }
+    };    
+
+
+    const updateQuery = async () => {
         try {
             const dataToSave = {
                 queryName: inputValue,
@@ -29,8 +96,8 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
 
             const query = JSON.stringify(dataToSave);
 
-            const response = await fetch('http://localhost:8080/save', {
-                method: 'POST',
+            const response = await fetch('http://localhost:8080/update/saved-query', {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -42,7 +109,12 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
             }
 
             const result = await response.json();
+
+            console.log('Success:', result);
+            onClose(); // Fecha o modal após a atualização
+
             setIsSuccessModalOpen(true);
+
         } catch (error) {
             console.error('Error:', error);
         }
@@ -70,6 +142,41 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                     alignItems: 'center',
                 }}
             >
+
+                <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
+                    <h5 className="font-bold mx-2">Consultas Salvas</h5>
+                    <button
+                        className="font-bold mx-2"
+                        onClick={() => {onClose(); setInputValue('')}}
+                        style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                            border: '1px solid #ccc',
+                            borderRadius: '5px',
+                            width: '60px',
+                            height: '30px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            zIndex: 1001,
+                        }}
+                    >
+                        X
+                    </button>
+                </div>
+                <div style={contentContainerStyle}>
+                    <div className="w-11/12 bg-neutral-300 rounded-md p-4">
+                        <h5 className="font-bold mb-4">Nome da Consulta</h5>
+                        <input
+                            type="text"
+                            onChange={handleInputChange1}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                    </div>
+                </div>
+                {/* Botões de Cancelar e Salvar */}
+
                 <div
                     style={{
                         backgroundColor: '#fff',
@@ -80,119 +187,75 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                         height: '250px',
                     }}
                 >
-                    <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
-                        <h5 className="font-bold mx-2">Consultas Salvas</h5>
-                        <button
-                            className="font-bold mx-2"
-                            onClick={onClose}
-                            style={{
-                                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                                border: '1px solid #ccc',
-                                borderRadius: '5px',
-                                width: '60px',
-                                height: '30px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                fontSize: '16px',
-                                cursor: 'pointer',
-                                zIndex: 1001,
-                            }}
-                        >
-                            X
-                        </button>
-                    </div>
-                    <div style={{ 
-                        width: '500px', 
-                        height: '200px', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'center', 
-                        marginTop: '20px', 
-                        paddingBottom: '60px' 
-                    }}>
-                        <div className="w-11/12 bg-neutral-300 rounded-md p-4" style={{ position: 'relative' }}>
-                            <h5 className="font-bold mb-4">Nome da Consulta</h5>
-                            <input
-                                type="text"
-                                value={inputValue}
-                                onChange={handleInputChange1}
-                                className="w-full p-2 border border-gray-300 rounded-md"
-                                style={{
-                                    marginBottom: '10px',
-                                }}
-                            />
-                            {error && (
-                                <div style={{
-                                    marginTop: '15px',
-                                    position: 'absolute',
-                                    bottom: '-25px',
-                                    left: '10px',  // Ajusta a posição para a esquerda
-                                    width: '100%',
-                                    textAlign: 'left',  // Alinhamento à esquerda
-                                }}>
-                                    <p style={{ 
-                                        color: 'red',
-                                        margin: 0,
-                                        fontSize: '14px', 
-                                    }}>
-                                        {error}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'flex-end', 
-                        padding: '10px', 
-                        position: 'absolute', 
-                        bottom: '0', 
-                        right: '0', 
-                        boxSizing: 'border-box', 
-                        backgroundColor: '#fff' 
-                    }}>
-                        <button
-                            style={{
-                                backgroundColor: '#6c757d',
-                                border: 'none',
-                                borderRadius: '5px',
-                                color: '#fff',
-                                padding: '8px 20px',
-                                fontSize: '16px',
-                                cursor: 'pointer',
-                                marginRight: '10px',
-                            }}
-                            onClick={onClose}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            style={{
-                                backgroundColor: '#007bff',
-                                border: 'none',
-                                borderRadius: '5px',
-                                color: '#fff',
-                                padding: '8px 20px',
-                                fontSize: '16px',
-                                cursor: 'pointer',
-                            }}
-                            onClick={saveQuery}
-                        >
-                            Confirmar
-                        </button>
-                    </div>
+
+                    <button
+                        style={{
+                            backgroundColor: '#6c757d',
+                            border: 'none',
+                            borderRadius: '5px',
+                            color: '#fff',
+                            padding: '10px 20px',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            marginRight: '10px',
+                        }}
+                        onClick={() => {onClose(); setInputValue('')}}
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        style={{
+                            backgroundColor: '#28a745',
+                            border: 'none',
+                            color: '#fff',
+                            borderRadius: '5px',
+                            padding: '10px 20px',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                        }}
+                        onClick={saveQuery}
+                    >
+                        Salvar
+                    </button>
                 </div>
             </div>
-            <ModalModal
-                isOpen={isSuccessModalOpen}
-                onClose={handleCloseSuccessModal} // Chama a função que fecha ambos os modais
-                onConfirm={handleCloseSuccessModal} // Fecha ambos os modais ao confirmar
-                message="Consulta salva com sucesso!"
-                modalType="SUCESSO"
-                confirmText="OK"
+            <ModalModal modalType="SUCESSO"
+                isOpen={isConfirmModalSaveOpen}
+                onClose={() => setIsModalModalSaveOpen(false)}
+                onConfirm={onClose}
+                confirmText="Ok"
+                message={modalMessage}
+                title="Confirmação"
+                buttonColors={{
+                    ok: "bg-gray-600 hover:bg-red-700 focus:ring-gray-600",
+                }}
             />
+            <ModalModal modalType="ALERTA"
+                isOpen={isConfirmModalUpdateOpen}
+                onClose={() => setIsModalModalUpdateOpen(false)}
+                onConfirm={updateQuery}
+                confirmText="Substituir"
+                message={modalMessage}
+                title="Confirmação"
+                buttonColors={{
+                    ok: "bg-red-600 hover:bg-red-700 focus:ring-gray-600",
+                }}
+            />
+            <ModalModal modalType="ALERTA"
+                isOpen={isConfirmModalAvisoOpen}
+                onClose={() => setIsModalModalAvisoOpen(false)}
+                onConfirm={() => setIsModalModalAvisoOpen(false)}
+                confirmText="Ok"
+                message={modalMessage}
+                title="Aviso"
+                buttonColors={{
+                    ok: "bg-yellow-600 hover:bg-yellow-700 focus:ring-gray-600",
+                }}
+            />
+        </div>
+       
         </>
+
     );
 }
 
