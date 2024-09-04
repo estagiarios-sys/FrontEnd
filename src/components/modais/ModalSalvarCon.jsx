@@ -34,6 +34,16 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
         setIsModalModalAvisoOpen(true);
     }
 
+    const contentContainerStyle = {
+        width: '500px',
+        height: '200px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginTop: '20px',
+        paddingBottom: '60px',
+    };
+
     const saveQuery = async () => {
 
         if (inputValue.length === 0 && sqlQuery.length === 0) {
@@ -251,11 +261,8 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                 buttonColors={{
                     ok: "bg-yellow-600 hover:bg-yellow-700 focus:ring-gray-600",
                 }}
-            />
-        </div>
-       
+            />       
         </>
-
     );
 }
 
