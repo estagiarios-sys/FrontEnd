@@ -187,7 +187,7 @@ function ModalSalvos({ isOpen, onClose }) {
                             padding: '10px 20px',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            marginRight: '184px',
+                            marginRight: '183.5px',
                         }}
                         onClick={handleApagar}
                     >
