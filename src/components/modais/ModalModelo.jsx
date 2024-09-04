@@ -160,6 +160,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                     cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
                 }}
             />
+            
         </>
     );
 }

@@ -7,7 +7,7 @@ interface ModalProps {
     message?: string;
     modalType?: "APAGAR" | "ALERTA" | "DIGITAR_NOME" | "SUCESSO";
     onNameChange?: (value: string) => void;
-    confirmText?: string;  // Nova propriedade opcional para o texto do botão de confirmação
+    confirmText?: string;
 }
 
 const modalTypes: Record<string, { title: string; defaultConfirmText: string; cancelText: string | null; isAlert: boolean }> = {
@@ -37,14 +37,14 @@ const modalTypes: Record<string, { title: string; defaultConfirmText: string; ca
     },
 };
 
-const ModalModal: React.FC<ModalProps> = ({
+const Modal: React.FC<ModalProps> = ({
     isOpen = false,
     onClose = () => {},
     onConfirm = () => {},
     message = "",
     modalType = "ALERTA",
     onNameChange = () => {},
-    confirmText // Agora pode receber o texto do botão diretamente
+    confirmText
 }) => {
     const [inputValue, setInputValue] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
@@ -53,7 +53,6 @@ const ModalModal: React.FC<ModalProps> = ({
 
     const { title, defaultConfirmText, cancelText, isAlert } = modalTypes[modalType] || modalTypes.ALERTA;
 
-    // Usa o confirmText passado, ou o defaultConfirmText se confirmText não for fornecido
     const finalConfirmText = confirmText || defaultConfirmText;
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +67,9 @@ const ModalModal: React.FC<ModalProps> = ({
         }
         setError(null);
         onConfirm();
-        onClose();
+        if (modalType === "DIGITAR_NOME" || modalType === "APAGAR") {
+            onClose(); // Fecha o modal somente para os tipos DIGITAR_NOME e APAGAR
+        }
     };
 
     return (
@@ -84,7 +85,7 @@ const ModalModal: React.FC<ModalProps> = ({
                     </button>
                 </div>
                 <div className="mb-4">
-                    <p className="text-gray-700 font-bold">{message}</p>
+                    <p className="text-gray-700">{message}</p>
                     {modalType === "DIGITAR_NOME" && (
                         <>
                             <input
@@ -92,7 +93,7 @@ const ModalModal: React.FC<ModalProps> = ({
                                 value={inputValue}
                                 onChange={handleInputChange}
                                 placeholder="Digite um nome"
-                                className="w-full p-2 border border-black rounded"
+                                className="w-full p-2 border border-gray-300 rounded"
                             />
                             {error && (
                                 <p className="text-red-500 text-sm mt-2">{error}</p>
@@ -101,27 +102,26 @@ const ModalModal: React.FC<ModalProps> = ({
                     )}
                 </div>
                 <div className="flex justify-end space-x-2">
-                    {!isAlert && (
+                    {!isAlert ? (
                         <>
                             <button
-                                className="text-white font-semibold py-2 px-4 rounded-lg bg-green-600 hover:bg-green-700 focus:ring-green-500"
+                                className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 focus:ring-green-500"
                                 onClick={handleConfirm}
                             >
                                 {finalConfirmText}
                             </button>
                             {cancelText && (
                                 <button
-                                    className="text-white font-semibold py-2 px-4 rounded-lg bg-gray-500 hover:bg-gray-600 focus:ring-gray-500"
+                                    className="bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 focus:ring-gray-500"
                                     onClick={onClose}
                                 >
                                     {cancelText}
                                 </button>
                             )}
                         </>
-                    )}
-                    {isAlert && (
+                    ) : (
                         <button
-                            className="text-white font-semibold py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                            className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 focus:ring-red-500"
                             onClick={() => {
                                 onConfirm();
                                 onClose();
@@ -136,4 +136,4 @@ const ModalModal: React.FC<ModalProps> = ({
     );
 };
 
-export default ModalModal;
+export default Modal;
