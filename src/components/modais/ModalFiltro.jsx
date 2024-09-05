@@ -110,7 +110,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                 setModalMessage("Filtro salvo com sucesso");
                 setModalType("SUCESSO");
                 setModalOpen(true);
-                return `${campo.valor} ${campo.ordenacao} '${valor}'`;
+                return `${campo.value} ${campo.ordenacao} '${valor}'`;
             }
         });
 
@@ -290,20 +290,18 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     >
                         Salvar
                     </button>
+                </div>          
+                <div>
+                {modalOpen && (
+                    <ModalModal
+                    isOpen={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    onConfirm={handleConfirm}
+                    type={modalType}
+                    message={modalMessage}
+                    />
+                )}
                 </div>
-                                
-                    <div>
-                    <button onClick={handleSave}>Salvar</button>
-                    {modalOpen && (
-                        <ModalModal
-                        isOpen={modalOpen}
-                        onClose={() => setModalOpen(false)}
-                        onConfirm={handleConfirm}
-                        type={modalType}
-                        message={modalMessage}
-                        />
-                    )}
-                    </div>
             </div>
         </div>
     );
