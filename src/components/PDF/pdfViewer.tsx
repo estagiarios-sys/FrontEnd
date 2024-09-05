@@ -55,9 +55,9 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
           table: table[0].values.map((_, rowIndex) =>
             table.map(col => col.values[rowIndex])
           ),
-          infos: 'Informações Genéricas...',
+          infos: 'Informações Aqui',
           op_produto: 'op: 555555',
-          titulo: updatedSchemas?.titulo?.content || 'Título Aqui',
+          titulo: 'Título Aqui',
           qrcode: 'https://systextil.com.br/',
           barcodes: '1234567890',
         }
@@ -246,16 +246,12 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
                 left: 5
               }
             },
-            columnStyles: {
-              minWidth: 10,
-              maxWidth: 60,
-            }
+            columnStyles: {}
           },
         }
       ]
     };
   };
-
   return <div id="designer-container" style={{ width: '100%', height: '100hv' }}></div>;
 }
 
