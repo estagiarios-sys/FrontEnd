@@ -162,7 +162,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            zIndex: 1001,
                         }}
                     >
                         X

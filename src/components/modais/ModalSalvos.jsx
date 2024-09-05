@@ -144,7 +144,6 @@ function ModalSalvos({ isOpen, onClose }) {
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            zIndex: 1001,
                         }}
                     >
                         X
