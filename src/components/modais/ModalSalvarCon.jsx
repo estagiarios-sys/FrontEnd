@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ModalModal from './ModalModal';
 
 function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
@@ -9,7 +9,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
     const [isConfirmModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
 
-    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [error, setError] = useState(null);
 
     const handleInputChange1 = (event) => {
@@ -59,12 +58,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
             handleModalModalAviso();
             return;
         }
-
-        if (!inputValue.trim()) {
-            setError("O nome não pode estar vazio."); // Define a mensagem de erro
-            return;
-        }
-
 
         try {
             const dataToSave = {
@@ -117,42 +110,42 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-
+            
             const result = await response.json();
 
             console.log('Success:', result);
             onClose(); // Fecha o modal após a atualização
-
-            setIsSuccessModalOpen(true);
-
         } catch (error) {
             console.error('Error:', error);
         }
     };
 
-    const handleCloseSuccessModal = () => {
-        setIsSuccessModalOpen(false);
-        onClose(); // Fecha o modal principal
-    };
-
     if (!isOpen) return null;
 
     return (
-        <>
+        <div
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}
+        >
             <div
                 style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    backgroundColor: '#fff',
+                    padding: '0px',
+                    borderRadius: '5px',
+                    position: 'relative',
+                    width: '500px',
+                    height: '250px',
                 }}
             >
-
                 <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
                     <h5 className="font-bold mx-2">Consultas Salvas</h5>
                     <button
@@ -190,11 +183,13 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                 <div
                     style={{
                         backgroundColor: '#fff',
-                        padding: '0px',
-                        borderRadius: '5px',
-                        position: 'relative',
-                        width: '500px',
-                        height: '250px',
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        padding: '10px',
+                        position: 'absolute',
+                        bottom: '0',
+                        right: '0',
+                        boxSizing: 'border-box',
                     }}
                 >
 
@@ -262,7 +257,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                     ok: "bg-yellow-600 hover:bg-yellow-700 focus:ring-gray-600",
                 }}
             />       
-        </>
+        </div>
     );
 }
 
