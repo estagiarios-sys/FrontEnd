@@ -1,7 +1,9 @@
+@import './cores.css';
+
 .containerClick {
     display: flex;
-    align-items: center; /* Alinha os itens verticalmente ao centro */
-    position: relative; /* Necessário para o posicionamento absoluto do tooltip */
+    align-items: center;
+    position: relative;
 }
 
 #info-click {
@@ -9,12 +11,11 @@
     padding: 8px;
 }
 
-/* Tooltip padrão */
+/* texto padrão */
 #info-click .info-texto {
     visibility: hidden;
     width: auto;
     background-color: rgba(51, 51, 51, 0.8);
-    /* Cor preta com 80% de opacidade */
     color: #fff;
     text-align: center;
     border-radius: 5px;
@@ -30,7 +31,6 @@
 /* Balão para cima */
 #info-click.up .info-texto {
     bottom: 100%;
-    /* Ajustado para dar espaço à seta */
     left: 50%;
     transform: translateX(-50%);
 }
@@ -39,19 +39,16 @@
     content: '';
     position: absolute;
     top: 100%;
-    /* Posiciona a seta logo abaixo do balão */
     left: 50%;
     transform: translateX(-50%);
     border-width: 5px;
     border-style: solid;
     border-color: rgba(51, 51, 51, 0.8) transparent transparent transparent;
-    /* Triângulo com 80% de opacidade */
 }
 
 /* Balão para baixo */
 #info-click.down .info-texto {
     top: 100%;
-    /* Ajustado para dar espaço à seta */
     left: 50%;
     transform: translateX(-50%);
 }
@@ -60,19 +57,16 @@
     content: '';
     position: absolute;
     bottom: 100%;
-    /* Posiciona a seta logo acima do balão */
     left: 50%;
     transform: translateX(-50%);
     border-width: 5px;
     border-style: solid;
     border-color: transparent transparent rgba(51, 51, 51, 0.8) transparent;
-    /* Triângulo com 80% de opacidade */
 }
 
 /* Balão para a esquerda */
 #info-click.left .info-texto {
     right: 100%;
-    /* Ajustado para dar espaço à seta */
     top: 50%;
     transform: translateY(-50%);
 }
@@ -82,18 +76,15 @@
     position: absolute;
     top: 50%;
     left: 100%;
-    /* Posiciona a seta à direita do balão */
     transform: translateY(-50%) rotate(180deg);
     border-width: 5px;
     border-style: solid;
     border-color: transparent rgba(51, 51, 51, 0.8) transparent transparent;
-    /* Triângulo com 80% de opacidade */
 }
 
 /* Balão para a direita */
 #info-click.right .info-texto {
     left: 100%;
-    /* Ajustado para dar espaço à seta */
     top: 50%;
     transform: translateY(-50%);
 }
@@ -103,12 +94,10 @@
     position: absolute;
     top: 50%;
     right: 100%;
-    /* Posiciona a seta à esquerda do balão */
     transform: translateY(-50%) rotate(180deg);
     border-width: 5px;
     border-style: solid;
     border-color: transparent transparent transparent rgba(51, 51, 51, 0.8);
-    /* Triângulo com 80% de opacidade */
 }
 
 /* Mostrar balão ao clicar */
@@ -117,7 +106,7 @@
     opacity: 1;
 }
 
-/* Adiciona um estilo para o botão do ícone */
+/* Adiciona um estilo para o button do ícone */
 #info-click-button {
     background: none;
     border: none;
@@ -129,21 +118,16 @@
     justify-content: center;
 }
 
-:root {
-    --custom-blue-dark: #0E8F98;
-    --custom-blue: #0A7F8E; /* Substitua com a cor desejada para o estado ativo */
-}
-
 .icon-info-click {
-    width: 1.25rem; /* w-5 */
-    height: 1.25rem; /* h-5 */
-    color: #07C6D4; /* Cor padrão */
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--azul);
 }
 
 .icon-info-click:hover {
-    color: var(--custom-blue-dark); /* Cor ao passar o mouse */
+    color: var(--azul-escuro);
 }
 
 .icon-info-click:active {
-    color: var(--custom-blue); /* Cor ao clicar */
+    color: var(--azul);
 }

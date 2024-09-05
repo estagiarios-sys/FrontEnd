@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import TabelaCampos from './components/tabelas_campos';
 import CamposSelecionados from './components/CamposSelecionados';
 import GerarRelatorio from './components/GerarRelatorio';
+import logoSystextil from './imagens/logo-systextil.svg';
 
 function Main() {
   const [selectedCampos, setSelectedCampos] = useState([]);
   const [availableCampos, setAvailableCampos] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
-  const [checkedCampos, setCheckedCampos] = useState([]); 
+  const [checkedCampos, setCheckedCampos] = useState([]);
 
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
@@ -35,12 +36,12 @@ function Main() {
     const camposParaRemover = selectedCampos.filter(campo => checkedCampos.includes(campo));
     const camposRestantes = selectedCampos.filter(campo => !checkedCampos.includes(campo));
     const orderByString = localStorage.getItem('orderByString') || '';
-    
+
     if (camposParaRemover.some(campo => orderByString.includes(campo))) {
       localStorage.setItem('orderByString', '');
       console.log('Removido o orderByString do localStorage, no left click');
     }
-    
+
     setAvailableCampos([...availableCampos, ...camposParaRemover]);
     setSelectedCampos(camposRestantes);
     setCheckedCampos([]);
@@ -93,74 +94,84 @@ function Main() {
   };
 
   return (
-    <div className='flex flex-col justify-center'>
-      <div className="flex justify-around items-start">
-        <div>
-          <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-          <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} />
-        </div>
-        <div>
-          <div className='mt-36'>
-            <button id='info-hover'
-              onClick={handleIndividualLeftClick}
-              className='left rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-              </svg>
-              <div className="info-texto">Remover campos selecionados</div>
-            </button>
+    <div className="main-container">
+      <div className='content flex flex-col justify-center'>
+        <div className="flex justify-around items-start">
+          <div>
+            <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
+            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} />
           </div>
           <div>
-            <button id='info-hover'
-              onClick={handleIndividualRightClick}
-              className='left rounded-full bg-custom-blue hover:bg-custom-blue-dark active:bg-custom-blue w-10 h-10 my-3 justify-center items-center flex'
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-              </svg>
-              <div className="info-texto">Adicionar primeiro campo selecionado</div>
-            </button>
+            <div className='mt-36'>
+              <button id='info-hover'
+                onClick={handleIndividualLeftClick}
+                className='left rounded-full bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul w-10 h-10 my-3 justify-center items-center flex'
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <div className="info-texto">Remover campos selecionados</div>
+              </button>
+            </div>
+            <div>
+              <button id='info-hover'
+                onClick={handleIndividualRightClick}
+                className='left rounded-full bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul w-10 h-10 my-3 justify-center items-center flex'
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+                <div className="info-texto">Adicionar primeiro campo selecionado</div>
+              </button>
+            </div>
+            <div>
+              <button id='info-hover'
+                onClick={handleAllLeftClick}
+                className='left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex'
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <div className="info-texto">Remover todos os campos</div>
+              </button>
+            </div>
+            <div>
+              <button id='info-hover'
+                onClick={handleAllRightClick}
+                className='left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex'
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+                <div className="info-texto">Adicionar todos os campos selecionados</div>
+              </button>
+            </div>
           </div>
           <div>
-            <button id='info-hover'
-              onClick={handleAllLeftClick}
-              className='left rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-              </svg>
-              <div className="info-texto">Remover todos os campos</div>
-            </button>
-          </div>
-          <div>
-            <button id='info-hover'
-              onClick={handleAllRightClick}
-              className='left rounded-full bg-custom-red hover:bg-custom-red-dark active:bg-custom-red w-10 h-10 my-3 justify-center items-center flex'
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-              </svg>
-              <div className="info-texto">Adicionar todos os campos selecionados</div>
-            </button>
+            <h1 className="font-bold text-3xl mt-4 mb-6 mr-10">Campos Selecionados</h1>
+            <CamposSelecionados
+              selectedCampos={selectedCampos}
+              onDragEnd={onDragEnd}
+              checkedCampos={checkedCampos}
+              handleCheckboxChange={handleCheckboxChange}
+              onSelectedCamposChange={handleSelectedCamposChange}
+            />
           </div>
         </div>
-        <div>
-          <h1 className="font-bold text-3xl mt-4 mb-6 mr-10">Campos Selecionados</h1>
-          <CamposSelecionados 
-            selectedCampos={selectedCampos}
-            onDragEnd={onDragEnd}
-            checkedCampos={checkedCampos}
-            handleCheckboxChange={handleCheckboxChange}
-            onSelectedCamposChange={handleSelectedCamposChange}
-          />
-        </div>
+        <GerarRelatorio
+          selectedColumns={selectedCampos}
+          selectTable={selectedTabela}
+          selectedRelacionada={selectedRelacionada}
+        />
+        <footer className="footer">
+          <span className="copyright-text">©  Copyright 2024 - Systextil - Todos os direitos reservados</span>
+          <div className="text-and-logo">
+            <img src={logoSystextil} alt="Descrição da Imagem" />
+            <span className="separator">|</span>
+            <span>Simplificando a cadeia têxtil!</span>
+          </div>
+        </footer>
       </div>
-      <GerarRelatorio 
-        selectedColumns={selectedCampos} 
-        selectTable={selectedTabela}
-        selectedRelacionada={selectedRelacionada} 
-      />
     </div>
   );
 }

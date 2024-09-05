@@ -7,21 +7,14 @@ module.exports = {
     extend: {
       colors: {
         // Vermelho
-        'custom-red': '#FF0B34',
-        'custom-red-light': '#FF4D6D',
-        'custom-red-lighter': '#FF8A8A',
-        'custom-red-dark': '#9C152C',
-
-        // Rosa
-        'custom-pink': '#AE1495',
-        'custom-pink-light': '#C94FB2',
-        'custom-pink-lighter': '#E084CF',
+        'custom-vermelho': '#ED1846',
+        'custom-vermelho-claro': '#F03A5F',
+        'custom-vermelho-escuro': '#B11236',
 
         // Azul
-        'custom-blue': '#07C6D4',
-        'custom-blue-light': '#47D7E0',
-        'custom-blue-lighter': '#87E6EB',
-        'custom-blue-dark': '#0E8F98',
+        'custom-azul': '#00AAB5',
+        'custom-azul-claro': ' #00D1E0',
+        'custom-azul-escuro': '#0A7F8E',
       },
       keyframes: {
         fadeIn: {

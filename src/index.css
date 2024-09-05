@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import './styles/main.css';
+@import './styles/footer.css';
+@import './styles/infoClick.css';
+@import './styles/infoHover.css';
+@import './styles/lista.css';

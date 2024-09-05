@@ -43,7 +43,7 @@ function CamposSelecionados({
       ...prevCustomNames,
       [campo]: value,
     }));
-  
+
     const updatedCampos = selectedCampos.map((selectedCampo) => {
 
       const campoSemApelidoComparacao = selectedCampo.replace(/\s+as\s+.*$/, '');
@@ -55,7 +55,7 @@ function CamposSelecionados({
         return selectedCampo;
       }
     });
-  
+
     onSelectedCamposChange(updatedCampos);
   };
 
@@ -68,16 +68,14 @@ function CamposSelecionados({
           <table
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="min-w-full bg-gray-100"
+            className="w-[596px] min-w-full border-2 border-custom-azul-escuro"
           >
             <thead>
-              <tr className="bg-gray-200">
-                {showCheckboxColumn && (
-                  <th className="py-2 px-4 border-b border-gray-300 text-sm">"Nada"</th>
-                )}
-                <th className="py-2 px-4 border-b border-gray-300 text-sm">Campo</th>
-                <th className="py-2 px-4 border-b border-gray-300 text-sm">Apelido</th>
-                <th className="py-2 px-4 border-b border-gray-300 text-sm">Ordem</th>
+              <tr className="bg-custom-azul-escuro text-white ">
+                <th className="py-2 px-4 text-sm w-[57px]"></th>
+                <th className="py-2 px-4 text-sm w-[146px]">Campo</th>
+                <th className="py-2 px-4 text-sm w-[216px]">Apelido</th>
+                <th className="py-2 px-4 text-sm w-[177px]">Ordem</th>
               </tr>
             </thead>
             <tbody>
@@ -89,20 +87,20 @@ function CamposSelecionados({
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        className="bg-white hover:bg-gray-50"
+                        className="bg-white hover:bg-gray-70"
                       >
                         {showCheckboxColumn && (
-                          <td className="py-2 px-4 border-b border-gray-300 text-sm">
+                          <td className="py-2 px-4 border-b border-custom-azul text-sm">
                             <input
                               type="checkbox"
                               checked={checkedCampos.includes(campo)}
                               onChange={() => handleCheckboxChange(campo)}
-                              className="form-checkbox h-5 w-5 text-red-600"
+                              className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
                             />
                           </td>
                         )}
-                        <td className="py-2 px-4 border-b border-gray-300 text-sm">{campo}</td>
-                        <td className="py-2 px-4 border-b border-gray-300 text-sm">
+                        <td className="py-2 px-4 border-b border-custom-azul text-sm">{campo}</td>
+                        <td className="py-2 px-4 border-b border-custom-azul text-sm">
                           <input
                             type="text"
                             onBlur={(e) => handleCustomNameChange(e, campo)}
@@ -111,7 +109,7 @@ function CamposSelecionados({
                           />
                         </td>
                         <td
-                          className="py-2 px-4 border-b border-gray-300 text-sm"
+                          className="py-2 px-4 border-b border-custom-azul text-sm"
                           onClick={() => handleTdClick(campo)}
                         >
                           <CustomSelect
@@ -126,6 +124,7 @@ function CamposSelecionados({
                             placeholder="Selecione..."
                             className="basic-single"
                             classNamePrefix="select"
+                            width="8rem"
                             isClearable
                           />
                         </td>
@@ -135,7 +134,7 @@ function CamposSelecionados({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={showCheckboxColumn ? 3 : 2} className="py-2 px-4 border-b border-gray-300 text-sm text-gray-500">
+                  <td colSpan={showCheckboxColumn ? 3 : 2} className="py-2 px-4 border-b border-gray-300 text-sm text-gray-500 whitespace-nowrap">
                     Nenhum campo selecionado
                   </td>
                 </tr>
