@@ -3,11 +3,12 @@ import Select from 'react-select';
 import ModalModal from './ModalModal';
 
 function ModalSalvos({ isOpen, onClose }) {
-    const [selectedCampos, setSelectedCampos] = useState([]);
+    const [selectedCampo, setSelectedCampo] = useState(null); // Agora armazena apenas um valor
     const [campoOptions, setCampoOptions] = useState([]);
     const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
+    const [isConfirmModalOkOpen, setIsModalModalOkOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
-    const [excludeCampo, setExcludeCampo] = useState([]);
+    const [excludeCampo, setExcludeCampo] = useState(null); // Um único valor
 
     useEffect(() => {
         async function fetchSavedQueries() {
@@ -35,37 +36,38 @@ function ModalSalvos({ isOpen, onClose }) {
 
         fetchSavedQueries();
     }, []);
-    
+
     async function deleteSavedQuery() {
         try {
-            const response = await fetch(`http://localhost:8080/delete/${excludeCampo[0]}`, {
+            const response = await fetch(`http://localhost:8080/delete/${excludeCampo}`, {
                 method: 'DELETE',
             });
 
             if (!response.ok) {
                 throw new Error(`Erro na requisição: ${response.statusText}`);
             }
-    
+
             console.log('Consulta excluída com sucesso');
-            console.log(excludeCampo[0]);
-    
+            console.log(excludeCampo);
+
             // Atualiza as opções removendo o item excluído
-            setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo[0]));
-            setSelectedCampos([]); // Limpa a seleção
-    
+            setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo));
+            setSelectedCampo(null); // Limpa a seleção
+
         } catch (error) {
             console.error('Erro ao excluir a consulta salva:', error);
         } finally {
             setIsModalModalOpen(false); // Fecha o modal de confirmação
         }
     }
-    
+
     const handleApagar = () => {
-        if (selectedCampos.length > 0) {
-            setModalMessage('Você tem certeza de que deseja apagar este item?');
+        if (selectedCampo) {
+            setModalMessage('Você tem certeza de que deseja apagar essa consulta?');
             setIsModalModalOpen(true);
         } else {
-            alert('Selecione uma consulta para apagar.');
+            setModalMessage('Selecione uma consulta para apagar.');
+            setIsModalModalOkOpen(true);
         }
     };
 
@@ -82,9 +84,11 @@ function ModalSalvos({ isOpen, onClose }) {
     }, [isOpen]);
 
     async function handleCarregar() {
-        localStorage.setItem('loadedQuery', selectedCampos[0]);
+        localStorage.setItem('loadedQuery', selectedCampo.value);
         const test = localStorage.getItem('loadedQuery');
         console.log(test);
+        setModalMessage('Consulta carregada!');
+        setIsModalModalOkOpen(true);
     }
 
     if (!isOpen) return null;
@@ -128,7 +132,7 @@ function ModalSalvos({ isOpen, onClose }) {
                     <h5 className="font-bold mx-2">Consultas Salvas</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={onClose}
+                        onClick={() => {onClose(); setSelectedCampo('')}}
                         style={{
                             backgroundColor: 'rgba(255, 255, 255, 0.5)',
                             border: '1px solid #ccc',
@@ -140,7 +144,6 @@ function ModalSalvos({ isOpen, onClose }) {
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            zIndex: 1001,
                         }}
                     >
                         X
@@ -150,22 +153,23 @@ function ModalSalvos({ isOpen, onClose }) {
                     <div className="w-11/12 bg-neutral-300 rounded-md p-4">
                         <h5 className="font-bold mb-4">Nome do Relatório</h5>
                         <Select
-                            isMulti
                             name="campos"
                             options={campoOptions}
-                            className="basic-multi-select w-full"
+                            className="basic-select w-full"
                             classNamePrefix="Select"
-                            placeholder="Selecione os Campos..."
-                            onChange={(selectedOptions) => {
-                                setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
-                                setExcludeCampo(selectedOptions ? selectedOptions.map(option => option.label) : []);
+                            placeholder="Selecione o Campo..."
+                            onChange={(selectedOption) => {
+                                setSelectedCampo(selectedOption); // Armazena o objeto selecionado
+                                setExcludeCampo(selectedOption ? selectedOption.label : null); // Armazena o label para exclusão
                             }}
-                            value={campoOptions.filter(option => selectedCampos.includes(option.value))}
+                            value={selectedCampo} // Usa o objeto selecionado
+                            getOptionLabel={(option) => option.label} // Define como mostrar o label
+                            getOptionValue={(option) => option.value} // Define como obter o valor
                         />
                     </div>
                 </div>
                 {/* Botões de Excluir, Cancelar e Salvar */}
-                
+
                 <div
                     style={{
                         display: 'flex',
@@ -204,7 +208,7 @@ function ModalSalvos({ isOpen, onClose }) {
                             cursor: 'pointer',
                             marginRight: '10px',
                         }}
-                        onClick={onClose}
+                        onClick={() => {onClose(); setSelectedCampo('')}}
                     >
                         Cancelar
                     </button>
@@ -236,8 +240,20 @@ function ModalSalvos({ isOpen, onClose }) {
                     cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
                 }}
             />
+            <ModalModal
+                isOpen={isConfirmModalOkOpen}
+                onClose={() => setIsModalModalOkOpen(false)}
+                onConfirm={() => setIsModalModalOkOpen(false)}
+                confirmText="Ok"
+                message={modalMessage}
+                title="Aviso"
+                buttonColors={{
+                    confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
+                    cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
+                }}
+            />
         </div>
-        
+
     );
 }
 
