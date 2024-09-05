@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import Select from 'react-select';
 
-const CustomSelect = forwardRef((props, ref) => {
+const CustomSelect = forwardRef(({ width = "10rem", ...props }, ref) => {
     const selectRef = useRef(null);
 
     // Permite que o componente pai chame métodos do Select
@@ -14,6 +14,14 @@ const CustomSelect = forwardRef((props, ref) => {
         },
     }));
 
+    const customStyles = {
+        control: (provided) => ({
+            ...provided,
+            width: width + ' !important', // Força a largura com !important
+            minWidth: '0 !important', // Garante que não haja largura mínima definida
+        }),
+    };
+
     return (
         <Select
             {...props}
@@ -23,6 +31,8 @@ const CustomSelect = forwardRef((props, ref) => {
                     props.innerRef(el);
                 }
             }}
+            classNamePrefix="Select"
+            styles={customStyles}
         />
     );
 });

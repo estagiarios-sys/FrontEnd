@@ -1,43 +1,44 @@
-/* lista.css */
-.Select__control {
-    width: 15rem; /* Ajuste o tamanho conforme necessário */
+@import './cores.css';
+
+div.Select__control {
+    
     background-color: white;
-    border-color: #0A7F8E;
+    border-color: var(--azul);
     box-shadow: none;
 }
 
-.Select__control--is-focused {
+div.Select__control--is-focused {
     background-color: #E0F4F4; /* Cor de fundo quando em foco */
-    border-color: #0A7F8E; /* Cor da borda quando em foco */
-    box-shadow: 0 0 0 1px #0A7F8E; /* Sombra da borda quando em foco */
+    border-color: var(--azul); /* Cor da borda quando em foco */
+    box-shadow: 0 0 0 1px var(--azul); /* Sombra da borda quando em foco */
 }
 
-.Select__menu {
+div.Select__menu {
     background-color: white;
 }
 
-.Select__option {
+div.Select__option {
     background-color: white;
     color: black;
     border: 1px solid transparent; 
 }
 
-.Select__option--is-selected {
-    background-color: #0E8F98; /* Cor de fundo para a opção selecionada */
+div.Select__option--is-selected {
+    background-color: var(--azul-escuro); /* Cor de fundo para a opção selecionada */
     color: white;
 }
 
-.Select__option:hover {
+div.Select__option:hover {
     background-color: #E0F4F4; /* Cor de fundo ao passar o mouse */
-    border-color: #0A7F8E;
+    border-color: var(--azul);;
 }
 
-.Select__placeholder {
+div.Select__placeholder {
     color: gray;
 }
 
-.Select__multi-value {
-    background-color: #0E8F98; /* Cor de fundo das opções selecionadas */
+div.Select__multi-value {
+    background-color: var(--azul-escuro); /* Cor de fundo das opções selecionadas */
     color: white; /* Cor do texto das opções selecionadas */
     border-radius: 16px; /* Arredondamento das bordas */
     padding: 2px 8px; /* Ajuste o espaçamento interno conforme necessário */
@@ -45,20 +46,20 @@
     align-items: center; /* Alinha verticalmente o conteúdo */
 }
 
-.Select__multi-value__label {
+div.Select__multi-value__label {
     color: white; /* Cor do texto dentro das opções selecionadas */
 }
 
-.Select__multi-value__remove {
+div.Select__multi-value__remove {
     color: white; /* Cor do ícone de remover (x) */
     cursor: pointer; /* Alterar o cursor para indicar interatividade */
-    background-color: #0E8F98; /* Cor de fundo do ícone de remover */
+    background-color: var(--azul-escuro); /* Cor de fundo do ícone de remover */
     border-radius: 20%; /* Faz com que o ícone de remover seja circular */
     padding: 2px 6px; /* Ajuste o espaçamento interno conforme necessário */
     margin-left: 4px; /* Espaçamento entre o texto e o ícone de remover */
 }
 
-.Select__multi-value__remove:hover {
-    background-color: #0A7F8E; /* Cor de fundo do ícone de remover ao passar o mouse */
+div.Select__multi-value__remove:hover {
+    background-color: var(--azul); /* Cor de fundo do ícone de remover ao passar o mouse */
     color: white; /* Cor do ícone de remover ao passar o mouse */
 }

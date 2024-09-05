@@ -16,7 +16,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
     const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false); // Modal para exibir o filtros de selects
     const [isModalPdfOpenView, setIsModalPdfOpenView] = useState(false); // Modal para exibir o PDF_View
     const [isModalExpoOpen, setIsModalExpoOpen] = useState(false); // Modal para exibir o Exportar e suas opções
-    const [relationshipData, setRelationshipData] = useState([]); 
+    const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [condicoesString, setCondicoesString] = useState('');
@@ -142,16 +142,16 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 joins: [], // Adicione os joins conforme necessário
 
             };
-    
+
             if (selectedRelacionada && relationshipData.length > 0) {
                 const tabelasSelecionadas = [selectTable, ...selectedRelacionada];
-    
+
                 tabelasSelecionadas.forEach((tabelaPrincipal) => {
                     selectedRelacionada.forEach((tabelaRelacionada) => {
                         if (tabelaPrincipal !== tabelaRelacionada) {
                             const tablePair = `${tabelaPrincipal} e ${tabelaRelacionada}`;
                             const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
-    
+
                             if (relationship) {
                                 console.log('Relacionamento encontrado:', relationship);
                                 jsonRequest.joins.push(relationship.join);
@@ -162,12 +162,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     });
                 });
             }
-    
+
             const url = 'http://localhost:8080/find';
-    
+
             console.log('Enviando requisição para:', url);
             console.log('JSON Request:', JSON.stringify(jsonRequest));
-    
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -175,22 +175,22 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 },
                 body: JSON.stringify(jsonRequest),
             });
-    
+
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
-    
+
             const responseData = await response.json();
-    
+
             const [sql, colunasAtualizada, data] = responseData;
-    
+
             console.log('SQL:', sql);
-    
+
             localStorage.setItem('SQLGeradoFinal', sql);
-    
+
             setSqlQuery(sql);
             setColumns(colunasAtualizada);
-    
+
             return colunasAtualizada.map((column, index) => ({
                 column,
                 values: data.map(row => row[index]),
@@ -199,7 +199,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             console.error('Erro ao buscar os dados:', error);
             return [];
         }
-    };    
+    };
 
     const fetchLoadQuery = async () => {
         try {
@@ -274,13 +274,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     <h1 className="font-bold text-3xl">Ações</h1>
                     <div className="flex mt-3">
                         <button
-                            className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
+                            className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleGenerateReport}
                         >
                             Gerar Relatório
                         </button>
                         <button
-                            className="p-2 px-5 border-2 text-white bg-custom-blue hover:bg-custom-pink-light active:bg-custom-pink-lighter rounded-sm mr-2"
+                            className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleModalSalvarCon}
                         >
                             Salvar Consulta
@@ -310,16 +310,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={handleModalModelo} className="flex flex-col justify-center items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                </svg>
-                                <label htmlFor="mais">Modelos</label>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
                             <button onClick={handleModalFiltro} className="flex flex-col justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" name="mais" />
@@ -336,6 +326,16 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                                     <path strokeLinecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
                                 <label htmlFor="mais">Editar</label>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="mx-2">
+                        <div className="flex flex-col justify-center items-center">
+                            <button onClick={handleModalModelo} className="flex flex-col justify-center items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                                <label htmlFor="mais">Modelos</label>
                             </button>
                         </div>
                     </div>
@@ -364,7 +364,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
                 <table className="w-full text-sm">
                     {tableData.length > 0 && (
-                        <thead className="bg-teal-600 text-white">
+                        <thead className="bg-custom-azul-escuro text-white">
                             <tr>
                                 {columns.map((column, index) => (
                                     <th key={index} className="p-2 border-b text-center">{column}</th>

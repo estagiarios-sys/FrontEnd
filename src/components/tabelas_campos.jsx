@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Select from 'react-select';
-import './genericos/infoClick.css';
-import './genericos/infoHover.css';
-import './genericos/lista.css';
 
 function TabelaCampos({ onDataChange, handleAllLeftClick }) {
   const [jsonData, setJsonData] = useState({});
@@ -165,7 +162,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
           <Select
             name="tabelas"
             options={tabelaOptions}
-            className="basic-single w-60"
+            className="basic-single w-96"
             classNamePrefix="Select"
             placeholder="Selecione uma tabela..."
             onChange={(selectedOption) => {
@@ -176,7 +173,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
             }}
             value={tabelaOptions.find(option => option.value === selectedTabela)}
           />
-          <div id='info-click' className={mostrarInfo1 ? 'right show' : 'right'} ref={dicaRef}>
+          <div id='info-click' className={mostrarInfo1 ? 'up show' : 'up'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo1(prev => !prev)} ref={buttonRef}>
               <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
@@ -188,12 +185,12 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
       </div>
       <div className="mt-5">
         <label htmlFor="relacionadas">Relacionadas</label>
-        <div className="containerHover">
+        <div className="containerClick">
           <Select
             isMulti
             name="relacionadas"
             options={relacionadaOptions}
-            className="basic-single w-60"
+            className="basic-single w-96"
             classNamePrefix="Select"
             placeholder="Selecione uma relação..."
             onChange={(selectedOptions) => {
@@ -203,7 +200,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
             value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))}
             closeMenuOnSelect={false}
           />
-          <div id='info-click' className={mostrarInfo2 ? 'right show' : 'right'} ref={dicaRef}>
+          <div id='info-click' className={mostrarInfo2 ? 'up show' : 'up'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo2(prev => !prev)} ref={buttonRef}>
               <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
@@ -220,7 +217,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
             isMulti
             name="campos"
             options={campoOptions}
-            className="basic-multi-select w-60"
+            className="basic-multi-select w-96"
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."
             onChange={handleChange}
@@ -229,7 +226,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
             onMenuOpen={() => setMenuIsOpen(true)} // Abre o menu
             onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
           />
-          <div id='info-click' className={mostrarInfo3? 'right show' : 'right'} ref={dicaRef}>
+          <div id='info-click' className={mostrarInfo3? 'up show' : 'up'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo3(prev => !prev)} ref={buttonRef}>
               <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
