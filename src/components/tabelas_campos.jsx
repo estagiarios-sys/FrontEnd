@@ -70,25 +70,27 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
   }));
 
   const campoOptions = useMemo(() => {
-    const options = [];
+    const options = new Map();
   
     if (selectedTabela && jsonData[selectedTabela]) {
       jsonData[selectedTabela].forEach(campo => {
-        options.push({ value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
+        options.set(`${selectedTabela}.${campo}`, { value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
       });
     }
   
-    if (selectedRelacionada && selectedRelacionada.length > 0 && selectedTabela) {
+    // Adiciona campos das tabelas selecionadas como relacionadas
+    if (selectedRelacionada.length > 0) {
       selectedRelacionada.forEach(relacionadaTabela => {
+        relacionadaTabela = relacionadaTabela.split(' e ')[1];
         relationships
-          .filter(rel => rel.tabelas.includes(selectedTabela) && rel.tabelas.includes(relacionadaTabela))
+          .filter(rel => rel.tabelas.includes(relacionadaTabela))
           .forEach(rel => {
-            const tabelas = rel.tabelas.split(' e '); 
-  
+            const tabelas = rel.tabelas.split(' e ');
+
             tabelas.forEach(table => {
-              if (table !== selectedTabela && jsonData[table]) {
+              if (table !== selectedTabela && table === relacionadaTabela && jsonData[table]) {
                 jsonData[table].forEach(campo => {
-                  options.push({ value: `${table}.${campo}`, label: `${table} - ${campo}` });
+                  options.set(`${table}.${campo}`, { value: `${table}.${campo}`, label: `${table} - ${campo}` });
                 });
               }
             });
@@ -96,27 +98,50 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
       });
     }
   
-    return [...new Set(options.map(option => option.value))].map(value => {
-      const [table, campo] = value.split('.');
-      return { value, label: `${table} - ${campo}` };
-    });
+    return Array.from(options.values());
   }, [selectedTabela, selectedRelacionada, jsonData, relationships]);
 
   const relacionadaOptions = useMemo(() => {
-    return selectedTabela
-      ? [...new Set(
-        relationships
-          .filter(rel => rel.tabelas.includes(selectedTabela))
-          .flatMap(relacionada =>
-            relacionada.tabelas.split(' e ')
-              .filter(tabela => tabela !== selectedTabela)
-          )
-      )].map(value => ({
-        value,
-        label: value,
-      }))
-      : [];
-  }, [selectedTabela, relationships]);
+    if (!selectedTabela) return [];
+  
+    const todasRelacionadas = new Set();
+  
+    relationships
+      .filter(rel => rel.tabelas.includes(selectedTabela))
+      .flatMap(rel => rel.tabelas.split(' e '))
+      .forEach(tabela => {
+        if (tabela !== selectedTabela) {
+          const relacionamento = [selectedTabela, ' e ', tabela].join('');
+          const relacionamentoInverso = [tabela, ' e ', selectedTabela].join('');
+  
+          if (!todasRelacionadas.has(relacionamentoInverso) && !todasRelacionadas.has(relacionamento)) {
+            todasRelacionadas.add(relacionamento);
+          }
+        }
+      });
+  
+    selectedRelacionada.forEach(relacionadaTabela => {
+      relacionadaTabela = relacionadaTabela.split(' e ')[1];
+      relationships
+        .filter(rel => rel.tabelas.includes(relacionadaTabela))
+        .flatMap(rel => rel.tabelas.split(' e '))
+        .forEach(tabela => {
+          if (tabela !== relacionadaTabela && tabela !== selectedTabela) {
+            const relacionamento = [relacionadaTabela, ' e ', tabela].join('');
+            const relacionamentoInverso = [tabela, ' e ', relacionadaTabela].join('');
+  
+            if (!todasRelacionadas.has(relacionamentoInverso) && !todasRelacionadas.has(relacionamento)) {
+              todasRelacionadas.add(relacionamento);
+            }
+          }
+        });
+    });
+  
+    return Array.from(todasRelacionadas).map(value => ({
+      value,
+      label: value,
+    }));
+  }, [selectedTabela, selectedRelacionada, relationships]);  
 
   useEffect(() => {
     const handleClearSelectedCampos = () => {
