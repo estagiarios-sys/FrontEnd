@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Select, { components } from 'react-select';
+import ModalModal from './ModalModal';
 
 const ordenacaoOptions = [
     { value: '>', label: 'Maior' },
@@ -19,6 +20,9 @@ const CustomSingleValue = (props) => (
 function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     const [selectedCampos, setSelectedCampos] = useState([]);
     const [addedCampos, setAddedCampos] = useState([]);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState("");
+    const [modalType, setModalType] = useState("ALERTA");
     
     const campoOptions = columns.map(col => ({
         value: col,
@@ -73,6 +77,16 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
             e.target.blur();
         }
     };
+    const handleConfirm = () => {
+        handleSave();
+        if (modalType === "SUCESSO") {
+            onClose(); // Fecha o modal de filtro
+            setModalOpen(false); // Fecha o modal de confirmação
+        } else if (modalType === "ALERTA") {
+            setModalOpen(true); // Garante que o modal de alerta permanece aberto
+        }
+    };
+
 
     const handleOrdenacaoChange = (index, selectedOption) => {
         const updatedCampos = [...addedCampos];
@@ -88,11 +102,15 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
             console.log(campo);
 
             if (campo.valor === undefined || campo.ordenacao === undefined || campo.valor === '' || campo.ordenacao === '') {
-                alert('Preencha todos os campos');
+                setModalMessage("Preencha todos os campos");
+                setModalType("ALERTA");
+                setModalOpen(true);
                 return;
             }else{
-                alert('Filtro salvo com sucesso');
-                return `${campo.value} ${ordenacao} '${valor}'`;
+                setModalMessage("Filtro salvo com sucesso");
+                setModalType("SUCESSO");
+                setModalOpen(true);
+                return `${campo.valor} ${campo.ordenacao} '${valor}'`;
             }
         });
 
@@ -273,6 +291,19 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                         Salvar
                     </button>
                 </div>
+                                
+                    <div>
+                    <button onClick={handleSave}>Salvar</button>
+                    {modalOpen && (
+                        <ModalModal
+                        isOpen={modalOpen}
+                        onClose={() => setModalOpen(false)}
+                        onConfirm={handleConfirm}
+                        type={modalType}
+                        message={modalMessage}
+                        />
+                    )}
+                    </div>
             </div>
         </div>
     );
