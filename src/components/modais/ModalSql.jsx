@@ -66,7 +66,6 @@ function ModalSql({ isOpen, onClose }) {
                             justifyContent: 'center',
                             alignItems: 'center',
                             fontSize: '16px',
-                            zIndex: 1001,
                             transition: 'background-color 0.3s ease',
                             backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                         }}
