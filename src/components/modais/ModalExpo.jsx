@@ -5,6 +5,9 @@ import ModalModal from "./ModalModal";
 function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
     const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
+    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
+    const [isHoveredButtonPDF, setIsHoveredButtonPDF] = useState(false);
+    const [isHoveredButtonCSC, setIsHoveredButtonCSC] = useState(false);
 
     const handleModalModalAviso = (message) => {
         setModalMessage(message);
@@ -101,29 +104,31 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
                     borderRadius: '5px',
                     position: 'relative',
                     width: '400px',
-                    height: '150px', // Definindo a altura como 500px
+                    height: '160px', // Definindo a altura como 500px
                 }}
             >
-                <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
-                    <h5 className="font-bold mx-2">Exportar Arquivo</h5>
+                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-3">
+                    <h5 className="font-bold mx-2">EXPORTAR AQUIVO</h5>
                     <button
                         className="font-bold mx-2"
                         onClick={onClose}
                         style={{
-                            position: 'absolute',
-                            top: '6px',
-                            right: '1px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                            border: '1px solid #ccc',
-                            borderRadius: '5px',
-                            width: '60px',
+                            borderRadius: '50px',
+                            hover: 'pointer',
+                            hoverBackgroundColor: '#0A7F8E',
+                            width: '30px',
                             height: '30px',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
+                            zIndex: 1001,
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                         }}
+                        onMouseEnter={() => setIsHoveredButtonX(true)}
+                        onMouseLeave={() => setIsHoveredButtonX(false)}
                     >
                         X
                     </button>
@@ -144,12 +149,15 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
                             flexDirection: 'column',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            backgroundColor: '#e0e0e0',
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonPDF ? 'rgba(0, 170, 181, 0.1)' : 'rgba(229, 231, 235, 0.3)',
                             borderRadius: '5px',
                             padding: '10px',
                             cursor: 'pointer',
                             border: 'none',
                         }}
+                        onMouseEnter={() => setIsHoveredButtonPDF(true)}
+                        onMouseLeave={() => setIsHoveredButtonPDF(false)}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -178,12 +186,14 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
                             flexDirection: 'column',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            backgroundColor: '#e0e0e0',
+                            backgroundColor: isHoveredButtonCSC ? 'rgba(0, 170, 181, 0.1)' : 'rgba(229, 231, 235, 0.3)',
                             borderRadius: '5px',
                             padding: '10px',
                             cursor: 'pointer',
                             border: 'none',
                         }}
+                        onMouseEnter={() => setIsHoveredButtonCSC(true)}
+                        onMouseLeave={() => setIsHoveredButtonCSC(false)}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

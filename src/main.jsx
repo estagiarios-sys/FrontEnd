@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TabelaCampos from './components/tabelas_campos';
 import CamposSelecionados from './components/CamposSelecionados';
 import GerarRelatorio from './components/GerarRelatorio';
-import logoSystextil from './imagens/logo-systextil.svg';
+import logoSystextil from './imagens/logo-systextil-branca.png';
 
 function Main() {
   const [selectedCampos, setSelectedCampos] = useState([]);
@@ -20,15 +20,6 @@ function Main() {
     setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo)));
     setSelectedTabela(data.tabela);
     setSelectedRelacionada(data.relacionada || []); // Agora espera um array de relacionadas
-  };
-
-  // Adiciona o primeiro campo disponível à lista de campos selecionados
-  const handleIndividualRightClick = () => {
-    if (availableCampos.length > 0) {
-      const [firstCampo, ...rest] = availableCampos;
-      setSelectedCampos([...selectedCampos, firstCampo]);
-      setAvailableCampos(rest);
-    }
   };
 
   // Remove campos selecionados com checkbox marcado e adiciona de volta aos disponíveis
@@ -115,17 +106,6 @@ function Main() {
             </div>
             <div>
               <button id='info-hover'
-                onClick={handleIndividualRightClick}
-                className='left rounded-full bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul w-10 h-10 my-3 justify-center items-center flex'
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                </svg>
-                <div className="info-texto">Adicionar primeiro campo selecionado</div>
-              </button>
-            </div>
-            <div>
-              <button id='info-hover'
                 onClick={handleAllLeftClick}
                 className='left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex'
               >
@@ -147,7 +127,7 @@ function Main() {
               </button>
             </div>
           </div>
-          <div>
+          <div className="mr-16">
             <h1 className="font-bold text-3xl mt-4 mb-6 mr-10">Campos Selecionados</h1>
             <CamposSelecionados
               selectedCampos={selectedCampos}

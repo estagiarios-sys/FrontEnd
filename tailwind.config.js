@@ -16,6 +16,12 @@ module.exports = {
         'custom-azul-claro': ' #00D1E0',
         'custom-azul-escuro': '#0A7F8E',
       },
+      fontFamily: {
+        sans: ['Montserrat', 'sans-serif'],  // Isso define Montserrat como fonte padrão para "font-sans"
+      },
+      fontSize: {
+        'tiny': '12px', // Define uma classe customizada chamada `text-tiny`
+      },
       keyframes: {
         fadeIn: {
           '0%': { opacity: 0 },

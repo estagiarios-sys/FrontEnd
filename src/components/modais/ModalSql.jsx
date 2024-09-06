@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
 function ModalSql({ isOpen, onClose }) {
+    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
+
     if (!isOpen) return null;
 
     // Estilos para a div específica
@@ -38,36 +40,35 @@ function ModalSql({ isOpen, onClose }) {
                     borderRadius: '5px',
                     position: 'relative',
                     width: '500px',
-                    height: '500px', // Definindo a altura como 500px
+                    height: '500px',
                 }}
             >
-                <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
+                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">SQL</h5>
                     <button
                         className="font-bold mx-2"
                         onClick={onClose}
                         style={{
-                            position: 'absolute',
-                            top: '6px',
-                            right: '1px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.5)', // Fundo semi-transparente
-                            border: '1px solid #ccc', // Borda cinza clara
-                            borderRadius: '5px', // Forma arredondada
-                            width: '60px', // Largura do botão
-                            height: '30px', // Altura do botão
+                            borderRadius: '50px',
+                            cursor: 'pointer',
+                            width: '30px',
+                            height: '30px',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
                             fontSize: '16px',
-                            cursor: 'pointer',
-                            zIndex: 1001, // Garantindo que o botão esteja sobre o conteúdo
+                            zIndex: 1001,
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                         }}
+                        onMouseEnter={() => setIsHoveredButtonX(true)}
+                        onMouseLeave={() => setIsHoveredButtonX(false)}
                     >
                         X
                     </button>
                 </div>
                 <div style={contentContainerStyle}>
-                    <div className="w-11/12 h-5/6 bg-neutral-300 rounded-md">
+                    <div className="w-11/12 h-5/6 bg-gray-200 bg-opacity-30 rounded-md">
                         <h5 className="m-6">{SQL}</h5>
                     </div>
                 </div>

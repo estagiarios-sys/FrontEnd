@@ -8,6 +8,10 @@ function ModalSalvos({ isOpen, onClose }) {
     const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [excludeCampo, setExcludeCampo] = useState([]);
+    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
+    const [isHoveredButtonExcluir, setIsHoveredButtonExcluir] = useState(false);
+    const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
+    const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
 
     useEffect(() => {
         async function fetchSavedQueries() {
@@ -35,7 +39,7 @@ function ModalSalvos({ isOpen, onClose }) {
 
         fetchSavedQueries();
     }, []);
-    
+
     async function deleteSavedQuery() {
         try {
             const response = await fetch(`http://localhost:8080/delete/${excludeCampo[0]}`, {
@@ -45,21 +49,21 @@ function ModalSalvos({ isOpen, onClose }) {
             if (!response.ok) {
                 throw new Error(`Erro na requisição: ${response.statusText}`);
             }
-    
+
             console.log('Consulta excluída com sucesso');
             console.log(excludeCampo[0]);
-    
+
             // Atualiza as opções removendo o item excluído
             setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo[0]));
             setSelectedCampos([]); // Limpa a seleção
-    
+
         } catch (error) {
             console.error('Erro ao excluir a consulta salva:', error);
         } finally {
             setIsModalModalOpen(false); // Fecha o modal de confirmação
         }
     }
-    
+
     const handleApagar = () => {
         if (selectedCampos.length > 0) {
             setModalMessage('Você tem certeza de que deseja apagar este item?');
@@ -124,16 +128,16 @@ function ModalSalvos({ isOpen, onClose }) {
                     height: '250px',
                 }}
             >
-                <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
-                    <h5 className="font-bold mx-2">Consultas Salvas</h5>
+                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
+                    <h5 className="font-bold mx-2">CONSULTAS SALVAS</h5>
                     <button
                         className="font-bold mx-2"
                         onClick={onClose}
                         style={{
-                            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                            border: '1px solid #ccc',
-                            borderRadius: '5px',
-                            width: '60px',
+                            borderRadius: '50px',
+                            hover: 'pointer',
+                            hoverBackgroundColor: '#0A7F8E',
+                            width: '30px',
                             height: '30px',
                             display: 'flex',
                             justifyContent: 'center',
@@ -141,14 +145,18 @@ function ModalSalvos({ isOpen, onClose }) {
                             fontSize: '16px',
                             cursor: 'pointer',
                             zIndex: 1001,
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                         }}
+                        onMouseEnter={() => setIsHoveredButtonX(true)}
+                        onMouseLeave={() => setIsHoveredButtonX(false)}
                     >
                         X
                     </button>
                 </div>
                 <div style={contentContainerStyle}>
-                    <div className="w-11/12 bg-neutral-300 rounded-md p-4">
-                        <h5 className="font-bold mb-4">Nome do Relatório</h5>
+                    <div className="w-11/12 bg-gray-200 bg-opacity-30  rounded-md p-4">
+                        <h5 className="font-medium mb-4">Nome do Relatório</h5>
                         <Select
                             isMulti
                             name="campos"
@@ -165,7 +173,7 @@ function ModalSalvos({ isOpen, onClose }) {
                     </div>
                 </div>
                 {/* Botões de Excluir, Cancelar e Salvar */}
-                
+
                 <div
                     style={{
                         display: 'flex',
@@ -180,45 +188,67 @@ function ModalSalvos({ isOpen, onClose }) {
                 >
                     <button
                         style={{
-                            backgroundColor: '#dc2626',
+                            backgroundColor: '#ED1846',
                             border: 'none',
                             borderRadius: '5px',
                             color: '#fff',
-                            padding: '10px 20px',
-                            fontSize: '16px',
+                            width: '60px',
+                            height: '30px',
+                            fontSize: '12px',
                             cursor: 'pointer',
-                            marginRight: '183.5px',
+                            marginRight: '275px',
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonExcluir ? '#B11236' : '#ED1846'
                         }}
+                        onMouseEnter={() => setIsHoveredButtonExcluir(true)}
+                        onMouseLeave={() => setIsHoveredButtonExcluir(false)}
                         onClick={handleApagar}
                     >
                         Excluir
                     </button>
-                    <button
+                    <button className="align-left"
                         style={{
                             backgroundColor: '#6c757d',
                             border: 'none',
                             borderRadius: '5px',
                             color: '#fff',
-                            padding: '10px 20px',
-                            fontSize: '16px',
+                            width: '60px',
+                            height: '30px',
+                            padding: '0', // Remover padding para garantir que o tamanho definido seja exato
+                            fontSize: '12px',
                             cursor: 'pointer',
                             marginRight: '10px',
+                            display: 'flex', // Usar flexbox para alinhamento
+                            alignItems: 'center', // Alinhamento vertical
+                            justifyContent: 'center', // Alinhamento horizontal
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonCancelar ? '#5a6268' : '#6c757d'
                         }}
                         onClick={onClose}
+                        onMouseEnter={() => setIsHoveredButtonCancelar(true)}
+                        onMouseLeave={() => setIsHoveredButtonCancelar(false)}
                     >
                         Cancelar
                     </button>
-                    <button
+                    <button className="align-left"
                         style={{
-                            backgroundColor: '#28a745',
                             border: 'none',
                             color: '#fff',
                             borderRadius: '5px',
-                            padding: '10px 20px',
-                            fontSize: '16px',
+                            width: '60px',
+                            height: '30px',
+                            padding: '0',
+                            fontSize: '12px',
                             cursor: 'pointer',
+                            display: 'flex', // Usar flexbox para alinhamento
+                            alignItems: 'center', // Alinhamento vertical
+                            justifyContent: 'center', // Alinhamento horizontal
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
                         }}
                         onClick={handleCarregar}
+                        onMouseEnter={() => setIsHoveredButtonCarregar(true)}
+                        onMouseLeave={() => setIsHoveredButtonCarregar(false)}
                     >
                         Carregar
                     </button>
@@ -237,7 +267,6 @@ function ModalSalvos({ isOpen, onClose }) {
                 }}
             />
         </div>
-        
     );
 }
 
