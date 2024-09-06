@@ -3,6 +3,15 @@ import React, { useState } from "react";
 function ModalSql({ isOpen, onClose }) {
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
 
+    const resetHoverStates = () => {
+        setIsHoveredButtonX(false);
+    };
+
+    const handleClose = () => {
+        resetHoverStates();
+        onClose();
+    };
+
     if (!isOpen) return null;
 
     // Estilos para a div específica
@@ -47,7 +56,7 @@ function ModalSql({ isOpen, onClose }) {
                     <h5 className="font-bold mx-2">SQL</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={onClose}
+                        onClick={handleClose}
                         style={{
                             borderRadius: '50px',
                             cursor: 'pointer',

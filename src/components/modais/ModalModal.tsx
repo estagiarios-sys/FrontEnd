@@ -3,17 +3,14 @@ import React, { useState, ChangeEvent } from "react";
 interface ModalProps {
     isOpen?: boolean;
     onClose?: () => void;
-    onConfirm?: (name?: string) => void; // Agora aceita um nome como parâmetro opcional
+    onConfirm?: () => void;
     message?: string;
     modalType?: "APAGAR" | "ALERTA" | "DIGITAR_NOME" | "SUCESSO";
     onNameChange?: (value: string) => void;
     confirmText?: string;  // Nova propriedade opcional para o texto do botão de confirmação
 }
 
-const modalTypes: Record<
-    string,
-    { title: string; defaultConfirmText: string; cancelText: string | null; isAlert: boolean }
-> = {
+const modalTypes: Record<string, { title: string; defaultConfirmText: string; cancelText: string | null; isAlert: boolean }> = {
     APAGAR: {
         title: "Confirmar Exclusão",
         defaultConfirmText: "Confirmar",
@@ -42,12 +39,12 @@ const modalTypes: Record<
 
 const ModalModal: React.FC<ModalProps> = ({
     isOpen = false,
-    onClose = () => { },
-    onConfirm = () => { },
+    onClose = () => {},
+    onConfirm = () => {},
     message = "",
     modalType = "ALERTA",
-    onNameChange = () => { },
-    confirmText, // Agora pode receber o texto do botão diretamente
+    onNameChange = () => {},
+    confirmText // Agora pode receber o texto do botão diretamente
 }) => {
     const [inputValue, setInputValue] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
@@ -70,12 +67,7 @@ const ModalModal: React.FC<ModalProps> = ({
             return;
         }
         setError(null);
-        // Passa o nome do template se o tipo for DIGITAR_NOME
-        if (modalType === "DIGITAR_NOME") {
-            onConfirm(inputValue);
-        } else {
-            onConfirm();
-        }
+        onConfirm();
         onClose();
     };
 
@@ -102,7 +94,9 @@ const ModalModal: React.FC<ModalProps> = ({
                                 placeholder="Digite um nome"
                                 className="w-full p-2 border border-black rounded"
                             />
-                            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                            {error && (
+                                <p className="text-red-500 text-sm mt-2">{error}</p>
+                            )}
                         </>
                     )}
                 </div>

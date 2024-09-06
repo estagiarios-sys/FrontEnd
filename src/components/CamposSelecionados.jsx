@@ -72,7 +72,7 @@ function CamposSelecionados({
           >
             <thead>
               <tr className="bg-custom-azul-escuro text-white ">
-                <th className="py-2 px-4 text-sm w-[57px]"></th>
+                <th className="py-2 px-4 text-sm w-[60px]"></th>
                 <th className="py-2 px-4 text-sm w-[146px]">Campo</th>
                 <th className="py-2 px-4 text-sm w-[216px]">Apelido</th>
                 <th className="py-2 px-4 text-sm w-[177px]">Ordem</th>
@@ -104,7 +104,7 @@ function CamposSelecionados({
                           <input
                             type="text"
                             onBlur={(e) => handleCustomNameChange(e, campo)}
-                            className="border border-custom-azul-escuro rounded p-1"
+                            className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none"
                             placeholder={campo}
                           />
                         </td>

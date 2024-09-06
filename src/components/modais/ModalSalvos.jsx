@@ -111,6 +111,19 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
         paddingBottom: '60px',
     };
 
+    const resetHoverStates = () => {
+        setIsHoveredButtonX(false);
+        setIsHoveredButtonExcluir(false);
+        setIsHoveredButtonCancelar(false);
+        setIsHoveredButtonCarregar(false);
+    };
+
+    const handleClose = () => {
+        resetHoverStates();
+        setSelectedCampo('');
+        onClose();
+    };
+
     return (
         <div
             style={{
@@ -140,7 +153,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                     <h5 className="font-bold mx-2">CONSULTAS SALVAS</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={() => {onClose(); setSelectedCampo('')}}
+                        onClick={handleClose}
                         style={{
                             borderRadius: '50px',
                             hover: 'pointer',

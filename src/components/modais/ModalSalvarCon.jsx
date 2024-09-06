@@ -8,6 +8,9 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
     const [isConfirmModalUpdateOpen, setIsModalModalUpdateOpen] = useState(false);
     const [isConfirmModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
+    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
+    const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
+    const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
 
     const [error, setError] = useState(null);
 
@@ -43,6 +46,16 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
         paddingBottom: '60px',
     };
 
+    const resetHoverStates = () => {
+        setIsHoveredButtonX(false);
+    };
+
+    const handleClose = () => {
+        resetHoverStates();
+        setInputValue('');
+        onClose();
+    };
+
     const saveQuery = async () => {
 
         if (inputValue.length === 0 && sqlQuery.length === 0) {
@@ -53,7 +66,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
             setModalMessage('Faça uma consulta para salvar.');
             handleModalModalAviso();
             return;
-        } else if(inputValue.length === 0 && sqlQuery.length > 0) {
+        } else if (inputValue.length === 0 && sqlQuery.length > 0) {
             setModalMessage('Digite um nome para salvar a consulta.');
             handleModalModalAviso();
             return;
@@ -64,9 +77,9 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                 queryName: inputValue,
                 query: sqlQuery,
             };
-    
+
             const query = JSON.stringify(dataToSave);
-    
+
             const response = await fetch('http://localhost:8080/save', {
                 method: 'POST',
                 headers: {
@@ -74,20 +87,20 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                 },
                 body: query,
             });
-    
+
             console.log(query);
-    
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-    
+
             const result = await response.json();
             console.log('Success:', result);
             handleModalModalSave();
         } catch (error) {
             handleModalModalUpdate();
         }
-    };    
+    };
 
 
     const updateQuery = async () => {
@@ -110,7 +123,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            
+
             const result = await response.json();
 
             console.log('Success:', result);
@@ -146,34 +159,39 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                     height: '250px',
                 }}
             >
-                <div className="w-full bg-neutral-500 flex flex-row justify-between text-white p-2">
-                    <h5 className="font-bold mx-2">Consultas Salvas</h5>
+                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
+                    <h5 className="font-bold mx-2">SALVAR CONSULTA</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={() => {onClose(); setInputValue('')}}
+                        onClick={handleClose}
                         style={{
-                            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                            border: '1px solid #ccc',
-                            borderRadius: '5px',
-                            width: '60px',
+                            borderRadius: '50px',
+                            hover: 'pointer',
+                            hoverBackgroundColor: '#0A7F8E',
+                            width: '30px',
                             height: '30px',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
+                            zIndex: 1001,
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                         }}
+                        onMouseEnter={() => setIsHoveredButtonX(true)}
+                        onMouseLeave={() => setIsHoveredButtonX(false)}
                     >
                         X
                     </button>
                 </div>
                 <div style={contentContainerStyle}>
-                    <div className="w-11/12 bg-neutral-300 rounded-md p-4">
-                        <h5 className="font-bold mb-4">Nome da Consulta</h5>
+                    <div className="w-11/12 bg-gray-200 bg-opacity-30  rounded-md p-4">
+                        <h5 className="font-medium mb-4">Nome da Consulta</h5>
                         <input
                             type="text"
                             onChange={handleInputChange1}
-                            className="w-full p-2 border border-gray-300 rounded-md"
+                            className="w-full border border-custom-azul-escuro rounded p-1 focus:ring-1 focus:ring-custom-azul-escuro focus:outline-none"
                         />
                     </div>
                 </div>
@@ -192,31 +210,48 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                     }}
                 >
 
-                    <button
+                    <button className="align-left"
                         style={{
                             backgroundColor: '#6c757d',
                             border: 'none',
                             borderRadius: '5px',
                             color: '#fff',
-                            padding: '10px 20px',
-                            fontSize: '16px',
+                            width: '80px',
+                            height: '40px',
+                            padding: '0', // Remover padding para garantir que o tamanho definido seja exato
+                            fontSize: '13px',
                             cursor: 'pointer',
                             marginRight: '10px',
+                            display: 'flex', // Usar flexbox para alinhamento
+                            alignItems: 'center', // Alinhamento vertical
+                            justifyContent: 'center', // Alinhamento horizontal
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonCancelar ? '#5a6268' : '#6c757d'
                         }}
-                        onClick={() => {onClose(); setInputValue('')}}
+                        onMouseEnter={() => setIsHoveredButtonCancelar(true)}
+                        onMouseLeave={() => setIsHoveredButtonCancelar(false)}
+                        onClick={() => { onClose(); setInputValue('') }}
                     >
                         Cancelar
                     </button>
-                    <button
+                    <button className="align-left"
                         style={{
-                            backgroundColor: '#28a745',
                             border: 'none',
                             color: '#fff',
                             borderRadius: '5px',
-                            padding: '10px 20px',
-                            fontSize: '16px',
+                            width: '80px',
+                            height: '40px',
+                            padding: '0',
+                            fontSize: '13px',
                             cursor: 'pointer',
+                            display: 'flex', // Usar flexbox para alinhamento
+                            alignItems: 'center', // Alinhamento vertical
+                            justifyContent: 'center', // Alinhamento horizontal
+                            transition: 'background-color 0.3s ease',
+                            backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
                         }}
+                        onMouseEnter={() => setIsHoveredButtonCarregar(true)}
+                        onMouseLeave={() => setIsHoveredButtonCarregar(false)}
                         onClick={saveQuery}
                     >
                         Salvar
@@ -255,7 +290,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                 buttonColors={{
                     ok: "bg-yellow-600 hover:bg-yellow-700 focus:ring-gray-600",
                 }}
-            />       
+            />
         </div>
     );
 }
