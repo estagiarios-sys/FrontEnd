@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalModal from './ModalModal';
 
-function ModalSalvos({ isOpen, onClose }) {
+function ModalSalvos({ isOpen, onClose, generateReport }) {
     const [selectedCampo, setSelectedCampo] = useState(null); // Agora armazena apenas um valor
     const [campoOptions, setCampoOptions] = useState([]);
     const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
@@ -83,12 +83,16 @@ function ModalSalvos({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
-    async function handleCarregar() {
+    async function handleCarregar(generateReport) {
         localStorage.setItem('loadedQuery', selectedCampo.value);
         const test = localStorage.getItem('loadedQuery');
         console.log(test);
         setModalMessage('Consulta carregada!');
         setIsModalModalOkOpen(true);
+
+        if(generateReport){
+            await generateReport()
+        }
     }
 
     if (!isOpen) return null;
@@ -222,7 +226,7 @@ function ModalSalvos({ isOpen, onClose }) {
                             fontSize: '16px',
                             cursor: 'pointer',
                         }}
-                        onClick={handleCarregar}
+                        onClick={() => handleCarregar(generateReport)}
                     >
                         Carregar
                     </button>
