@@ -10,10 +10,12 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
     const [isCleaning, setIsCleaning] = useState(false); // Estado para animação de limpeza
     const [models, setModels] = useState([]);
     const [error, setError] = useState(''); // Estado para mensagem de erro
+    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
+
 
     // Função para obter as chaves do localStorage e formatar para o Select
     const loadModels = () => {
-        const keys = Object.keys(localStorage).filter(key => key !== 'orderByString'); 
+        const keys = Object.keys(localStorage).filter(key => key !== 'orderByString');
         const modelOptions = keys.map((key) => ({
             value: key,
             label: key,
@@ -58,11 +60,12 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
         if (selectedItem) {
             onSelect(selectedItem.value);
             onClose(); // Fecha o modal
-        }else{
+        } else {
             setModalMessage('Selecione um Modelo para Salvar');
             setIsModalModalOpen(true);
-            
+
         }
+
         setError('');
     };
 
@@ -71,14 +74,31 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
     return (
         <>
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-1000">
-                <div className="bg-white p-4 rounded-lg relative w-[440px] max-w-full shadow-lg">
-                    <div className="w-full bg-green-600 flex justify-between items-center text-white p-3 rounded-t-lg">
-                        <h5 className="font-bold text-lg">Modelos de Relatórios</h5>
+                <div className="bg-white  relative w-[440px] max-w-full shadow-lg">
+                    <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-3 ">
+                        <h5 className="font-bold text-lg">MODELOS DE RELATÓRIOS</h5>
                         <button
-                            className=" text-black rounded-full w-8 h-8 flex items-center justify-center text-xl cursor-pointer"
+                            className="font-bold mx-2"
                             onClick={onClose}
+                            style={{
+                                borderRadius: '50px',
+                                hover: 'pointer',
+                                hoverBackgroundColor: '#0A7F8E',
+                                width: '30px',
+                                height: '30px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                fontSize: '16px',
+                                cursor: 'pointer',
+                                zIndex: 1001,
+                                transition: 'background-color 0.3s ease',
+                                backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
+                            }}
+                            onMouseEnter={() => setIsHoveredButtonX(true)}
+                            onMouseLeave={() => setIsHoveredButtonX(false)}
                         >
-                            &times;
+                            X
                         </button>
                     </div>
                     <div className="mt-4 mx-3 flex items-center">
@@ -87,65 +107,32 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                             onChange={setSelectedItem}
                             options={models} // Use as opções carregadas do localStorage
                             placeholder="Selecione um modelo"
-                            styles={{
-                                container: (provided) => ({
-                                    ...provided,
-                                    width: '100%',
-                                }),
-                                control: (provided) => ({
-                                    ...provided,
-                                    height: 40,
-                                    borderColor: '#d1d5db',
-                                    boxShadow: 'none',
-                                    borderRadius: '8px',
-                                    fontWeight: 'bold',
-                                    '&:hover': {
-                                        borderColor: '#2563eb',
-                                    }
-                                }),
-                                menu: (provided) => ({
-                                    ...provided,
-                                    maxHeight: 85,
-                                    borderRadius: '8px',
-                                    border: '1px solid #d1d5db',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                                }),
-                                menuList: (provided) => ({
-                                    ...provided,
-                                    padding: 0,
-                                    maxHeight: 85,
-                                    overflowY: 'auto',
-                                }),
-                                option: (provided, state) => ({
-                                    ...provided,
-                                    backgroundColor: state.isSelected ? '#2563eb' : 'white',
-                                    color: state.isSelected ? 'white' : 'black',
-                                    '&:hover': {
-                                        backgroundColor: '#e2e8f0',
-                                    }
-                                }),
-                            }}
+                            className="basic-single w-full"
+                            classNamePrefix="Select"
+                            isClearable
                         />
-                        <button
+
+                        {/* caso voce seja estanho pode usar esse button que é muito feio
+                         <button
                             className={`ml-4 p-2 rounded-full transition-transform ${isCleaning ? 'animate-clean' : ''}`}
                             onClick={handleLimpar}
                             style={{ border: 'none', background: 'none', cursor: 'pointer' }}
                         >
-                            <FaEraser size={24} color={isCleaning ? '#ff6347' : '#000'} />
-                        </button>
+                            <FaEraser size={24} color={isCleaning ? '#00AAB5' : '#0A7F8E'} />
+                        </button> */}
                     </div>
                     {error && (
                         <p className="text-red-500 text-sm mt-2 mx-3">{error}</p> // Exibe a mensagem de erro
                     )}
                     <div className="flex justify-end space-x-2 p-4 mt-4">
                         <button
-                            className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 w-20"
+                            className="bg-custom-vermelho text-white font-  rounded-[5px] hover:bg-custom-vermelho-escuro focus:outline-none focus:ring-2 focus:ring-custom-vermelho w-[60px] h-[30px] text-tiny"
                             onClick={handleApagar}
                         >
                             Excluir
                         </button>
                         <button
-                            className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-20 flex flex-col justify-center items-center"
+                            className="bg-custom-azul-escuro text-white font-  rounded-[5px] hover:bg-custom-azul focus:outline-none focus:ring-2 focus:ring-custom-azu-escuro w-[60px] h-[30px] text-tiny"
                             onClick={handleUseModel}  // Chama a função para usar o modelo selecionado
                         >
                             Usar
@@ -160,9 +147,6 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                 confirmText="OK"
                 message={modalMessage}
                 title="Confirmação"
-               
-                
-
             />
         </>
     );
