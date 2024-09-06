@@ -58,11 +58,24 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     };
 
     const handleRemoveCheckedCampos = () => {
-        setAddedCampos(prevCampos => prevCampos.filter(campo => !campo.checked));
-        if (onSave) {
-            onSave('');
-        }
-    };
+        setAddedCampos(prevCampos => {
+            const updatedCampos = prevCampos.filter(campo => !campo.checked);
+    
+            const condicoes = updatedCampos.map((campo) => {
+                const valor = campo.valor || '';
+                const ordenacao = campo.ordenacao || '';
+                return `${campo.value} ${campo.ordenacao} '${valor}'`;
+            });
+    
+            const condicoesString = `${condicoes.join(' AND ')}`;
+    
+            if (onSave) {
+                onSave(condicoesString);
+            }
+    
+            return updatedCampos;
+        });
+    };    
 
     const handleValorChange = (index, value) => {
         const updatedCampos = [...addedCampos];
@@ -98,8 +111,6 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         const condicoes = addedCampos.map((campo) => {
             const valor = campo.valor || '';
             const ordenacao = campo.ordenacao || '';
-
-            console.log(campo);
 
             if (campo.valor === undefined || campo.ordenacao === undefined || campo.valor === '' || campo.ordenacao === '') {
                 setModalMessage("Preencha todos os campos");

@@ -305,8 +305,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={handleModalFiltro} className="flex flex-col justify-center items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                            <button onClick={handleModalFiltro} className="relative flex flex-col justify-center items-center">
+                                {condicoesString && (
+                                    <span className="absolute -top-2 -right-1 bg-red-600 text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
+                                        {condicoesString.split('AND').length} {/* Número de condições separadas por 'AND' */}
+                                    </span>
+                                )}
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10" >
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" name="mais" />
                                 </svg>
                                 <label htmlFor="mais">Filtros</label>
