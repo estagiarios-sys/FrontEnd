@@ -175,7 +175,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            zIndex: 1001,
                             transition: 'background-color 0.3s ease',
                             backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                         }}

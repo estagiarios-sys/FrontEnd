@@ -88,14 +88,19 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
     }, [isOpen]);
 
     async function handleCarregar(generateReport) {
-        localStorage.setItem('loadedQuery', selectedCampo.value);
-        const test = localStorage.getItem('loadedQuery');
-        console.log(test);
-        setModalMessage('Consulta carregada!');
-        setIsModalModalOkOpen(true);
-
-        if(generateReport){
-            await generateReport()
+        if (selectedCampo && selectedCampo.value) {
+            localStorage.setItem('loadedQuery', selectedCampo.value);
+            const test = localStorage.getItem('loadedQuery');
+            console.log(test);
+            setModalMessage('Consulta carregada!');
+            setIsModalModalOkOpen(true);
+    
+            if (generateReport) {
+                await generateReport();
+            }
+        } else {
+            setModalMessage('Selecione uma consulta para carregar.');
+            setIsModalModalOkOpen(true);
         }
     }
 
@@ -165,7 +170,6 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                             alignItems: 'center',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            zIndex: 1001,
                             transition: 'background-color 0.3s ease',
                             backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                         }}
@@ -292,13 +296,9 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                 isOpen={isConfirmModalOkOpen}
                 onClose={() => setIsModalModalOkOpen(false)}
                 onConfirm={() => setIsModalModalOkOpen(false)}
-                confirmText="Ok"
+                confirmText="Confirmar"
                 message={modalMessage}
                 title="Aviso"
-                buttonColors={{
-                    confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
-                    cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
-                }}
             />
         </div>
     );

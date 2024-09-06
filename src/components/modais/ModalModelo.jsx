@@ -94,7 +94,6 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                                 alignItems: 'center',
                                 fontSize: '16px',
                                 cursor: 'pointer',
-                                zIndex: 1001,
                                 transition: 'background-color 0.3s ease',
                                 backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                             }}
@@ -165,7 +164,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                                 backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
                             }}
                             onMouseEnter={() => setIsHoveredButtonCarregar(true)}
-                        onMouseLeave={() => setIsHoveredButtonCarregar(false)}
+                            onMouseLeave={() => setIsHoveredButtonCarregar(false)}
                             onClick={handleUseModel}  // Chama a função para usar o modelo selecionado
                         >
                             Aplicar
@@ -174,10 +173,11 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                 </div>
             </div>
             <ModalModal
+                modalType="APAGAR"
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsModalModalOpen(false)}
                 onConfirm={handleConfirm}
-                confirmText="OK"
+                confirmText="Confirmar"
                 message={modalMessage}
                 title="Confirmação"
             />
