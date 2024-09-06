@@ -91,7 +91,7 @@ const ModalModal: React.FC<ModalProps> = ({
                                 type="text"
                                 value={inputValue}
                                 onChange={handleInputChange}
-                                placeholder="Digite um nome"
+                                placeholder="Digite um nome1111"
                                 className="w-full p-2 border border-black rounded"
                             />
                             {error && (
