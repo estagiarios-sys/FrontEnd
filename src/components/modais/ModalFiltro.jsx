@@ -51,7 +51,18 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
             onSave("");
         }
     };
+    
+    const resetHoverStates = () => {
+        setIsHoveredButtonX(false);
+        setIsHoveredButtonCancelar(false);
+        setIsHoveredButtonCarregar(false);
+    };
 
+    const handleClose = () => {
+        resetHoverStates();
+        onClose();
+    };
+    
     const handleCheckboxChange = (index) => {
         setAddedCampos(prevCampos => {
             const updatedCampos = [...prevCampos];
@@ -157,7 +168,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     <h5 className="font-bold mx-2 text-2xl">FILTROS</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={onClose}
+                        onClick={handleClose}
                         style={{
                             borderRadius: '50px',
                             cursor: 'pointer',
@@ -279,7 +290,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                                                         value={campo.valor || ''}
                                                         onChange={(e) => handleValorChange(index, e.target.value)}
                                                         onKeyDown={(e) => handleValorKeyDown(index, e)}
-                                                        className="border border-custom-azul-escuro rounded p-1 w-full"
+                                                        className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none w-full"
                                                         placeholder="Digite o valor"
                                                     />
                                                 </td>

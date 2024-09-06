@@ -11,6 +11,8 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
     const [models, setModels] = useState([]);
     const [error, setError] = useState(''); // Estado para mensagem de erro
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
+    const [isHoveredButtonExcluir, setIsHoveredButtonExcluir] = useState(false);
+    const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
 
 
     // Função para obter as chaves do localStorage e formatar para o Select
@@ -29,12 +31,13 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
         }
     }, [isOpen]);
 
-    const handleLimpar = () => {
-        setIsCleaning(true); // Ativa a animação de limpeza
-        setTimeout(() => {
-            setSelectedItem(null); // Limpa a seleção após a animação
-            setIsCleaning(false); // Desativa a animação de limpeza
-        }, 500); // Duração da animação
+    const resetHoverStates = () => {
+        setIsHoveredButtonX(false);
+    };
+
+    const handleClose = () => {
+        resetHoverStates();
+        onClose();
     };
 
     const handleApagar = () => {
@@ -79,7 +82,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                         <h5 className="font-bold text-lg">MODELOS DE RELATÓRIOS</h5>
                         <button
                             className="font-bold mx-2"
-                            onClick={onClose}
+                            onClick={handleClose}
                             style={{
                                 borderRadius: '50px',
                                 hover: 'pointer',
@@ -126,16 +129,46 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                     )}
                     <div className="flex justify-end space-x-2 p-4 mt-4">
                         <button
-                            className="bg-custom-vermelho text-white font-  rounded-[5px] hover:bg-custom-vermelho-escuro focus:outline-none focus:ring-2 focus:ring-custom-vermelho w-[60px] h-[30px] text-tiny"
+                            style={{
+                                backgroundColor: '#ED1846',
+                                border: 'none',
+                                borderRadius: '5px',
+                                color: '#fff',
+                                width: '80px',
+                                height: '40px',
+                                fontSize: '13px',
+                                cursor: 'pointer',
+                                marginRight: '10px',
+                                transition: 'background-color 0.3s ease',
+                                backgroundColor: isHoveredButtonExcluir ? '#B11236' : '#ED1846'
+                            }}
+                            onMouseEnter={() => setIsHoveredButtonExcluir(true)}
+                            onMouseLeave={() => setIsHoveredButtonExcluir(false)}
                             onClick={handleApagar}
                         >
                             Excluir
                         </button>
                         <button
-                            className="bg-custom-azul-escuro text-white font-  rounded-[5px] hover:bg-custom-azul focus:outline-none focus:ring-2 focus:ring-custom-azu-escuro w-[60px] h-[30px] text-tiny"
+                            style={{
+                                border: 'none',
+                                color: '#fff',
+                                borderRadius: '5px',
+                                width: '80px',
+                                height: '40px',
+                                padding: '0',
+                                fontSize: '13px',
+                                cursor: 'pointer',
+                                display: 'flex', // Usar flexbox para alinhamento
+                                alignItems: 'center', // Alinhamento vertical
+                                justifyContent: 'center', // Alinhamento horizontal
+                                transition: 'background-color 0.3s ease',
+                                backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
+                            }}
+                            onMouseEnter={() => setIsHoveredButtonCarregar(true)}
+                        onMouseLeave={() => setIsHoveredButtonCarregar(false)}
                             onClick={handleUseModel}  // Chama a função para usar o modelo selecionado
                         >
-                            Usar
+                            Aplicar
                         </button>
                     </div>
                 </div>

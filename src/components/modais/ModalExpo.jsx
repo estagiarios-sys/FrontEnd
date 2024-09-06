@@ -18,6 +18,15 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
         setIsModalModalAvisoOpen(false);
     };
 
+    const resetHoverStates = () => {
+        setIsHoveredButtonX(false);
+    };
+
+    const handleClose = () => {
+        resetHoverStates();
+        onClose();
+    };
+
     // Função para verificar se os dados estão presentes antes de gerar o PDF
     const generatePDF = (table, templateKey) => {
         
@@ -111,7 +120,7 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
                     <h5 className="font-bold mx-2">EXPORTAR AQUIVO</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={onClose}
+                        onClick={handleClose}
                         style={{
                             borderRadius: '50px',
                             hover: 'pointer',

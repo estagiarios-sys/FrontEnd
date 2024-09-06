@@ -309,7 +309,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={handleModalFiltro} className="relative flex flex-col justify-center items-center">
                                 {condicoesString && (
-                                    <span className="absolute -top-2 -right-1 bg-red-600 text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
+                                    <span className="absolute -top-2 -right-1 bg-custom-vermelho text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
                                         {condicoesString.split('AND').length} {/* Número de condições separadas por 'AND' */}
                                     </span>
                                 )}
