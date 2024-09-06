@@ -9,7 +9,7 @@ div.Select__control {
 
 div.Select__control--is-focused {
     background-color: #E0F4F4; /* Cor de fundo quando em foco */
-    border-color: var(--azul); /* Cor da borda quando em foco */
+    border-color: var(--azul) !important; /* Cor da borda quando em foco */
     box-shadow: 0 0 0 1px var(--azul); /* Sombra da borda quando em foco */
 }
 
@@ -25,6 +25,10 @@ div.Select__option {
 
 div.Select__option--is-selected {
     background-color: var(--azul-escuro); /* Cor de fundo para a opção selecionada */
+    color: white;
+}
+div.Select__option--is-selected:hover {
+    background-color: var(--azul) !important; /* Cor de fundo para a opção selecionada */
     color: white;
 }
 
