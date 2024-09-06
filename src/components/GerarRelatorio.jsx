@@ -9,7 +9,7 @@ import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalModal from "./modais/ModalModal";
 
-function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
+function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
 
     const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false); // Modal para exibir as views salvas
     const [isModalOpenSQl, setIsModalOpenSQL] = useState(false); // Modal para exibir o SQL
@@ -208,7 +208,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
                 },
                 body: loadedQuery,
             });
-            localStorage.removeItem('loadedQuery');
+            
+            handleLoadFromLocalStorage()
+            localStorage.removeItem('loadedQuery')
 
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
@@ -393,7 +395,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} table={tableData} templateKey={selectedTemplateKey} /> {/* Passa a chave do template selecionado */}
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} templateKey={selectedTemplateKey} />
-            <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} />
+            <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery} />
             <ModalModal isOpen={isModalModalAvisoOpen} onClose={closeModalModalAviso} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />

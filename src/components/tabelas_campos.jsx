@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Select from 'react-select';
 
-function TabelaCampos({ onDataChange, handleAllLeftClick }) {
+function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLocalStorage }) {
   const [jsonData, setJsonData] = useState({});
   const [relationships, setRelationships] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
@@ -55,6 +55,63 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
     fetchRelationships();
   }, []);
 
+  const extractFieldsAndTablesFromSQL = (sqlQuery) => {
+
+    const regexTabelas = /FROM\s+(\w+)|JOIN\s+(\w+)/g;
+    const regexCampos = /SELECT\s+(.*?)\s+FROM/;
+
+    const tabelas = [];
+    const campos = [];
+
+    let matchTabelas;
+
+    while ((matchTabelas = regexTabelas.exec(sqlQuery)) !== null) {
+      const tabela = matchTabelas[1] || matchTabelas[2];
+      if (tabela) {
+        tabelas.push(tabela);
+      }
+    }
+
+    const matchCampos = sqlQuery.match(regexCampos);
+    if (matchCampos) {
+      const listaCampos = matchCampos[1].split(',').map(campo => campo.trim());
+      campos.push(...listaCampos);
+    }
+
+    return { tabelas, campos };
+  };
+
+
+  const handleLoadFromLocalStorage = useCallback(() => {
+    const sqlQuery = localStorage.getItem('loadedQuery');
+    if (sqlQuery) {
+      const { tabelas, campos } = extractFieldsAndTablesFromSQL(sqlQuery);
+  
+      if (tabelas.length > 0) {
+        setSelectedTabela(tabelas[0]);
+  
+        const relacionadas = tabelas.slice(1).map(tabelaRelacionada => {
+          return `${tabelas[0]} e ${tabelaRelacionada}`;
+        });
+  
+        setSelectedRelacionada(prevRelacionadas => {
+          const relacionamentos = new Set([...prevRelacionadas, ...relacionadas]);
+          return Array.from(relacionamentos);
+        });
+  
+        setSelectedCampos(campos.map(campo => {
+          const [tabela, campoNome] = campo.split('.');
+          return `${tabela}.${campoNome}`;
+        }));
+      }
+    }
+  }, []); // Dependências vazias para memoizar a função
+  
+  useEffect(() => {
+    passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
+  }, [passHandleLoadFromLocalStorage, handleLoadFromLocalStorage]); // Inclua handleLoadFromLocalStorage como dependência
+  
+  
   const tabelas = Object.keys(jsonData);
 
   useEffect(() => {
@@ -68,13 +125,13 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
 
   const campoOptions = useMemo(() => {
     const options = new Map();
-  
+
     if (selectedTabela && jsonData[selectedTabela]) {
       jsonData[selectedTabela].forEach(campo => {
         options.set(`${selectedTabela}.${campo}`, { value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
       });
     }
-  
+
     // Adiciona campos das tabelas selecionadas como relacionadas
     if (selectedRelacionada.length > 0) {
       selectedRelacionada.forEach(relacionadaTabela => {
@@ -94,7 +151,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
           });
       });
     }
-  
+
     return Array.from(options.values());
   }, [selectedTabela, selectedRelacionada, jsonData, relationships]);
 
@@ -103,42 +160,60 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
   
     const todasRelacionadas = new Set();
   
+    // Adiciona as tabelas relacionadas automaticamente com o formato "tabela_principal e tabela_relacionada"
     relationships
       .filter(rel => rel.tabelas.includes(selectedTabela))
       .flatMap(rel => rel.tabelas.split(' e '))
       .forEach(tabela => {
         if (tabela !== selectedTabela) {
-          const relacionamento = [selectedTabela, ' e ', tabela].join('');
-          const relacionamentoInverso = [tabela, ' e ', selectedTabela].join('');
+          const relacionamento = `${selectedTabela} e ${tabela}`;
+          const relacionamentoInverso = `${tabela} e ${selectedTabela}`;
   
           if (!todasRelacionadas.has(relacionamentoInverso) && !todasRelacionadas.has(relacionamento)) {
-            todasRelacionadas.add(relacionamento);
+            todasRelacionadas.add(relacionamento); // Adiciona o relacionamento corretamente formatado
           }
         }
       });
   
+    // Adiciona as tabelas que já foram selecionadas ou extraídas do LocalStorage
     selectedRelacionada.forEach(relacionadaTabela => {
-      relacionadaTabela = relacionadaTabela.split(' e ')[1];
+      const relacionadaTabelaNome = relacionadaTabela.includes(' e ') ? relacionadaTabela.split(' e ')[1] : relacionadaTabela;
+  
+      // Verifica se essa relação já foi adicionada antes de processar
       relationships
-        .filter(rel => rel.tabelas.includes(relacionadaTabela))
+        .filter(rel => rel.tabelas.includes(relacionadaTabelaNome))
         .flatMap(rel => rel.tabelas.split(' e '))
         .forEach(tabela => {
-          if (tabela !== relacionadaTabela && tabela !== selectedTabela) {
-            const relacionamento = [relacionadaTabela, ' e ', tabela].join('');
-            const relacionamentoInverso = [tabela, ' e ', relacionadaTabela].join('');
+          if (tabela !== relacionadaTabelaNome && tabela !== selectedTabela) {
+            const relacionamento = `${relacionadaTabelaNome} e ${tabela}`;
+            const relacionamentoInverso = `${tabela} e ${relacionadaTabelaNome}`;
   
             if (!todasRelacionadas.has(relacionamentoInverso) && !todasRelacionadas.has(relacionamento)) {
-              todasRelacionadas.add(relacionamento);
+              todasRelacionadas.add(relacionamento); // Adiciona o relacionamento corretamente formatado
             }
           }
         });
+  
+      // Adiciona a própria tabela relacionada do LocalStorage (sem duplicação)
+      if (!todasRelacionadas.has(relacionadaTabela)) {
+        todasRelacionadas.add(relacionadaTabela); // Adiciona do localStorage se não estiver já presente
+      }
     });
   
-    return Array.from(todasRelacionadas).map(value => ({
-      value,
+    // Garante que o select de "Relacionadas" fique vazio se não houver relacionamentos
+    if (todasRelacionadas.size === 0) return [];
+  
+    // Mapeia as tabelas relacionadas para o formato do select
+    const relacionamentosAdicionados = Array.from(todasRelacionadas).map(value => ({
+      value: value,
       label: value,
     }));
-  }, [selectedTabela, selectedRelacionada, relationships]);  
+  
+    return relacionamentosAdicionados;
+  }, [selectedTabela, selectedRelacionada, relationships]);
+  
+  
+  
 
   useEffect(() => {
     const handleClearSelectedCampos = () => {
@@ -179,6 +254,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
     setMenuIsOpen(true);
   };
 
+  
+
   return (
     <div className="flex flex-col justify-start items-start ml-20">
       <div className="mt-5">
@@ -214,17 +291,19 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
           <Select
             isMulti
             name="relacionadas"
-            options={relacionadaOptions}
+            options={relacionadaOptions} // Opções geradas pelo useMemo
             className="basic-single w-96"
             classNamePrefix="Select"
             placeholder="Selecione uma relação..."
             onChange={(selectedOptions) => {
-              setSelectedRelacionada(selectedOptions ? selectedOptions.map(option => option.value) : []);
-              handleAllLeftClick();
+              const selectedValues = selectedOptions ? selectedOptions.map(option => option.value) : [];
+              setSelectedRelacionada(selectedValues); // Atualiza o estado de tabelas relacionadas
+              handleAllLeftClick(); // Alguma ação que você já está utilizando
             }}
-            value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))}
+            value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))} // Mantém os valores selecionados
             closeMenuOnSelect={false}
           />
+
           <div id='info-click' className={mostrarInfo2 ? 'up show' : 'up'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo2(prev => !prev)} ref={buttonRef}>
               <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -241,17 +320,18 @@ function TabelaCampos({ onDataChange, handleAllLeftClick }) {
           <Select
             isMulti
             name="campos"
-            options={campoOptions}
+            options={campoOptions} // Campos gerados a partir das tabelas selecionadas
             className="basic-multi-select w-96"
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."
             onChange={handleChange}
-            value={campoOptions.filter(option => selectedCampos.includes(option.value))}
+            value={campoOptions.filter(option => selectedCampos.includes(option.value))} // Exibe os campos selecionados
             menuIsOpen={menuIsOpen} // Controla a visibilidade do menu
             onMenuOpen={() => setMenuIsOpen(true)} // Abre o menu
             onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
           />
-          <div id='info-click' className={mostrarInfo3? 'up show' : 'up'} ref={dicaRef}>
+
+          <div id='info-click' className={mostrarInfo3 ? 'up show' : 'up'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo3(prev => !prev)} ref={buttonRef}>
               <svg class="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd" />
