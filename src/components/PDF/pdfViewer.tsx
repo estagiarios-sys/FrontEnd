@@ -55,9 +55,9 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
           table: table[0].values.map((_, rowIndex) =>
             table.map(col => col.values[rowIndex])
           ),
-          infos: 'Informações Genéricas...',
-          op_produto: 'op: 1234',
-          titulo: updatedSchemas?.titulo?.content || 'Título Aqui',
+          infos: 'Informações Aqui',
+          op_produto: 'op: 555555',
+          titulo: 'Título Aqui',
           qrcode: 'https://systextil.com.br/',
           barcodes: '1234567890',
         }
@@ -69,10 +69,10 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
           template,
           inputs,
           plugins: {
+            table: tableBeta,
             line,
             image,
             text,
-            Table: tableBeta,
             qrcode: barcodes.qrcode,
             barcode: barcodes.code128,
             rectangle,
@@ -96,7 +96,7 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
       basePdf: {
         width: 210,
         height: 297,
-        padding: [10, 10, 10, 10],
+        padding: [5, 5, 5, 5],
       },
       schemas: [
         {
@@ -108,44 +108,30 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
             width: 81.1,
             height: 15.2,
           },
+
           op_produto: {
             type: 'text',
-            content: 'op: 1234',
+            content: 'op: 555555',
             fontSize: 20,
-            position: { x: 166, y: 17.2 },
+            position: { 
+              x: 166, 
+              y: 17.2 
+            },
             width: 36,
             height: 8.5,
           },
-          image: {
-            type: 'image',
-            position: {
-              x: 8.7,
-              y: 2.9
-            },
-            width: 33,
-            height: 25
-          },
-          infos: {
-            type: 'text',
-            fontSize: 20,
-            position: { x: 56.7, y: 197.5 },
-            width: 87,
-            height: 9.8,
-          },
+
           line_1: {
             type: 'line',
-            position: { x: 8.2, y: 30 },
+            position: {
+              x: 8.2,
+              y: 30
+            },
             width: 194,
             height: 0.8,
             color: '#000000'
           },
-          line_2: {
-            type: 'line',
-            position: { x: 8.2, y: 195 },
-            width: 194,
-            height: 0.8,
-            color: '#000000'
-          },
+          
           table: {
             type: 'table',
             position: {
@@ -153,8 +139,9 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
               y: 36
             },
             width: 190,
-            height: 150,
+            height: 200, // Limite o tamanho da tabela para não ultrapassar a página, esta dando erro aqui
             showHead: true,
+            pageBreak: 'auto', // Habilitar quebra de página, se necessário
             head: table.map(col => col.column),
             headWidthPercentages: Array(columnCount).fill(widthPercentage),
             tableStyles: {
@@ -206,29 +193,82 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
                 left: 5
               }
             },
-            columnStyles: {
-              minWidth: 10,
-              maxWidth: 60,
-            }
+            columnStyles: {},
           },
+
+          line_3: {
+            type: 'line',
+            position: {
+              x: 8.2,
+              y: 200
+            },
+            width: 194,
+            height: 0.8,
+            color: '#000000'
+          },
+
           qrcode: {
             type: 'qrcode',
-            position: { x: 7.1, y: 197.5 },
+            content: 'https://systextil.com.br/',
+            position: {
+              x: 7.1,
+              y: 269
+            },
             width: 26.60,
-            height: 23
+            height: 20
           },
+
           barcodes: {
             type: 'code128',
-            position: { x: 148.50, y: 199 },
+            content: 'https://systextil.com.br/',
+            position: {
+              x: 145,
+              y: 269
+            },
             width: 56,
             height: 19.4
           },
+
+          infos: {
+            type: 'text',
+            content: 'Informações Genéricas...',
+            fontSize: 20,
+            position: {
+              x: 56.7,
+              y: 277.3
+            },
+            width: 87,
+            height: 9.8,
+          },
+
+          line_2: {
+            type: 'line',
+            position: {
+              x: 8.2,
+              y: 266
+            },
+            width: 194,
+            height: 0.8,
+            color: '#000000'
+          },
+
+          rectangle: {
+            type: 'rectangle',
+            borderWidth: 1,
+            borderColor: '#000000',
+            color: '',
+            position: {
+              x: 5,
+              y: 4
+            },
+            width: 200,
+            height: 287,
+          } 
         }
       ]
     };
   };
-
-  return <div id="designer-container" style={{ width: '100%', height: '100%' }}></div>;
+  return <div id="designer-container" style={{ width: '100%', height: '100hv' }}></div>;
 }
 
 export default View;

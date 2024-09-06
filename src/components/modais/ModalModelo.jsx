@@ -59,8 +59,6 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
     const handleUseModel = () => {
         if (selectedItem) {
             onSelect(selectedItem.value);
-            setModalMessage('Modelo gerado com sucesso');
-            setIsModalModalOpen(true);  // Passa a key selecionada para o componente pai
             onClose(); // Fecha o modal
         } else {
             setModalMessage('Selecione um Modelo para Salvar');

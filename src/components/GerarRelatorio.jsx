@@ -144,22 +144,17 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada }) {
             };
 
             if (selectedRelacionada && relationshipData.length > 0) {
-                const tabelasSelecionadas = [selectTable, ...selectedRelacionada];
 
-                tabelasSelecionadas.forEach((tabelaPrincipal) => {
-                    selectedRelacionada.forEach((tabelaRelacionada) => {
-                        if (tabelaPrincipal !== tabelaRelacionada) {
-                            const tablePair = `${tabelaPrincipal} e ${tabelaRelacionada}`;
-                            const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
+                console.log('tabelas selecionadas:', selectedRelacionada);
 
-                            if (relationship) {
-                                console.log('Relacionamento encontrado:', relationship);
-                                jsonRequest.joins.push(relationship.join);
-                            } else {
-                                console.log('Relacionamento não encontrado para:', tablePair);
-                            }
-                        }
-                    });
+                selectedRelacionada.forEach((tablePair) => {
+                    const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
+                    if (relationship) {
+                        console.log('Relacionamento encontrado:', relationship);
+                        jsonRequest.joins.push(relationship.join);
+                    } else {
+                        console.log('Relacionamento não encontrado para:', tablePair);
+                    }
                 });
             }
 
