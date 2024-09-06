@@ -9,21 +9,23 @@ export default function Nova() {
   const designerRef = useRef<Designer | null>(null);
   const [savedTemplate, setSavedTemplate] = useState<Template | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar a abertura do modal
+  const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState(""); // Estado para a mensagem do modal
   const [templateName, setTemplateName] = useState(""); // Estado para armazenar o nome do template
+  const [updateName, setUpdateName] = useState("");
 
   useEffect(() => {
-
     const domContainer = document.getElementById('designer-container');
 
     if (domContainer) {
       const template: Template = {
-        // esse cara gera a borda rosa do pdf que serve para enquadrar a tabela, essa mesma borda não é gerada na hora da exportação.
+        // esse cara gera a borda rosa do pdf que serve para enquadrar a tabela, a mesma borda não é gerada na hora da exportação.
         basePdf: { 
           width: 210, // Largura em milímetros (A4)
           height: 297, // Altura em milímetros (A4)
           padding: [5, 5, 5, 5] // Padding: [top, right, bottom, left]
         },
+
         schemas: [
           {
             titulo: {
@@ -131,12 +133,11 @@ export default function Nova() {
               ]),
               showHead: true,
               head: ["%tableName%", "%tableName%", "%tableName%"],
-              headWidthPercentages: [30, 30, 40],
+              headWidthPercentages: [31, 38, 31],
               tableStyles: {
                 borderWidth: 0.3,       //espessura da borda
                 borderColor: "#000000" //cor da borda da tabela
               },
-              
               headStyles: {
                 fontName: "Helvetica",
                 fontSize: 13,
@@ -188,9 +189,28 @@ export default function Nova() {
         ]
       };
 
-      const plugins = { text, image, line, rectangle, ellipse, svg, qrcode: barcodes.qrcode, barcode: barcodes.code128, table: tableBeta };
+      const plugins = { 
+        text, 
+        image, 
+        line, 
+        rectangle, 
+        ellipse, 
+        svg, 
+        qrcode: barcodes.qrcode, 
+        barcode: barcodes.code128, 
+        table: tableBeta 
+      };
 
-      const designer = new Designer({ domContainer, template, options: { lang: 'en', labels: { fieldsList: 'Lista de Elementos' } }, plugins })
+      const designer = new Designer({ 
+        domContainer, 
+        template, 
+        options: { 
+          lang: 'en', 
+          labels: { 
+            fieldsList: 'Lista de Elementos' 
+          } 
+        }, plugins 
+      })
 
       designerRef.current = designer;
 
@@ -198,11 +218,6 @@ export default function Nova() {
         console.log('Template antes de ser salvo:', updatedTemplate); // Adicione este log
         setSavedTemplate(updatedTemplate);
       });
-      
-      setTimeout(() => {
-        const currentTemplate = designer.getTemplate();
-        designer.saveTemplate();
-      }, 3000); 
 
     } else {
       console.error('Container do DOM não encontrado');
@@ -217,33 +232,51 @@ export default function Nova() {
     if (designerRef.current) {
       const updatedTemplate = designerRef.current.getTemplate();
       setSavedTemplate(updatedTemplate);
-      
+
       // Abre o modal para perguntar o nome do template
       setModalMessage("Digite o nome para salvar o template:");
       setIsModalOpen(true);
     }
   };
 
-
   const handleConfirmModal = (inputValue?: string) => {
     if (inputValue) {
-      // Salva o template no localStorage
-      localStorage.setItem(inputValue, JSON.stringify(savedTemplate));
-      console.log('Template salvo com o nome:', inputValue);
-      
-      // Atualiza a mensagem do modal para mostrar um sucesso
-      setModalMessage("Template salvo com sucesso!");
-      setIsModalOpen(false);
-      
-      // Limpa o nome do template
-      setTemplateName("");
+      const existingTemplate = localStorage.getItem(inputValue);
+
+      if (existingTemplate) {
+        setUpdateName(inputValue);
+        setModalMessage("Esse nome já existe. Deseja sobrescrever os dados?");
+        setIsModalUpdateOpen(true);
+      } else {
+        // Salva o template no localStorage
+        localStorage.setItem(inputValue, JSON.stringify(savedTemplate));
+        console.log('Template salvo com o nome:', inputValue);
+
+        setIsModalOpen(false);
+      } 
     } else {
       alert("Por favor, digite um nome válido para o template.");
     }
   };
 
+  const handleUpdateModal = () => {   
+    if (updateName) {
+      // Salva o template no localStorage
+      localStorage.setItem(updateName, JSON.stringify(savedTemplate));
+      console.log('Template salvo com o nome:', updateName);
+      setIsModalOpen(false);
+
+    } else {
+      alert("Ocorreu um erro enviando o template. Por favor, tente novamente.");
+    }
+  };
+
   const handleModalClose = () => {
     setIsModalOpen(false);
+  };
+
+  const handleModalUpdateClose = () => {
+    setIsModalUpdateOpen(false);
   };
 
   const handleNameChange = (inputValue: string) => {
@@ -253,7 +286,6 @@ export default function Nova() {
   return (
     <div>
       <button className='ml-0.5  h-8 border border-black rounded-md transition-colors duration-300 hover:border-blue-200' onClick={handleManualSave}>Salvar</button>
-
       <div id="designer-container" style={{ width: '100%', height: '100%' }}></div>
       
       {/* Componente ModalModal */}
@@ -263,8 +295,14 @@ export default function Nova() {
         onConfirm={handleConfirmModal} 
         message={modalMessage} 
         modalType="DIGITAR_NOME" 
-        // Passa a função de atualização do nome
-        onNameChange={handleNameChange}
+        onNameChange={handleNameChange} // Passa a função de atualização do nome
+      />
+      <ModalModal 
+        isOpen={isModalUpdateOpen} 
+        onClose={handleModalUpdateClose} 
+        onConfirm={handleUpdateModal} 
+        message={modalMessage} 
+        modalType="APAGAR" 
       />
     </div>
   );
