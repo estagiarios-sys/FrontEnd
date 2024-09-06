@@ -104,7 +104,7 @@ function CamposSelecionados({
                           <input
                             type="text"
                             onBlur={(e) => handleCustomNameChange(e, campo)}
-                            className="border border-gray-300 rounded p-1"
+                            className="border border-custom-azul-escuro rounded p-1"
                             placeholder={campo}
                           />
                         </td>

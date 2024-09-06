@@ -106,17 +106,6 @@ function Main() {
             </div>
             <div>
               <button id='info-hover'
-                onClick={handleAllLeftClick}
-                className='left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex'
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                </svg>
-                <div className="info-texto">Remover todos os campos</div>
-              </button>
-            </div>
-            <div>
-              <button id='info-hover'
                 onClick={handleAllRightClick}
                 className='left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex'
               >
@@ -124,6 +113,17 @@ function Main() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                 </svg>
                 <div className="info-texto">Adicionar todos os campos selecionados</div>
+              </button>
+            </div>
+            <div>
+              <button id='info-hover'
+                onClick={handleAllLeftClick}
+                className='left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex'
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <div className="info-texto">Remover todos os campos</div>
               </button>
             </div>
           </div>

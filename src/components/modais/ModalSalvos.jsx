@@ -191,17 +191,17 @@ function ModalSalvos({ isOpen, onClose }) {
                         backgroundColor: '#fff',
                     }}
                 >
-                    <button
+                    <button 
                         style={{
                             backgroundColor: '#ED1846',
                             border: 'none',
                             borderRadius: '5px',
                             color: '#fff',
-                            width: '60px',
-                            height: '30px',
-                            fontSize: '12px',
+                            width: '80px',
+                            height: '40px',
+                            fontSize: '13px',
                             cursor: 'pointer',
-                            marginRight: '275px',
+                            marginRight: '220px',
                             transition: 'background-color 0.3s ease',
                             backgroundColor: isHoveredButtonExcluir ? '#B11236' : '#ED1846'
                         }}
@@ -217,10 +217,10 @@ function ModalSalvos({ isOpen, onClose }) {
                             border: 'none',
                             borderRadius: '5px',
                             color: '#fff',
-                            width: '60px',
-                            height: '30px',
+                            width: '80px',
+                            height: '40px',
                             padding: '0', // Remover padding para garantir que o tamanho definido seja exato
-                            fontSize: '12px',
+                            fontSize: '13px',
                             cursor: 'pointer',
                             marginRight: '10px',
                             display: 'flex', // Usar flexbox para alinhamento
@@ -240,10 +240,10 @@ function ModalSalvos({ isOpen, onClose }) {
                             border: 'none',
                             color: '#fff',
                             borderRadius: '5px',
-                            width: '60px',
-                            height: '30px',
+                            width: '80px',
+                            height: '40px',
                             padding: '0',
-                            fontSize: '12px',
+                            fontSize: '13px',
                             cursor: 'pointer',
                             display: 'flex', // Usar flexbox para alinhamento
                             alignItems: 'center', // Alinhamento vertical
