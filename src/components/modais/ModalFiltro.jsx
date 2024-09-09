@@ -135,7 +135,9 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                 setModalMessage("Filtro salvo com sucesso");
                 setModalType("SUCESSO");
                 setModalOpen(true);
-                return `${campo.value} ${campo.ordenacao} '${valor}'`;
+                const value = campo.value || '';
+                const valorAntesDeAs = value.split(/\sas\s/)[0].trim();
+                return `${valorAntesDeAs} ${campo.ordenacao} '${valor}'`;
             }
         });
 
