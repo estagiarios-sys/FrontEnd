@@ -1,7 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import View from "../PDF/pdfViewer";
 
 function ModalPdfView({ isOpen, onClose, table, templateKey }) {
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'; // Impede o scroll da página
+    } else {
+      document.body.style.overflow = 'auto'; // Permite o scroll da página
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto'; // Permite o scroll da página
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
   
   return (

@@ -305,6 +305,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                 <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 20px 20px 20px' }}>
                     <button
                         style={{
+                            fontWeight: 'bold',
                             backgroundColor: '#6c757d',
                             border: 'none',
                             color: '#fff',
@@ -327,6 +328,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     </button>
                     <button
                         style={{
+                            fontWeight: 'bold',
                             border: 'none',
                             color: '#fff',
                             borderRadius: '5px',
