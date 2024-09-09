@@ -196,17 +196,6 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
             columnStyles: {},
           },
 
-          line_3: {
-            type: 'line',
-            position: {
-              x: 8.2,
-              y: 200
-            },
-            width: 194,
-            height: 0.8,
-            color: '#000000'
-          },
-
           qrcode: {
             type: 'qrcode',
             content: 'https://systextil.com.br/',
@@ -251,19 +240,6 @@ const View: React.FC<ViewProps> = ({ table, templateKey  }) => {
             height: 0.8,
             color: '#000000'
           },
-
-          rectangle: {
-            type: 'rectangle',
-            borderWidth: 1,
-            borderColor: '#000000',
-            color: '',
-            position: {
-              x: 5,
-              y: 4
-            },
-            width: 200,
-            height: 287,
-          } 
         }
       ]
     };
