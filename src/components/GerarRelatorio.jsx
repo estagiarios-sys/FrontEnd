@@ -26,7 +26,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [isModalSalvarConOpen, setIsModalSalvarCon] = useState(false);
     const [sqlQuery, setSqlQuery] = useState('');
     const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false); // ModalModal para exibir avisos
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 15;
 
     const handleSelectTemplate = (key) => {
         setSelectedTemplateKey(key);
@@ -130,6 +131,25 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setCondicoesString(conditions);
     };
 
+    const hasData = tableData.length > 0 && tableData[0].values;
+
+    // Calcular o número total de páginas
+    const totalPages = hasData ? Math.ceil(tableData[0].values.length / itemsPerPage) : 0;
+
+    // Função para mudar a página atual
+    const changePage = (direction) => {
+        setCurrentPage(prevPage => {
+            if (direction === 'next' && prevPage < totalPages) return prevPage + 1;
+            if (direction === 'prev' && prevPage > 1) return prevPage - 1;
+            return prevPage;
+        });
+    };
+
+    // Calcular o índice inicial e final dos itens da página atual
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const shouldShowPagination = hasData && tableData[0].values.length > 15;
+
     const orderByString = localStorage.getItem('orderByString');
 
     const fetchData = async () => {
@@ -208,7 +228,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 },
                 body: loadedQuery,
             });
-            
+
             handleLoadFromLocalStorage()
             localStorage.removeItem('loadedQuery')
 
@@ -255,6 +275,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
             if (data && data.length > 0) {
                 setIsView(true);
+                setCurrentPage(1);
             } else {
                 setIsView(false);
             }
@@ -363,33 +384,56 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                     </div>
                 </div>
             </div>
-            <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
-                <table className="w-full text-sm">
-                    {tableData.length > 0 && (
-                        <thead className="bg-custom-azul-escuro text-white">
-                            <tr>
-                                {columns.map((column, index) => (
-                                    <th key={index} className="p-2 border-b text-center">{column}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                    )}
-                    <tbody>
-                        {tableData.length > 0 ? (
-                            tableData[0].values.map((_, rowIndex) => (
-                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                                    {columns.map((column, colIndex) => (
-                                        <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex].values[rowIndex]}</td>
+            <div className="w-full text-center">
+                <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
+                    <table className="w-full text-sm">
+                        {hasData && (
+                            <thead className="bg-custom-azul-escuro text-white">
+                                <tr>
+                                    {columns.map((column, index) => (
+                                        <th key={index} className="p-2 border-b text-center">{column}</th>
                                     ))}
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
-                            </tr>
+                            </thead>
                         )}
-                    </tbody>
-                </table>
+                        <tbody>
+                            {hasData ? (
+                                tableData[0].values.slice(startIndex, endIndex).map((_, rowIndex) => (
+                                    <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                                        {columns.map((column, colIndex) => (
+                                            <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex]?.values[startIndex + rowIndex]}</td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                {shouldShowPagination && (
+                <div className="flex justify-center mt-4 mb-4">
+                    <button
+                        onClick={() => changePage('prev')}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                    >
+                        Anterior
+                    </button>
+                    <span className="flex items-center">
+                        Página {currentPage} de {totalPages}
+                    </span>
+                    <button 
+                        onClick={() => changePage('next')}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                    >
+                        Próxima
+                    </button>
+                </div>
+            )}
             </div>
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
