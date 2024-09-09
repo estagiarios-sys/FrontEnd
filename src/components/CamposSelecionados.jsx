@@ -50,7 +50,7 @@ function CamposSelecionados({
       const campoSemApelido = campo.replace(/\s+as\s+.*$/, '');
 
       if (campoSemApelidoComparacao === campoSemApelido) {
-        return value ? `${campoSemApelido} as '${value}'` : campoSemApelido;
+        return value ? `${campoSemApelido} as '${value} '` : campoSemApelido;
       } else {
         return selectedCampo;
       }
