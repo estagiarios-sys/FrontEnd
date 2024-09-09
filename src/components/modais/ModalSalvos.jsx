@@ -214,6 +214,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                 >
                     <button 
                         style={{
+                            fontWeight: 'bold',
                             backgroundColor: '#ED1846',
                             border: 'none',
                             borderRadius: '5px',
@@ -234,6 +235,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                     </button>
                     <button className="align-left"
                         style={{
+                            fontWeight: 'bold',
                             backgroundColor: '#6c757d',
                             border: 'none',
                             borderRadius: '5px',
@@ -258,6 +260,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                     </button>
                     <button className="align-left"
                         style={{
+                            fontWeight: 'bold',
                             border: 'none',
                             color: '#fff',
                             borderRadius: '5px',
@@ -281,6 +284,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                 </div>
             </div>
             <ModalModal
+                modalType="APAGAR"
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsModalModalOpen(false)}
                 onConfirm={deleteSavedQuery}
@@ -295,7 +299,10 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
             <ModalModal
                 isOpen={isConfirmModalOkOpen}
                 onClose={() => setIsModalModalOkOpen(false)}
-                onConfirm={() => setIsModalModalOkOpen(false)}
+                onConfirm={() => {
+                    setIsModalModalOkOpen(false);
+                    onClose();
+                }}
                 confirmText="Confirmar"
                 message={modalMessage}
                 title="Aviso"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function ModalSql({ isOpen, onClose }) {
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
@@ -11,6 +11,18 @@ function ModalSql({ isOpen, onClose }) {
         resetHoverStates();
         onClose();
     };
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'; // Impede o scroll da página
+        } else {
+            document.body.style.overflow = 'auto'; // Permite o scroll da página
+        }
+
+        return () => {
+            document.body.style.overflow = 'auto'; // Permite o scroll da página
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

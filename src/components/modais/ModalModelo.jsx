@@ -29,6 +29,8 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
         if (isOpen) {
             loadModels(); // Carrega as opções do modelo quando o modal é aberto
         }
+
+        setError(''); // Limpa a mensagem de erro, se houver
     }, [isOpen]);
 
     const resetHoverStates = () => {
@@ -64,12 +66,9 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
             onSelect(selectedItem.value);
             onClose(); // Fecha o modal
         } else {
-            setModalMessage('Selecione um Modelo para Salvar');
-            setIsModalModalOpen(true);
-
+            setError('Selecione um modelo para aplicar'); // Define a mensagem de erro
         }
-
-        setError('');
+        
     };
 
     if (!isOpen) return null; // Se o modal não estiver aberto, não renderiza nada
@@ -129,6 +128,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                     <div className="flex justify-end space-x-2 p-4 mt-4">
                         <button
                             style={{
+                                fontWeight: 'bold',
                                 backgroundColor: '#ED1846',
                                 border: 'none',
                                 borderRadius: '5px',
@@ -149,6 +149,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                         </button>
                         <button
                             style={{
+                                fontWeight: 'bold',
                                 border: 'none',
                                 color: '#fff',
                                 borderRadius: '5px',
@@ -177,7 +178,7 @@ function ModalModelo({ isOpen, onClose, onSelect }) {
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsModalModalOpen(false)}
                 onConfirm={handleConfirm}
-                confirmText="Confirmar"
+                confirmText="Excluir"
                 message={modalMessage}
                 title="Confirmação"
             />
