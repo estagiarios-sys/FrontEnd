@@ -21,6 +21,19 @@ export async function generatePDF(tableData: TableData[], templateKey: string | 
     };
   }
 
+  function updateSchema(baseSchema: any, updates: any): any {
+    const updatedSchema = { ...baseSchema };
+
+    Object.keys(updates).forEach(key => {
+      // Evitar sobrescrever a tabela
+      if (key !== 'table') {
+        updatedSchema[key] = updates[key];
+      }
+    });
+
+    return updatedSchema;
+  }
+
   const transformedData = transformTableData(tableData);
   const columnCount = tableData.length;
   const widthPercentage = 100 / columnCount;
@@ -36,7 +49,7 @@ export async function generatePDF(tableData: TableData[], templateKey: string | 
     if (savedTemplate) {
       try {
         const parsedTemplate = JSON.parse(savedTemplate) as Template;
-        
+
         const headStyles = parsedTemplate.schemas[0]?.table?.headStyles as { [key: string]: any };
         if (headStyles?.backgroundColor) {
           backgroundColor = headStyles.backgroundColor;
@@ -58,11 +71,11 @@ export async function generatePDF(tableData: TableData[], templateKey: string | 
   }
 
   // Template padrão
-  const template: Template = {
+  const baseTemplate: Template = {
     basePdf: {
       width: 210, // Largura em milímetros (A4)
       height: 297, // Altura em milímetros (A4)
-      padding: [10, 10, 10, 10] // Padding: [top, right, bottom, left]
+      padding: [5, 5, 5, 5] // Padding: [top, right, bottom, left]
     },
     schemas: [
       {
@@ -140,7 +153,7 @@ export async function generatePDF(tableData: TableData[], templateKey: string | 
             y: 37.85
           },
           width: 150,
-          height: 57.5,
+          height: 100,
           content: JSON.stringify(transformedData.values),
           showHead: true,
           head: transformedData.headers,
@@ -200,6 +213,9 @@ export async function generatePDF(tableData: TableData[], templateKey: string | 
     ]
   };
 
+  // Aplica a atualização do schema, se houver
+  const updatedTemplate = updateSchema(baseTemplate.schemas[0], templateKey ? JSON.parse(localStorage.getItem(templateKey) || '{}').schemas[0] : {});
+
   const inputs = [
     {
       table: transformedData.values, 
@@ -213,11 +229,14 @@ export async function generatePDF(tableData: TableData[], templateKey: string | 
   ];
 
   try {
-    console.log("Template:", template);
+    console.log("Template:", baseTemplate);
     console.log("Inputs:", inputs);
 
     const pdf = await generate({
-      template,
+      template: {
+        ...baseTemplate,
+        schemas: [updatedTemplate]
+      },
       inputs,
       plugins: {
         text,
