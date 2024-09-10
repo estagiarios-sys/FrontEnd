@@ -7,6 +7,37 @@ const ordenacaoOptions = [
   { value: 'DESC', label: 'DESC' },
 ];
 
+const TotalizerOptions = [
+  { value: 'COUNT', label: 'CONTAGEM' },
+  { value: 'SUM', label: 'SOMA' },
+  { value: 'AVG', label: 'MÉDIA' },
+  { value: 'MIN', label: 'MÍNIMO' },
+  { value: 'MAX', label: 'MÁXIMO' },
+];
+
+let totalizers = {};
+
+export function removeSelectedTotalizers(camposParaRemover) {
+
+  console.log('camposParaRemover', camposParaRemover);
+
+  camposParaRemover.forEach((campo) => {
+    console.log('campo removido asadasdasdads', campo);
+    const campoSemApelido = campo.replace(/\s+as\s+.*$/, ''); // Remove o apelido do campo
+    delete totalizers[campoSemApelido];
+  });
+  console.log('totalizadorString', totalizers);
+}
+
+export function resetTotalizers() {
+  totalizers = {};
+  console.log('totalizadorString', totalizers);
+}
+
+export function getTotalizers() {
+  return totalizers;
+}
+
 function CamposSelecionados({
   selectedCampos = [],
   onDragEnd,
@@ -18,6 +49,22 @@ function CamposSelecionados({
   const [selectedOrder, setSelectedOrder] = useState(null); // Estado para a seleção atual
   const [customNames, setCustomNames] = useState({}); // Estado para os nomes personalizados
   const selectRefs = useRef({}); // Referências para os componentes CustomSelect
+
+  const handleTotalizerSave = (selectedOption, campo) => {
+
+    const campoSemApelido = campo.replace(/\s+as\s+.*$/, ''); // Remove o apelido do campo
+    
+    if (selectedOption) {
+      // Se uma opção for selecionada, adiciona ou atualiza o totalizador no objeto
+      totalizers[campoSemApelido] = selectedOption.value;
+    } else {
+      // Se a opção for desmarcada (ou seja, o totalizador foi removido), remove o campo do objeto
+      delete totalizers[campoSemApelido];
+    }
+
+    console.log('totalizadorString', totalizers);
+  };
+
 
   const handleOrderBySave = (selectedOption, fieldName) => {
     const newOrder = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
@@ -73,9 +120,9 @@ function CamposSelecionados({
             <thead>
               <tr className="bg-custom-azul-escuro text-white ">
                 <th className="py-2 px-4 text-sm w-[60px]"></th>
-                <th className="py-2 px-4 text-sm w-[146px]">Campo</th>
-                <th className="py-2 px-4 text-sm w-[216px]">Apelido</th>
-                <th className="py-2 px-4 text-sm w-[177px]">Ordem</th>
+                <th className="py-2 px-4 text-sm w-[216px]">Campo</th>
+                <th className="py-2 px-4 text-sm w-[193px]">Ordem</th>
+                <th className="py-2 px-4 text-sm w-[241px]">Totalizador</th>
               </tr>
             </thead>
             <tbody>
@@ -99,7 +146,6 @@ function CamposSelecionados({
                             />
                           </td>
                         )}
-                        <td className="py-2 px-4 border-b border-custom-azul text-sm">{campo}</td>
                         <td className="py-2 px-4 border-b border-custom-azul text-sm">
                           <input
                             type="text"
@@ -124,7 +170,20 @@ function CamposSelecionados({
                             placeholder="Selecione..."
                             className="basic-single"
                             classNamePrefix="select"
-                            width="8rem"
+                            width="9rem"
+                            isClearable
+                          />
+                        </td>
+                        <td
+                          className="py-2 px-4 border-b border-custom-azul text-sm"
+                        >
+                          <CustomSelect
+                            options={TotalizerOptions}
+                            onChange={(selectedOption) => handleTotalizerSave(selectedOption, campo)}
+                            placeholder="Selecione..."
+                            className="basic-single"
+                            classNamePrefix="select"
+                            width="12rem"
                             isClearable
                           />
                         </td>

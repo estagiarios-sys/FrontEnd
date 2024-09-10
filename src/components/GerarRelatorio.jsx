@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalModal from "./modais/ModalModal";
+import { getTotalizers } from "./CamposSelecionados";
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
 
@@ -160,7 +161,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 conditions: condicoesString, // Adicione a condição aqui
                 orderBy: orderByString, // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
-
+                totalizers: getTotalizers(), // Adicione os totalizadores conforme necessário
             };
 
             if (selectedRelacionada && relationshipData.length > 0) {
@@ -411,29 +412,49 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                                 </tr>
                             )}
                         </tbody>
+                        <tfoot>
+                            <tr className="bg-gray-200 text-center">
+                                <td className="p-2 border-t" colSpan={columns.length}>
+                                    <table className="w-full">
+                                        <tbody>
+                                            <tr>
+                                                <td className="text-left font-semibold text-custom-azul-escuro">TOTALIZADORES:</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr className="bg-gray-200 text-center">
+                                {columns.map((_, index) => (
+                                    <td key={index} className="p-2 border-t">
+                                        {'2'}
+                                    </td>
+                                ))}
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
                 {shouldShowPagination && (
-                <div className="flex justify-center mt-4 mb-4">
-                    <button
-                        onClick={() => changePage('prev')}
-                        disabled={currentPage === 1}
-                        className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
-                    >
-                        Anterior
-                    </button>
-                    <span className="flex items-center">
-                        Página {currentPage} de {totalPages}
-                    </span>
-                    <button 
-                        onClick={() => changePage('next')}
-                        disabled={currentPage === totalPages}
-                        className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
-                    >
-                        Próxima
-                    </button>
-                </div>
-            )}
+                    <div className="flex justify-center mt-4 mb-4">
+                        <button
+                            onClick={() => changePage('prev')}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                        >
+                            Anterior
+                        </button>
+                        <span className="flex items-center">
+                            Página {currentPage} de {totalPages}
+                        </span>
+                        <button
+                            onClick={() => changePage('next')}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                        >
+                            Próxima
+                        </button>
+                    </div>
+                )}
             </div>
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
