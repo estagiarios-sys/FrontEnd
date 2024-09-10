@@ -49,6 +49,7 @@ function CamposSelecionados({
   const [selectedOrder, setSelectedOrder] = useState(null); // Estado para a seleção atual
   const [customNames, setCustomNames] = useState({}); // Estado para os nomes personalizados
   const selectRefs = useRef({}); // Referências para os componentes CustomSelect
+  const selectTotalizerRefs = useRef({}); // Referências para os componentes CustomSelect
 
   const handleTotalizerSave = (selectedOption, campo) => {
 
@@ -76,6 +77,12 @@ function CamposSelecionados({
   const handleTdClick = (campo) => {
     if (selectRefs.current[campo]) {
       selectRefs.current[campo].openMenu(); // Abre o menu do CustomSelect
+    }
+  };
+
+  const handleTotalizerClick = (campo) => {
+    if (selectTotalizerRefs.current[campo]) {
+      selectTotalizerRefs.current[campo].openMenu(); // Abre o menu do CustomSelect
     }
   };
 
@@ -115,7 +122,7 @@ function CamposSelecionados({
           <table
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="w-[596px] min-w-full border-2 border-custom-azul-escuro"
+            className="w-auto min-w-full border-2 border-custom-azul-escuro"
           >
             <thead>
               <tr className="bg-custom-azul-escuro text-white ">
@@ -125,7 +132,7 @@ function CamposSelecionados({
                 <th className="py-2 px-4 text-sm w-[241px]">Totalizador</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="max-h-[322.4px] overflow-y-auto">
               {selectedCamposSemApelido.length > 0 ? (
                 selectedCamposSemApelido.map((campo, index) => (
                   <Draggable key={campo} draggableId={campo} index={index}>
@@ -176,8 +183,10 @@ function CamposSelecionados({
                         </td>
                         <td
                           className="py-2 px-4 border-b border-custom-azul text-sm"
+                          onClick={() => handleTotalizerClick(campo)}
                         >
                           <CustomSelect
+                            ref={(ref) => (selectTotalizerRefs.current[campo] = ref)}
                             options={TotalizerOptions}
                             onChange={(selectedOption) => handleTotalizerSave(selectedOption, campo)}
                             placeholder="Selecione..."
