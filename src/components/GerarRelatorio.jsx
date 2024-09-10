@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalModal from "./modais/ModalModal";
+import { getTotalizers } from "./CamposSelecionados";
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
 
@@ -28,6 +29,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false); // ModalModal para exibir avisos
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
+    const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
+
 
     const handleSelectTemplate = (key) => {
         setSelectedTemplateKey(key);
@@ -160,7 +163,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 conditions: condicoesString, // Adicione a condição aqui
                 orderBy: orderByString, // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
-
+                totalizers: getTotalizers(), // Adicione os totalizadores conforme necessário
             };
 
             if (selectedRelacionada && relationshipData.length > 0) {
@@ -197,18 +200,24 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
             const responseData = await response.json();
 
-            const [sql, colunasAtualizada, data] = responseData;
+            const [sql, sql2, colunasAtualizada, data, resultTotalizer] = responseData;
 
-            console.log('SQL:', sql);
+            const sqlFinal = "Primeira Consulta: " + sql + " Consulta do totalizador: " + sql2;
 
-            localStorage.setItem('SQLGeradoFinal', sql);
+            console.log('resultTotalizer:', resultTotalizer);
 
+            console.log('SQL Gerado:', sqlFinal);
+
+            localStorage.setItem('SQLGeradoFinal', sqlFinal);
+
+            setRenderTotalizerResult(resultTotalizer);
             setSqlQuery(sql);
             setColumns(colunasAtualizada);
 
             return colunasAtualizada.map((column, index) => ({
                 column,
                 values: data.map(row => row[index]),
+
             }));
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
@@ -285,6 +294,41 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             setIsView(false);
         }
     };
+
+    const renderTotalizer = () => {
+        if (!renderTotalizerResult) return null;
+
+        const totalizerKeys = Object.keys(renderTotalizerResult);
+
+        return (
+            <tfoot className= "border-t border-black">
+                <tr className="bg-gray-200 text-center">
+                    <td className="p-2 border-t-2 border-black" colSpan={columns.length}>
+                        <table className="w-full ">
+                            <tbody>
+                                <tr>
+                                    <td className="text-left font-semibold text-custom-azul-escuro ">TOTALIZADORES:</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr className="bg-gray-200 text-center">
+                    {columns.map((column, index) => {
+                        const totalizerKey = totalizerKeys.find(key => key.includes(column));
+                        return (
+                            <td 
+                            className="font-regular text-black pb-3"
+                            key={index}>
+                                {totalizerKey ? renderTotalizerResult[totalizerKey] : ""}
+                            </td>
+                        );
+                    })}
+                </tr>
+            </tfoot>
+        );
+    };
+
     return (
         <div className="flex flex-col w-full">
             <div className="w-full flex flex-row justify-between mt-4">
@@ -411,29 +455,30 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                                 </tr>
                             )}
                         </tbody>
+                        {renderTotalizer()}
                     </table>
                 </div>
                 {shouldShowPagination && (
-                <div className="flex justify-center mt-4 mb-4">
-                    <button
-                        onClick={() => changePage('prev')}
-                        disabled={currentPage === 1}
-                        className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
-                    >
-                        Anterior
-                    </button>
-                    <span className="flex items-center">
-                        Página {currentPage} de {totalPages}
-                    </span>
-                    <button 
-                        onClick={() => changePage('next')}
-                        disabled={currentPage === totalPages}
-                        className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
-                    >
-                        Próxima
-                    </button>
-                </div>
-            )}
+                    <div className="flex justify-center mt-4 mb-4">
+                        <button
+                            onClick={() => changePage('prev')}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                        >
+                            Anterior
+                        </button>
+                        <span className="flex items-center">
+                            Página {currentPage} de {totalPages}
+                        </span>
+                        <button
+                            onClick={() => changePage('next')}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                        >
+                            Próxima
+                        </button>
+                    </div>
+                )}
             </div>
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
