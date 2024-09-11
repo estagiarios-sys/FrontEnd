@@ -11,7 +11,8 @@ import ModalModal from "./modais/ModalModal";
 import { getTotalizers } from "./CamposSelecionados";
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
-
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false); // Modal para exibir as views salvas
     const [isModalOpenSQl, setIsModalOpenSQL] = useState(false); // Modal para exibir o SQL
     const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false); // Modal para exibir o filtros de selects
@@ -272,6 +273,18 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     };
 
     const handleGenerateReport = async () => {
+        setIsLoading(true);
+        setLoadingProgress(0);
+
+        const progressInterval = setInterval(() => {
+            setLoadingProgress((prevProgress) => {
+                if (prevProgress >= 100) {
+                    clearInterval(progressInterval);
+                    return 100;
+                }
+                return prevProgress + 10;
+            });
+        }, 100);
         try {
             let data;
             if (localStorage.getItem('loadedQuery')) {
@@ -292,6 +305,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
+        } finally {
+            clearInterval(progressInterval);
+            setIsLoading(false);
+            setLoadingProgress(100);
         }
     };
 
@@ -338,9 +355,16 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleGenerateReport}
+                            disabled={isLoading}
                         >
-                            Gerar Relatório
+                         {isLoading ? 'Carregando...' : 'Gerar Relatório'}
                         </button>
+                        {isLoading && (
+                <div className="fixed inset-0 flex flex-col items-center justify-center bg-opacity-50 bg-gray-200 z-50">
+                    <div className="ww-8 h-8 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
+                    <div className="mt-2 text-blue-500">{loadingProgress}%</div>
+                </div>
+            )}
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleModalSalvarCon}
