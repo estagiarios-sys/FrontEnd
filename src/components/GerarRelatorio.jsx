@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalModal from "./modais/ModalModal";
+import { getTotalizers } from "./CamposSelecionados";
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
 
@@ -26,6 +27,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [isModalSalvarConOpen, setIsModalSalvarCon] = useState(false);
     const [sqlQuery, setSqlQuery] = useState('');
     const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false); // ModalModal para exibir avisos
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 15;
+    const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
 
 
     const handleSelectTemplate = (key) => {
@@ -130,6 +134,25 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setCondicoesString(conditions);
     };
 
+    const hasData = tableData.length > 0 && tableData[0].values;
+
+    // Calcular o número total de páginas
+    const totalPages = hasData ? Math.ceil(tableData[0].values.length / itemsPerPage) : 0;
+
+    // Função para mudar a página atual
+    const changePage = (direction) => {
+        setCurrentPage(prevPage => {
+            if (direction === 'next' && prevPage < totalPages) return prevPage + 1;
+            if (direction === 'prev' && prevPage > 1) return prevPage - 1;
+            return prevPage;
+        });
+    };
+
+    // Calcular o índice inicial e final dos itens da página atual
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const shouldShowPagination = hasData && tableData[0].values.length > 15;
+
     const orderByString = localStorage.getItem('orderByString');
 
     const fetchData = async () => {
@@ -140,7 +163,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 conditions: condicoesString, // Adicione a condição aqui
                 orderBy: orderByString, // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
-
+                totalizers: getTotalizers(), // Adicione os totalizadores conforme necessário
             };
 
             if (selectedRelacionada && relationshipData.length > 0) {
@@ -177,18 +200,24 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
             const responseData = await response.json();
 
-            const [sql, colunasAtualizada, data] = responseData;
+            const [sql, sql2, colunasAtualizada, data, resultTotalizer] = responseData;
 
-            console.log('SQL:', sql);
+            const sqlFinal = "Primeira Consulta: " + sql + " Consulta do totalizador: " + sql2;
 
-            localStorage.setItem('SQLGeradoFinal', sql);
+            console.log('resultTotalizer:', resultTotalizer);
 
+            console.log('SQL Gerado:', sqlFinal);
+
+            localStorage.setItem('SQLGeradoFinal', sqlFinal);
+
+            setRenderTotalizerResult(resultTotalizer);
             setSqlQuery(sql);
             setColumns(colunasAtualizada);
 
             return colunasAtualizada.map((column, index) => ({
                 column,
                 values: data.map(row => row[index]),
+
             }));
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
@@ -208,7 +237,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 },
                 body: loadedQuery,
             });
-            
+
             handleLoadFromLocalStorage()
             localStorage.removeItem('loadedQuery')
 
@@ -255,6 +284,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
             if (data && data.length > 0) {
                 setIsView(true);
+                setCurrentPage(1);
             } else {
                 setIsView(false);
             }
@@ -264,6 +294,41 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             setIsView(false);
         }
     };
+
+    const renderTotalizer = () => {
+        if (!renderTotalizerResult) return null;
+
+        const totalizerKeys = Object.keys(renderTotalizerResult);
+
+        return (
+            <tfoot className= "border-t border-black">
+                <tr className="bg-gray-200 text-center">
+                    <td className="p-2 border-t-2 border-black" colSpan={columns.length}>
+                        <table className="w-full ">
+                            <tbody>
+                                <tr>
+                                    <td className="text-left font-semibold text-custom-azul-escuro ">TOTALIZADORES:</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr className="bg-gray-200 text-center">
+                    {columns.map((column, index) => {
+                        const totalizerKey = totalizerKeys.find(key => key.includes(column));
+                        return (
+                            <td 
+                            className="font-regular text-black pb-3"
+                            key={index}>
+                                {totalizerKey ? renderTotalizerResult[totalizerKey] : ""}
+                            </td>
+                        );
+                    })}
+                </tr>
+            </tfoot>
+        );
+    };
+
     return (
         <div className="flex flex-col w-full">
             <div className="w-full flex flex-row justify-between mt-4">
@@ -309,7 +374,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={handleModalFiltro} className="relative flex flex-col justify-center items-center">
                                 {condicoesString && (
-                                    <span className="absolute -top-2 -right-1 bg-red-600 text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
+                                    <span className="absolute -top-2 -right-1 bg-custom-vermelho text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
                                         {condicoesString.split('AND').length} {/* Número de condições separadas por 'AND' */}
                                     </span>
                                 )}
@@ -327,7 +392,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path strokeLinecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
-                                <label htmlFor="mais">Editar</label>
+                                <label htmlFor="mais">Criar</label>
                             </button>
                         </div>
                     </div>
@@ -363,33 +428,57 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                     </div>
                 </div>
             </div>
-            <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
-                <table className="w-full text-sm">
-                    {tableData.length > 0 && (
-                        <thead className="bg-custom-azul-escuro text-white">
-                            <tr>
-                                {columns.map((column, index) => (
-                                    <th key={index} className="p-2 border-b text-center">{column}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                    )}
-                    <tbody>
-                        {tableData.length > 0 ? (
-                            tableData[0].values.map((_, rowIndex) => (
-                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                                    {columns.map((column, colIndex) => (
-                                        <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex].values[rowIndex]}</td>
+            <div className="w-full text-center">
+                <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
+                    <table className="w-full text-sm">
+                        {hasData && (
+                            <thead className="bg-custom-azul-escuro text-white">
+                                <tr>
+                                    {columns.map((column, index) => (
+                                        <th key={index} className="p-2 border-b text-center">{column}</th>
                                     ))}
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
-                            </tr>
+                            </thead>
                         )}
-                    </tbody>
-                </table>
+                        <tbody>
+                            {hasData ? (
+                                tableData[0].values.slice(startIndex, endIndex).map((_, rowIndex) => (
+                                    <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                                        {columns.map((column, colIndex) => (
+                                            <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex]?.values[startIndex + rowIndex]}</td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                        {renderTotalizer()}
+                    </table>
+                </div>
+                {shouldShowPagination && (
+                    <div className="flex justify-center mt-4 mb-4">
+                        <button
+                            onClick={() => changePage('prev')}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                        >
+                            Anterior
+                        </button>
+                        <span className="flex items-center">
+                            Página {currentPage} de {totalPages}
+                        </span>
+                        <button
+                            onClick={() => changePage('next')}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                        >
+                            Próxima
+                        </button>
+                    </div>
+                )}
             </div>
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />

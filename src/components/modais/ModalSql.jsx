@@ -1,7 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function ModalSql({ isOpen, onClose }) {
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
+
+    const resetHoverStates = () => {
+        setIsHoveredButtonX(false);
+    };
+
+    const handleClose = () => {
+        resetHoverStates();
+        onClose();
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'; // Impede o scroll da página
+        } else {
+            document.body.style.overflow = 'auto'; // Permite o scroll da página
+        }
+
+        return () => {
+            document.body.style.overflow = 'auto'; // Permite o scroll da página
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -47,7 +68,7 @@ function ModalSql({ isOpen, onClose }) {
                     <h5 className="font-bold mx-2">SQL</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={onClose}
+                        onClick={handleClose}
                         style={{
                             borderRadius: '50px',
                             cursor: 'pointer',
@@ -57,7 +78,6 @@ function ModalSql({ isOpen, onClose }) {
                             justifyContent: 'center',
                             alignItems: 'center',
                             fontSize: '16px',
-                            zIndex: 1001,
                             transition: 'background-color 0.3s ease',
                             backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
                         }}

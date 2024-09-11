@@ -285,7 +285,7 @@ export default function Nova() {
 
   return (
     <div>
-      <button className='ml-0.5  h-8 border border-black rounded-md transition-colors duration-300 hover:border-blue-200' onClick={handleManualSave}>Salvar</button>
+      <button className="fixed top-3 right-[410px] bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul text-white py-2 px-4 rounded z-50" onClick={handleManualSave}>Salvar</button>
       <div id="designer-container" style={{ width: '100%', height: '100%' }}></div>
       
       {/* Componente ModalModal */}

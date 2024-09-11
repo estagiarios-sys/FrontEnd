@@ -3,6 +3,7 @@ import TabelaCampos from './components/tabelas_campos';
 import CamposSelecionados from './components/CamposSelecionados';
 import GerarRelatorio from './components/GerarRelatorio';
 import logoSystextil from './imagens/logo-systextil-branca.png';
+import { resetTotalizers, removeSelectedTotalizers } from './components/CamposSelecionados';
 
 function Main() {
   const [selectedCampos, setSelectedCampos] = useState([]);
@@ -28,13 +29,14 @@ function Main() {
 
   // Remove campos selecionados com checkbox marcado e adiciona de volta aos disponíveis
   const handleIndividualLeftClick = () => {
-    const camposParaRemover = selectedCampos.filter(campo => checkedCampos.includes(campo));
-    const camposRestantes = selectedCampos.filter(campo => !checkedCampos.includes(campo));
+    const camposParaRemover = selectedCampos.filter(campo => checkedCampos.includes(campo.replace(/\s+as\s+.*$/, '')));
+    const camposRestantes = selectedCampos.filter(campo => !checkedCampos.includes(campo.replace(/\s+as\s+.*$/, '')));
     const orderByString = localStorage.getItem('orderByString') || '';
+
+    removeSelectedTotalizers(camposParaRemover);
 
     if (camposParaRemover.some(campo => orderByString.includes(campo))) {
       localStorage.setItem('orderByString', '');
-      console.log('Removido o orderByString do localStorage, no left click');
     }
 
     setAvailableCampos([...availableCampos, ...camposParaRemover]);
@@ -59,6 +61,7 @@ function Main() {
   // Move todos os campos selecionados para a lista de disponíveis e limpa a lista de selecionados
   const handleAllLeftClick = () => {
     localStorage.setItem('orderByString', '');
+    resetTotalizers();
     setAvailableCampos(prevAvailableCampos => [
       ...prevAvailableCampos,
       ...selectedCampos
