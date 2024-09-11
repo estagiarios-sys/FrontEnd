@@ -66,6 +66,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
             };
     
             const query = JSON.stringify(dataToSave);
+            console.log(query)
     
             const response = await fetch('http://localhost:8080/save', {
                 method: 'POST',
@@ -75,7 +76,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                 body: query,
             });
     
-            console.log(query);
+           
     
             if (!response.ok) {
                 throw new Error('Network response was not ok');
