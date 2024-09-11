@@ -55,57 +55,104 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
     fetchRelationships();
   }, []);
 
-  const extractFieldsAndTablesFromSQL = (sqlQuery) => {
-
+  const extractFieldsAndTablesFromSQL = (sqlQuery, relationships) => {
+    // Captura a tabela principal do FROM e as tabelas relacionadas do JOIN
     const regexTabelas = /FROM\s+(\w+)|JOIN\s+(\w+)/g;
     const regexCampos = /SELECT\s+(.*?)\s+FROM/;
-
+    
     const tabelas = [];
     const campos = [];
-
+    
     let matchTabelas;
-
+    
+    // Loop para capturar todas as tabelas do SQL
     while ((matchTabelas = regexTabelas.exec(sqlQuery)) !== null) {
       const tabela = matchTabelas[1] || matchTabelas[2];
-      if (tabela) {
+      if (tabela && !tabelas.includes(tabela)) {
         tabelas.push(tabela);
       }
     }
-
+    
+    // Captura os campos da consulta
     const matchCampos = sqlQuery.match(regexCampos);
     if (matchCampos) {
       const listaCampos = matchCampos[1].split(',').map(campo => campo.trim());
       campos.push(...listaCampos);
     }
-
-    return { tabelas, campos };
+  
+    // Filtra os relacionamentos para incluir apenas aqueles que estão realmente no SQL
+    const relacionadas = [...new Set(tabelas.reduce((acc, tabelaPrincipal) => {
+      relationships.forEach(rel => {
+        const [tabela1, tabela2] = rel.tabelas.split(' e ');
+        
+        // Verifica se a tabelaPrincipal faz parte do relacionamento e se não está já invertido.
+        if ((tabela1 === tabelaPrincipal || tabela2 === tabelaPrincipal) && !acc.includes(`${tabela2} e ${tabela1}`) && !acc.includes(`${tabela1} e ${tabela2}`)) {
+          
+          // Verifica se ambas as tabelas estão nas tabelas extraídas da SQL
+          if (tabelas.includes(tabela1) && tabelas.includes(tabela2)) {
+            const isTabelaPrincipalPrimeira = tabela1 === tabelaPrincipal;
+            const relacao = isTabelaPrincipalPrimeira ? `${tabela1} e ${tabela2}` : `${tabela2} e ${tabela1}`;
+            
+            // Adiciona a relação apenas se ela ainda não estiver presente.
+            if (!acc.includes(relacao)) {
+              acc.push(relacao);
+            }
+          }
+        }
+      });
+      
+      return acc;
+    }, []))]; // Garante que não haja duplicatas com Set
+  
+    return { tabelas, relacionadas, campos };
   };
-
-
+  
+  
+  
   const handleLoadFromLocalStorage = useCallback(() => {
     const sqlQuery = localStorage.getItem('loadedQuery');
     if (sqlQuery) {
-      const { tabelas, campos } = extractFieldsAndTablesFromSQL(sqlQuery);
+      const { tabelas, relacionadas, campos } = extractFieldsAndTablesFromSQL(sqlQuery, relationships);
   
       if (tabelas.length > 0) {
         setSelectedTabela(tabelas[0]);
   
-        const relacionadas = tabelas.slice(1).map(tabelaRelacionada => {
-          return `${tabelas[0]} e ${tabelaRelacionada}`;
+        // Vamos garantir que o relacionamento seja filtrado de acordo com o que está no SQL
+        const relacionamentosValidos = relacionadas.filter(relacionada => {
+          // Pega ambas as tabelas do relacionamento, que estão no formato "tabela1 e tabela2"
+          const [tabela1, tabela2] = relacionada.split(' e ');
+
+          // Verifica se ambas as tabelas do relacionamento estão na lista de tabelas extraídas do SQL
+          return tabelas.includes(tabela1) && tabelas.includes(tabela2);
         });
   
-        setSelectedRelacionada(prevRelacionadas => {
-          const relacionamentos = new Set([...prevRelacionadas, ...relacionadas]);
-          return Array.from(relacionamentos);
+        console.log("Relacionamentos válidos (apenas do SQL):", relacionamentosValidos);
+  
+        // Atualiza relacionamentos no estado sem duplicatas
+        setSelectedRelacionada(prevRelacionada => {
+          const updatedRelacionada = [...new Set([...relacionamentosValidos])];
+          console.log("Relacionamentos finais (sem duplicatas):", updatedRelacionada);
+          return updatedRelacionada;
         });
   
-        setSelectedCampos(campos.map(campo => {
-          const [tabela, campoNome] = campo.split('.');
-          return `${tabela}.${campoNome}`;
-        }));
+        // Atualiza campos sem duplicação
+        setSelectedCampos(prevCampos => {
+          const updatedCampos = [...new Set([...prevCampos, ...campos.map(campo => {
+            const [tabela, campoNome] = campo.split('.');
+            return `${tabela}.${campoNome}`;
+          })])];
+          console.log("Campos finais (sem duplicatas):", updatedCampos);
+          return updatedCampos;
+        });
       }
     }
-  }, []); // Dependências vazias para memoizar a função
+  }, [relationships]);
+  
+  
+  
+  
+
+  
   
   useEffect(() => {
     passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
@@ -115,9 +162,13 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   const tabelas = Object.keys(jsonData);
 
   useEffect(() => {
-    onDataChange({ tabela: selectedTabela, relacionada: selectedRelacionada, campos: selectedCampos });
+    onDataChange({
+      tabela: selectedTabela,
+      relacionada: [...new Set(selectedRelacionada)], // Remove duplicatas aqui também, se necessário
+      campos: [...new Set(selectedCampos)] // Remove duplicatas nos campos também
+    });
   }, [selectedTabela, selectedRelacionada, selectedCampos, onDataChange]);
-
+  
   const tabelaOptions = tabelas.map(tabela => ({
     value: tabela,
     label: tabela,

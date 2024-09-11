@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import CustomSelect from './genericos/CustomSelect';
 
@@ -43,7 +43,7 @@ function CamposSelecionados({
   onDragEnd,
   handleCheckboxChange,
   checkedCampos = [],
-  onSelectedCamposChange,
+  onSelectedCamposChange
 }) {
   const selectedCamposSemApelido = selectedCampos.map((campo) => campo.replace(/\s+as\s+.*$/, ''));
   const [selectedOrder, setSelectedOrder] = useState(null); // Estado para a seleção atual
