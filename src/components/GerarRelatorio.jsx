@@ -54,7 +54,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalOpenSQL(true);
     };
 
-
     const handleModalPdfView = () => {
         if (isView) {
             setIsModalPdfOpenView(true);
@@ -93,7 +92,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalOpenFiltro(false);
     };
 
-
     const closeModalSalvos = () => {
         setIsModalOpenSalvos(false);
     };
@@ -130,7 +128,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         });
     };
 
-
     const handleSaveConditions = (conditions) => {
         setCondicoesString(conditions);
     };
@@ -153,7 +150,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const shouldShowPagination = hasData && tableData[0].values.length > 15;
-
     const orderByString = localStorage.getItem('orderByString');
 
     const fetchData = async () => {
@@ -362,7 +358,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         {isLoading && (
                 <div className="fixed inset-0 flex flex-col items-center justify-center bg-opacity-50 bg-gray-200 z-50">
                     <div className="ww-8 h-8 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
-                    <div className="mt-2 text-blue-500">{loadingProgress}%</div>
+                    <div className="mt-2 text-blue-500">{loadingProgress}%
+                    </div>
+                    <div><button className=" text-blue-500 font-bold z-50 mt-3" onClick={()=> setIsLoading(false)}>Cancelar</button></div>
                 </div>
             )}
                         <button
