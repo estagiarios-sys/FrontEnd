@@ -33,6 +33,7 @@ const CustomSelect = forwardRef(({ width = "10rem", ...props }, ref) => {
             }}
             classNamePrefix="Select"
             styles={customStyles}
+            menuPortalTarget={document.body}
         />
     );
 });

@@ -148,17 +148,11 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
     }
   }, [relationships]);
   
-  
-  
-  
-
-  
-  
   useEffect(() => {
     passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
   }, [passHandleLoadFromLocalStorage, handleLoadFromLocalStorage]); // Inclua handleLoadFromLocalStorage como dependência
-  
-  
+
+
   const tabelas = Object.keys(jsonData);
 
   useEffect(() => {
@@ -208,9 +202,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
   const relacionadaOptions = useMemo(() => {
     if (!selectedTabela) return [];
-  
+
     const todasRelacionadas = new Set();
-  
+
     // Adiciona as tabelas relacionadas automaticamente com o formato "tabela_principal e tabela_relacionada"
     relationships
       .filter(rel => rel.tabelas.includes(selectedTabela))
@@ -219,17 +213,17 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
         if (tabela !== selectedTabela) {
           const relacionamento = `${selectedTabela} e ${tabela}`;
           const relacionamentoInverso = `${tabela} e ${selectedTabela}`;
-  
+
           if (!todasRelacionadas.has(relacionamentoInverso) && !todasRelacionadas.has(relacionamento)) {
             todasRelacionadas.add(relacionamento); // Adiciona o relacionamento corretamente formatado
           }
         }
       });
-  
+
     // Adiciona as tabelas que já foram selecionadas ou extraídas do LocalStorage
     selectedRelacionada.forEach(relacionadaTabela => {
       const relacionadaTabelaNome = relacionadaTabela.includes(' e ') ? relacionadaTabela.split(' e ')[1] : relacionadaTabela;
-  
+
       // Verifica se essa relação já foi adicionada antes de processar
       relationships
         .filter(rel => rel.tabelas.includes(relacionadaTabelaNome))
@@ -238,33 +232,33 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           if (tabela !== relacionadaTabelaNome && tabela !== selectedTabela) {
             const relacionamento = `${relacionadaTabelaNome} e ${tabela}`;
             const relacionamentoInverso = `${tabela} e ${relacionadaTabelaNome}`;
-  
+
             if (!todasRelacionadas.has(relacionamentoInverso) && !todasRelacionadas.has(relacionamento)) {
               todasRelacionadas.add(relacionamento); // Adiciona o relacionamento corretamente formatado
             }
           }
         });
-  
+
       // Adiciona a própria tabela relacionada do LocalStorage (sem duplicação)
       if (!todasRelacionadas.has(relacionadaTabela)) {
         todasRelacionadas.add(relacionadaTabela); // Adiciona do localStorage se não estiver já presente
       }
     });
-  
+
     // Garante que o select de "Relacionadas" fique vazio se não houver relacionamentos
     if (todasRelacionadas.size === 0) return [];
-  
+
     // Mapeia as tabelas relacionadas para o formato do select
     const relacionamentosAdicionados = Array.from(todasRelacionadas).map(value => ({
       value: value,
       label: value,
     }));
-  
+
     return relacionamentosAdicionados;
   }, [selectedTabela, selectedRelacionada, relationships]);
-  
-  
-  
+
+
+
 
   useEffect(() => {
     const handleClearSelectedCampos = () => {
@@ -305,7 +299,20 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
     setMenuIsOpen(true);
   };
 
-  
+  const customStyles = {
+    valueContainer: (provided) => ({
+      ...provided,
+      maxHeight: '120px', // Altura máxima do container de opções selecionadas
+      overflowY: 'auto', // Habilita o scroll quando a altura for excedida
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      display: 'flex',
+      alignItems: 'center',
+    }),
+  };
+
+
 
   return (
     <div className="flex flex-col justify-start items-start ml-20">
@@ -380,6 +387,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
             menuIsOpen={menuIsOpen} // Controla a visibilidade do menu
             onMenuOpen={() => setMenuIsOpen(true)} // Abre o menu
             onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
+            styles={customStyles} // Aplica os estilos customizados
           />
 
           <div id='info-click' className={mostrarInfo3 ? 'up show' : 'up'} ref={dicaRef}>
