@@ -88,8 +88,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
                 body: query,
             });
 
-            console.log(query);
-
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }

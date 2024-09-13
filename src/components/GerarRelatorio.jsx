@@ -12,7 +12,8 @@ import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
-
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false); // Modal para exibir as views salvas
     const [isModalOpenSQl, setIsModalOpenSQL] = useState(false); // Modal para exibir o SQL
     const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false); // Modal para exibir o filtros de selects
@@ -53,7 +54,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalOpenSQL(true);
     };
 
-
     const handleModalPdfView = () => {
         if (isView) {
             setIsModalPdfOpenView(true);
@@ -91,7 +91,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const closeModalFiltro = () => {
         setIsModalOpenFiltro(false);
     };
-
 
     const closeModalSalvos = () => {
         setIsModalOpenSalvos(false);
@@ -162,7 +161,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const shouldShowPagination = hasData && tableData[0].values.length > 15;
-
     const orderByString = localStorage.getItem('orderByString');
 
     const fetchData = async () => {
@@ -282,6 +280,18 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     };
 
     const handleGenerateReport = async () => {
+        setIsLoading(true);
+        setLoadingProgress(0);
+
+        const progressInterval = setInterval(() => {
+            setLoadingProgress((prevProgress) => {
+                if (prevProgress >= 100) {
+                    clearInterval(progressInterval);
+                    return 100;
+                }
+                return prevProgress + 10;
+            });
+        }, 100);
         try {
             let data;
             if (localStorage.getItem('loadedQuery')) {
@@ -302,6 +312,61 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
+        } finally {
+            clearInterval(progressInterval);
+            setIsLoading(false);
+            setLoadingProgress(100);
+        }
+    };
+
+    const handleDownloadPDF = async () => {
+        // Função para gerar o HTML completo da tabela
+        const generateFullTableHTML = () => {
+            if (!hasData) return '<p>Nenhum dado encontrado.</p>';
+
+            const tableHeaders = columns.map((column) => `<th class="p-2 border-b text-center">${column}</th>`).join('');
+
+            const tableRows = tableData[0].values.map((_, rowIndex) => {
+                const rowHTML = columns.map((column, colIndex) =>
+                    `<td class="p-2 border-b text-center">${tableData[colIndex]?.values[rowIndex]}</td>`
+                ).join('');
+                const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
+                return `<tr class="${rowClass}">${rowHTML}</tr>`;
+            }).join('');
+
+            return `
+                <table class="w-full text-sm">
+                    <thead class="bg-custom-azul-escuro text-black">
+                        <tr>${tableHeaders}</tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            `;
+        };
+
+        // Gerar o HTML da tabela inteira
+        const fullTableHTML = generateFullTableHTML();
+
+        try {
+            const response = await fetch('http://localhost:8080/pdf/generate', { // Backend Java
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ html: fullTableHTML }), // Envia o HTML da tabela completa
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao gerar o PDF.');
+            }
+
+            const blob = await response.blob();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'relatorio.pdf';
+            link.click();
+        } catch (error) {
+            console.error('Erro ao baixar o PDF:', error);
         }
     };
 
@@ -377,15 +442,25 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleGenerateReport}
+                            disabled={isLoading}
                         >
-                            Gerar Relatório
+                         {isLoading ? 'Carregando...' : 'Gerar Relatório'}
                         </button>
+                        {isLoading && (
+                <div className="fixed inset-0 flex flex-col items-center justify-center bg-opacity-50 bg-gray-200 z-50">
+                    <div className="ww-8 h-8 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
+                    <div className="mt-2 text-blue-500">{loadingProgress}%
+                    </div>
+                    <div><button className=" text-blue-500 font-bold z-50 mt-3" onClick={()=> setIsLoading(false)}>Cancelar</button></div>
+                </div>
+            )}
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleModalSalvarCon}
                         >
                             Salvar Consulta
                         </button>
+                        <button onClick={handleDownloadPDF}>Download PDF</button>
                     </div>
                 </div>
                 <div className="flex mr-36 justify-center items-center">
