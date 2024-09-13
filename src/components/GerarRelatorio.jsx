@@ -9,6 +9,7 @@ import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalModal from "./modais/ModalModal";
 import { getTotalizers } from "./CamposSelecionados";
+import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
 
@@ -30,7 +31,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
-
 
     const handleSelectTemplate = (key) => {
         setSelectedTemplateKey(key);
@@ -129,7 +129,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         });
     };
 
-
     const handleSaveConditions = (conditions) => {
         setCondicoesString(conditions);
     };
@@ -141,11 +140,22 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
     // Função para mudar a página atual
     const changePage = (direction) => {
-        setCurrentPage(prevPage => {
-            if (direction === 'next' && prevPage < totalPages) return prevPage + 1;
-            if (direction === 'prev' && prevPage > 1) return prevPage - 1;
-            return prevPage;
-        });
+        switch (direction) {
+            case 'first':
+                setCurrentPage(1);
+                break;
+            case 'prev':
+                setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+                break;
+            case 'next':
+                setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+                break;
+            case 'last':
+                setCurrentPage(totalPages);
+                break;
+            default:
+                break;
+        }
     };
 
     // Calcular o índice inicial e final dos itens da página atual
@@ -295,14 +305,43 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     };
 
+    document.querySelectorAll('.resizer').forEach(resizer => {
+        let startX, startWidth, initialMouseX;
+
+        resizer.addEventListener('mousedown', e => {
+            startX = e.clientX;
+            initialMouseX = e.clientX;
+            startWidth = parseInt(document.defaultView.getComputedStyle(resizer.parentNode).width, 10);
+
+            // Adiciona os eventos de mousemove e mouseup no document
+            document.documentElement.addEventListener('mousemove', handleMouseMove);
+            document.documentElement.addEventListener('mouseup', handleMouseUp);
+        });
+
+        function handleMouseMove(e) {
+            const deltaX = e.clientX - initialMouseX;
+            const newWidth = startWidth + deltaX;
+
+            // Atualiza a largura do elemento com a nova largura
+            resizer.parentNode.style.width = `${newWidth}px`;
+        }
+
+        function handleMouseUp() {
+            // Remove os eventos de mousemove e mouseup
+            document.documentElement.removeEventListener('mousemove', handleMouseMove);
+            document.documentElement.removeEventListener('mouseup', handleMouseUp);
+        }
+    });
+
     const renderTotalizer = () => {
         if (!renderTotalizerResult) return null;
 
         const totalizerKeys = Object.keys(renderTotalizerResult);
 
         return (
-            <tfoot className= "border-t border-black">
-                <tr className="bg-gray-200 text-center">
+
+            <tfoot className="border-t border-black">
+                <tr className="bg-custom-azul-claro text-center">
                     <td className="p-2 border-t-2 border-black" colSpan={columns.length}>
                         <table className="w-full ">
                             <tbody>
@@ -313,13 +352,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         </table>
                     </td>
                 </tr>
-                <tr className="bg-gray-200 text-center">
+                <tr className="bg-custom-azul-claro text-center">
                     {columns.map((column, index) => {
                         const totalizerKey = totalizerKeys.find(key => key.includes(column));
                         return (
-                            <td 
-                            className="font-regular text-black pb-3"
-                            key={index}>
+                            <td
+                                className="font-regular text-black pb-3"
+                                key={index}>
                                 {totalizerKey ? renderTotalizerResult[totalizerKey] : ""}
                             </td>
                         );
@@ -435,7 +474,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                             <thead className="bg-custom-azul-escuro text-white">
                                 <tr>
                                     {columns.map((column, index) => (
-                                        <th key={index} className="p-2 border-b text-center">{column}</th>
+                                        <th
+                                            key={index}
+                                            className={`p-2 border-b text-center resizable ${index === columns.length - 1 ? 'no-resize' : ''}`}
+                                        >
+                                            {column}
+                                            {index !== columns.length - 1 && <div className="resizer" />}
+                                        </th>
                                     ))}
                                 </tr>
                             </thead>
@@ -459,23 +504,41 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                     </table>
                 </div>
                 {shouldShowPagination && (
-                    <div className="flex justify-center mt-4 mb-4">
+                    <div className="flex justify-center mt-4 mb-4 items-center">
+                        <button
+                            onClick={() => changePage('first')}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                            title="Ir para a primeira página"
+                        >
+                            <FaAngleDoubleLeft />
+                        </button>
                         <button
                             onClick={() => changePage('prev')}
                             disabled={currentPage === 1}
                             className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                            title="Ir para a página anterior"
                         >
-                            Anterior
+                            <FaAngleLeft />
                         </button>
-                        <span className="flex items-center">
+                        <span className="flex items-center mx-2">
                             Página {currentPage} de {totalPages}
                         </span>
                         <button
                             onClick={() => changePage('next')}
                             disabled={currentPage === totalPages}
                             className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                            title="Ir para a página seguinte"
                         >
-                            Próxima
+                            <FaAngleRight />
+                        </button>
+                        <button
+                            onClick={() => changePage('last')}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                            title="Ir para a última página"
+                        >
+                            <FaAngleDoubleRight />
                         </button>
                     </div>
                 )}

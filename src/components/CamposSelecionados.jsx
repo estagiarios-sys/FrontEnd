@@ -54,7 +54,7 @@ function CamposSelecionados({
   const handleTotalizerSave = (selectedOption, campo) => {
 
     const campoSemApelido = campo.replace(/\s+as\s+.*$/, ''); // Remove o apelido do campo
-    
+
     if (selectedOption) {
       // Se uma opção for selecionada, adiciona ou atualiza o totalizador no objeto
       totalizers[campoSemApelido] = selectedOption.value;
@@ -116,103 +116,106 @@ function CamposSelecionados({
   const showCheckboxColumn = selectedCampos.length > 0;
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="droppable" type="list" direction="vertical">
-        {(provided) => (
-          <table
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className="w-auto min-w-full border-2 border-custom-azul-escuro"
-          >
-            <thead>
-              <tr className="bg-custom-azul-escuro text-white ">
-                <th className="py-2 px-4 text-sm w-[60px]"></th>
-                <th className="py-2 px-4 text-sm w-[216px]">Campo</th>
-                <th className="py-2 px-4 text-sm w-[193px]">Ordem</th>
-                <th className="py-2 px-4 text-sm w-[241px]">Totalizador</th>
-              </tr>
-            </thead>
-            <tbody className="max-h-[322.4px] overflow-y-auto">
-              {selectedCamposSemApelido.length > 0 ? (
-                selectedCamposSemApelido.map((campo, index) => (
-                  <Draggable key={campo} draggableId={campo} index={index}>
-                    {(provided) => (
-                      <tr
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="bg-white hover:bg-gray-70"
-                      >
-                        {showCheckboxColumn && (
+    <div
+      style={{ maxHeight: '280px', overflowY: 'auto', position: 'relative' }}>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="droppable" type="list" direction="vertical">
+          {(provided) => (
+            <table
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="w-auto min-w-full border-2 border-custom-azul-escuro"
+            >
+              <thead className="bg-custom-azul-escuro text-white sticky top-0 z-10">
+                <tr className="bg-custom-azul-escuro text-white ">
+                  <th className="py-2 px-4 text-sm w-[60px]"></th>
+                  <th className="py-2 px-4 text-sm w-[216px]">Campo</th>
+                  <th className="py-2 px-4 text-sm w-[193px]">Ordem</th>
+                  <th className="py-2 px-4 text-sm w-[241px]">Totalizador</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedCamposSemApelido.length > 0 ? (
+                  selectedCamposSemApelido.map((campo, index) => (
+                    <Draggable key={campo} draggableId={campo} index={index}>
+                      {(provided) => (
+                        <tr
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="bg-white hover:bg-gray-70"
+                        >
+                          {showCheckboxColumn && (
+                            <td className="py-2 px-4 border-b border-custom-azul text-sm">
+                              <input
+                                type="checkbox"
+                                checked={checkedCampos.includes(campo)}
+                                onChange={() => handleCheckboxChange(campo)}
+                                className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
+                              />
+                            </td>
+                          )}
                           <td className="py-2 px-4 border-b border-custom-azul text-sm">
                             <input
-                              type="checkbox"
-                              checked={checkedCampos.includes(campo)}
-                              onChange={() => handleCheckboxChange(campo)}
-                              className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
+                              type="text"
+                              onBlur={(e) => handleCustomNameChange(e, campo)}
+                              className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none"
+                              placeholder={campo}
                             />
                           </td>
-                        )}
-                        <td className="py-2 px-4 border-b border-custom-azul text-sm">
-                          <input
-                            type="text"
-                            onBlur={(e) => handleCustomNameChange(e, campo)}
-                            className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none"
-                            placeholder={campo}
-                          />
-                        </td>
-                        <td
-                          className="py-2 px-4 border-b border-custom-azul text-sm"
-                          onClick={() => handleTdClick(campo)}
-                        >
-                          <CustomSelect
-                            ref={(ref) => (selectRefs.current[campo] = ref)}
-                            options={ordenacaoOptions}
-                            value={
-                              selectedOrder && selectedOrder.fieldName === campo
-                                ? { value: selectedOrder.value, label: selectedOrder.value }
-                                : null
-                            }
-                            onChange={(selectedOption) => handleOrderBySave(selectedOption, campo)}
-                            placeholder="Selecione..."
-                            className="basic-single"
-                            classNamePrefix="select"
-                            width="9rem"
-                            isClearable
-                          />
-                        </td>
-                        <td
-                          className="py-2 px-4 border-b border-custom-azul text-sm"
-                          onClick={() => handleTotalizerClick(campo)}
-                        >
-                          <CustomSelect
-                            ref={(ref) => (selectTotalizerRefs.current[campo] = ref)}
-                            options={TotalizerOptions}
-                            onChange={(selectedOption) => handleTotalizerSave(selectedOption, campo)}
-                            placeholder="Selecione..."
-                            className="basic-single"
-                            classNamePrefix="select"
-                            width="12rem"
-                            isClearable
-                          />
-                        </td>
-                      </tr>
-                    )}
-                  </Draggable>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={showCheckboxColumn ? 3 : 2} className="py-2 px-4 border-b border-gray-300 text-sm text-gray-500 whitespace-nowrap">
-                    Nenhum campo selecionado
-                  </td>
-                </tr>
-              )}
-              {provided.placeholder}
-            </tbody>
-          </table>
-        )}
-      </Droppable>
-    </DragDropContext>
+                          <td
+                            className="py-2 px-4 border-b border-custom-azul text-sm"
+                            onClick={() => handleTdClick(campo)}
+                          >
+                            <CustomSelect
+                              ref={(ref) => (selectRefs.current[campo] = ref)}
+                              options={ordenacaoOptions}
+                              value={
+                                selectedOrder && selectedOrder.fieldName === campo
+                                  ? { value: selectedOrder.value, label: selectedOrder.value }
+                                  : null
+                              }
+                              onChange={(selectedOption) => handleOrderBySave(selectedOption, campo)}
+                              placeholder="Selecione..."
+                              className="basic-single"
+                              classNamePrefix="select"
+                              width="9rem"
+                              isClearable
+                            />
+                          </td>
+                          <td
+                            className="py-2 px-4 border-b border-custom-azul text-sm"
+                            onClick={() => handleTotalizerClick(campo)}
+                          >
+                            <CustomSelect
+                              ref={(ref) => (selectTotalizerRefs.current[campo] = ref)}
+                              options={TotalizerOptions}
+                              onChange={(selectedOption) => handleTotalizerSave(selectedOption, campo)}
+                              placeholder="Selecione..."
+                              className="basic-single"
+                              classNamePrefix="select"
+                              width="12rem"
+                              isClearable
+                            />
+                          </td>
+                        </tr>
+                      )}
+                    </Draggable>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={showCheckboxColumn ? 3 : 2} className="py-2 px-4 border-b border-gray-300 text-sm text-gray-500 whitespace-nowrap">
+                      Nenhum campo selecionado
+                    </td>
+                  </tr>
+                )}
+                {provided.placeholder}
+              </tbody>
+            </table>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
   );
 }
 
