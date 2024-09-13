@@ -295,6 +295,57 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     };
 
+    const handleDownloadPDF = async () => {
+        // Função para gerar o HTML completo da tabela
+        const generateFullTableHTML = () => {
+            if (!hasData) return '<p>Nenhum dado encontrado.</p>';
+
+            const tableHeaders = columns.map((column) => `<th class="p-2 border-b text-center">${column}</th>`).join('');
+
+            const tableRows = tableData[0].values.map((_, rowIndex) => {
+                const rowHTML = columns.map((column, colIndex) =>
+                    `<td class="p-2 border-b text-center">${tableData[colIndex]?.values[rowIndex]}</td>`
+                ).join('');
+                const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
+                return `<tr class="${rowClass}">${rowHTML}</tr>`;
+            }).join('');
+
+            return `
+                <table class="w-full text-sm">
+                    <thead class="bg-custom-azul-escuro text-black">
+                        <tr>${tableHeaders}</tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            `;
+        };
+
+        // Gerar o HTML da tabela inteira
+        const fullTableHTML = generateFullTableHTML();
+
+        try {
+            const response = await fetch('http://localhost:8080/pdf/generate', { // Backend Java
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ html: fullTableHTML }), // Envia o HTML da tabela completa
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao gerar o PDF.');
+            }
+
+            const blob = await response.blob();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'relatorio.pdf';
+            link.click();
+        } catch (error) {
+            console.error('Erro ao baixar o PDF:', error);
+        }
+    };
+
     const renderTotalizer = () => {
         if (!renderTotalizerResult) return null;
 
@@ -347,6 +398,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         >
                             Salvar Consulta
                         </button>
+                        <button onClick={handleDownloadPDF}>Download PDF</button>
                     </div>
                 </div>
                 <div className="flex mr-36 justify-center items-center">
