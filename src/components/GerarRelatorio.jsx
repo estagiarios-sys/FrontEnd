@@ -33,10 +33,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const itemsPerPage = 15;
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
     const tableRef = useRef(null);
-    const [isResizing, setIsResizing] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [currentColumn, setCurrentColumn] = useState(null);
-    const [columnWidths, setColumnWidths] = useState({});
+    const [columnWidths] = useState({});
 
     const handleSelectTemplate = (key) => {
         setSelectedTemplateKey(key);
@@ -375,43 +372,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     };
 
-    useEffect(() => {
-        // Inicializar larguras com base no layout atual
-        const thElements = tableRef.current.querySelectorAll('th');
-        const initialWidths = {};
-        thElements.forEach((th, index) => {
-            initialWidths[index] = th.offsetWidth;
-        });
-        setColumnWidths(initialWidths);
-    }, [columns]);
-
-    const handleMouseMove = (event) => {
-        if (isResizing && currentColumn !== null) {
-            const newWidths = { ...columnWidths };
-            newWidths[currentColumn] = Math.max(event.clientX - tableRef.current.getBoundingClientRect().left, 50); // Largura mínima
-            setColumnWidths(newWidths);
-        }
-    };
-
-    const handleMouseUp = () => {
-        setIsResizing(false);
-    };
-
-    const handleMouseDown = (index, event) => {
-        setIsResizing(true);
-        setStartX(event.clientX);
-        setCurrentColumn(index);
-    };
-
-    useEffect(() => {
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [isResizing, currentColumn]);
-
     const renderTotalizer = () => {
         if (!renderTotalizerResult) return null;
 
@@ -565,16 +525,14 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                                     {columns.map((column, index) => (
                                         <th
                                             key={index}
-                                            className={`p-2 border-b text-center ${index === columns.length - 1 ? 'no-resize' : ''}`}
-                                            style={{ width: columnWidths[index] }}
+                                            className="p-2 border-b text-center"
+                                            style={{
+                                                resize: index === columns.length - 1 ? 'none' : 'horizontal', // Remove o resize da última coluna
+                                                overflow: 'auto',
+                                                width: columnWidths[index] || 'auto'
+                                            }}
                                         >
                                             {column}
-                                            {index !== columns.length - 1 && (
-                                                <div
-                                                    className="resizer"
-                                                    onMouseDown={(e) => handleMouseDown(index, e)}
-                                                />
-                                            )}
                                         </th>
                                     ))}
                                 </tr>
@@ -585,7 +543,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                                 tableData[0].values.slice(startIndex, endIndex).map((_, rowIndex) => (
                                     <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
                                         {columns.map((column, colIndex) => (
-                                            <td key={colIndex} className="p-2 border-b text-center" style={{ width: columnWidths[colIndex] }}>
+                                            <td
+                                                key={colIndex}
+                                                className="p-2 border-b text-center"
+                                            >
                                                 {tableData[colIndex]?.values[startIndex + rowIndex]}
                                             </td>
                                         ))}
