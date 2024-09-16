@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-function ModalPdfView({ isOpen, onClose, fullTableHTML }) {
+function ModalPdfView({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ function ModalPdfView({ isOpen, onClose, fullTableHTML }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ html: fullTableHTML }), // Envia o HTML da tabela completa
+        body: JSON.stringify( combinedData ), // Envia o HTML da tabela completa
       });
 
       if (!response.ok) {

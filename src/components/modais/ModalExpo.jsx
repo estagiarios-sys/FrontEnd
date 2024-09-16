@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ModalModal from "./ModalModal";
 
-function ModalExpo({ isOpen, onClose, table, selectedColumns, fullTableHTML }) {
+function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
     const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
@@ -39,7 +39,7 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, fullTableHTML }) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ html: fullTableHTML }), // Envia o HTML da tabela completa
+                body: JSON.stringify( combinedData ), // Envia o HTML da tabela completa
             });
 
             if (!response.ok) {
