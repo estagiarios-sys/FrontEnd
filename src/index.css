@@ -14,7 +14,6 @@ body {
 @import './styles/infoHover.css';
 @import './styles/lista.css';
 @import './styles/scroll.css';
-@import './styles/redimencinarLargura.css';
 
 body {
     user-select: none;
