@@ -15,7 +15,7 @@ const TotalizerOptions = [
   { value: 'MAX', label: 'MÁXIMO' },
 ];
 
-let totalizers = {};
+let totalizers = [];
 
 export function removeSelectedTotalizers(camposParaRemover) {
 

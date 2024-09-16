@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalModal from './ModalModal';
+import { getTotalizers } from "../CamposSelecionados";
 
 function ModalSalvos({ isOpen, onClose, generateReport }) {
     const [selectedCampo, setSelectedCampo] = useState(null); // Agora armazena apenas um valor
@@ -28,9 +29,15 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                 const data = await response.json();
 
                 const options = data.map(item => ({
-                    value: item.query,
-                    label: item.queryName
+                    label: item.queryName,
+                    finalQuery: item.finalQuery,
+                    queryWithTotalizers: {
+                        "query": item.totalizersQuery,
+                        "totalizers": item.totalizers.map(totalizerObj => totalizerObj.totalizer)
+                    }
                 }));
+
+                
 
                 setCampoOptions(options);
             } catch (error) {
@@ -88,10 +95,9 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
     }, [isOpen]);
 
     async function handleCarregar(generateReport) {
-        if (selectedCampo && selectedCampo.value) {
-            localStorage.setItem('loadedQuery', selectedCampo.value);
-            const test = localStorage.getItem('loadedQuery');
-            console.log(test);
+        console.log(selectedCampo)
+        if (selectedCampo && selectedCampo.finalQuery) {
+            localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo))
             setModalMessage('Consulta carregada!');
             setIsModalModalOkOpen(true);
     

@@ -10,7 +10,8 @@ import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalModal from "./modais/ModalModal";
 import { getTotalizers } from "./CamposSelecionados";
 
-function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
+
+function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage}) {
 
     const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false); // Modal para exibir as views salvas
     const [isModalOpenSQl, setIsModalOpenSQL] = useState(false); // Modal para exibir o SQL
@@ -30,6 +31,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
+    const [sql2, setSql2] = useState('');
+
 
 
     const handleSelectTemplate = (key) => {
@@ -202,6 +205,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
             const [sql, sql2, colunasAtualizada, data, resultTotalizer] = responseData;
 
+            setSql2(sql2)
+
             const sqlFinal = "Primeira Consulta: " + sql + " Consulta do totalizador: " + sql2;
 
             console.log('resultTotalizer:', resultTotalizer);
@@ -229,48 +234,75 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         try {
             const url = 'http://localhost:8080/find/loadedQuery';
             const loadedQuery = localStorage.getItem('loadedQuery');
-
+    
+            if (!loadedQuery) {
+                throw new Error('No query found in localStorage');
+            }
+    
+            const parsedLoadedQuery = JSON.parse(loadedQuery);
+    
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: loadedQuery,
+                body: JSON.stringify(parsedLoadedQuery),
             });
-
-            handleLoadFromLocalStorage()
-            localStorage.removeItem('loadedQuery')
-
+    
+            handleLoadFromLocalStorage();
+            localStorage.removeItem('loadedQuery');
+    
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
-
+    
             const responseData = await response.json();
-
-            const { columnsNickName, foundObjects } = responseData;
-
+            console.log('Resposta da API:', responseData);
+    
+            const { columnsNickName, foundObjects, totalizersResults } = responseData;
+    
             if (!Array.isArray(foundObjects) || !Array.isArray(columnsNickName)) {
-
                 throw new Error('Estrutura de resposta inválida');
             }
-
+    
+            // Transforma os dados da API
             const transformedData = columnsNickName.map((column, index) => {
                 return {
                     column,
-                    values: foundObjects.map(row => row[index])
+                    values: foundObjects.map(row => row[index]),
                 };
             });
-
+    
             setColumns(columnsNickName);
-
+    
+            // Associa os totalizadores às colunas e armazena no estado
+            if (Array.isArray(totalizersResults) && totalizersResults.length > 0) {
+                const resultTotalizer = {};
+    
+                // Associa os totalizadores às colunas
+                totalizersResults.forEach((totalizer, index) => {
+                    resultTotalizer[columnsNickName[index]] = totalizer; // Armazena "Contador: 6" por coluna
+                });
+    
+                console.log('Totalizadores finais:', resultTotalizer);
+                setRenderTotalizerResult(resultTotalizer);
+    
+                // Opcional: Salvar no localStorage se precisar
+                localStorage.setItem('totalizers', JSON.stringify(resultTotalizer));
+            }
+    
             return transformedData;
-
+    
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             return [];
         }
     };
-
+    
+    
+    
+    
+    
     const handleGenerateReport = async () => {
         try {
             let data;
@@ -486,7 +518,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} templateKey={selectedTemplateKey} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
-            <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery} />
+            <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}  sql2={sql2}/>
             <ModalModal isOpen={isModalModalAvisoOpen} onClose={closeModalModalAviso} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
         </div>
     );
