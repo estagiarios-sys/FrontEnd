@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
-import View from "../PDF/pdfViewer";
+import React, { useEffect, useState } from "react";
 
-function ModalPdfView({ isOpen, onClose, table, templateKey }) {
+function ModalPdfView({ isOpen, onClose, fullTableHTML }) {
+  const [pdfUrl, setPdfUrl] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
+      HandlePreviewPDF(); // Chama a função para gerar o PDF
       document.body.style.overflow = 'hidden'; // Impede o scroll da página
     } else {
       document.body.style.overflow = 'auto'; // Permite o scroll da página
@@ -16,7 +17,31 @@ function ModalPdfView({ isOpen, onClose, table, templateKey }) {
   }, [isOpen]);
 
   if (!isOpen) return null;
-  
+
+  const HandlePreviewPDF = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/pdf/preview', { // Backend Java
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ html: fullTableHTML }), // Envia o HTML da tabela completa
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar o PDF.');
+      }
+
+      const blob = await response.blob();
+      console.log('Blob gerado:', blob);
+      const url = URL.createObjectURL(blob);
+      console.log('PDF gerado:', url);
+      setPdfUrl(url); // Atualiza para usar o URL do PDF
+    } catch (error) {
+      console.error('Erro ao gerar o PDF:', error);
+    }
+  };
+
   return (
     <div
       style={{
@@ -64,7 +89,19 @@ function ModalPdfView({ isOpen, onClose, table, templateKey }) {
         >
           Fechar
         </button>
-        <View table={table} templateKey={templateKey}/> 
+        {pdfUrl && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column', // Colocando os elementos um embaixo do outro
+              height: '100%',
+            }}
+          >          
+            <iframe src={pdfUrl} width="100%" height="600px" title="PDF Preview" />
+          </div>
+        )}
       </div>
     </div>
   );
