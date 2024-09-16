@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { generatePDF as generatePDFExternal } from "../PDF/pdfGenerate";  // Supondo que `generatePDF` está sendo importado corretamente
 import ModalModal from "./ModalModal";
 
-function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
+function ModalExpo({ isOpen, onClose, table, selectedColumns, fullTableHTML }) {
     const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
@@ -27,19 +26,34 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
         onClose();
     };
 
-    // Função para verificar se os dados estão presentes antes de gerar o PDF
-    const generatePDF = (table, templateKey) => {
-        
+    const handleDownloadPDF = async () => {
+
         if (!table || table.length === 0) {
             handleModalModalAviso("Por favor, selecione uma tabela e certifique-se de que há dados para exportar.");
             return;
         }
-        if (!templateKey) {
-            handleModalModalAviso("Por favor, selecione um template antes de exportar.");
-            return;
-        }
 
-        generatePDFExternal(table, templateKey); // Chama a função externa para gerar o PDF
+        try {
+            const response = await fetch('http://localhost:8080/pdf/generate', { // Backend Java
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ html: fullTableHTML }), // Envia o HTML da tabela completa
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao gerar o PDF.');
+            }
+
+            const blob = await response.blob();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'relatorio.pdf';
+            link.click();
+        } catch (error) {
+            console.error('Erro ao baixar o PDF:', error);
+        }
     };
 
     // Função para converter os dados em CSV
@@ -151,7 +165,7 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, templateKey }) {
                         gap: '60px',
                     }}
                 >
-                    <button onClick={() => generatePDF(table, templateKey)}
+                    <button onClick={() => handleDownloadPDF()}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
