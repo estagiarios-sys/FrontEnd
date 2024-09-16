@@ -354,37 +354,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             </table>
         `;
     };
-
+    
     // Gerar o HTML da tabela inteira
-    const fullTableHTML = generateFullTableHTML();
-
-    document.querySelectorAll('.resizer').forEach(resizer => {
-        let startX, startWidth, initialMouseX;
-
-        resizer.addEventListener('mousedown', e => {
-            startX = e.clientX;
-            initialMouseX = e.clientX;
-            startWidth = parseInt(document.defaultView.getComputedStyle(resizer.parentNode).width, 10);
-
-            // Adiciona os eventos de mousemove e mouseup no document
-            document.documentElement.addEventListener('mousemove', handleMouseMove);
-            document.documentElement.addEventListener('mouseup', handleMouseUp);
-        });
-
-        function handleMouseMove(e) {
-            const deltaX = e.clientX - initialMouseX;
-            const newWidth = startWidth + deltaX;
-
-            // Atualiza a largura do elemento com a nova largura
-            resizer.parentNode.style.width = `${newWidth}px`;
-        }
-
-        function handleMouseUp() {
-            // Remove os eventos de mousemove e mouseup
-            document.documentElement.removeEventListener('mousemove', handleMouseMove);
-            document.documentElement.removeEventListener('mouseup', handleMouseUp);
-        }
-    });
+    const combinedData = {
+        fullTableHTML: generateFullTableHTML(),
+        titlePDF: '01234567890123456789',
+        imgPDF: 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png'
+    };
 
     const renderTotalizer = () => {
         if (!renderTotalizerResult) return null;
@@ -617,8 +593,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPersonalizar isOpen={isModalOpenPersonalizar} onClose={closeModalPersonalizar} />
-            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} fullTableHTML={fullTableHTML} />
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} fullTableHTML={fullTableHTML} />
+            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedData} />
+            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery} />
