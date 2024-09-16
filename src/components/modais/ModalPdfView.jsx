@@ -98,26 +98,8 @@ function ModalPdfView({ isOpen, onClose, fullTableHTML }) {
               flexDirection: 'column', // Colocando os elementos um embaixo do outro
               height: '100%',
             }}
-          >
-            {/* Renderizando o PDF diretamente dentro de um iframe */}
-            <embed src={pdfUrl} type="application/pdf" width="100%" height="600px" />
-            {/* Botão de Download */}
-            <a
-              href={pdfUrl}
-              download="preview.pdf" // Nome do arquivo ao ser baixado
-              style={{
-                marginTop: '10px',
-                padding: '10px 20px',
-                backgroundColor: '#007BFF', // Cor de fundo do botão
-                color: '#fff', // Cor do texto do botão
-                borderRadius: '5px',
-                textDecoration: 'none',
-                fontSize: '16px',
-                cursor: 'pointer',
-              }}
-            >
-              Download PDF
-            </a>
+          >          
+            <iframe src={pdfUrl} width="100%" height="600px" title="PDF Preview" />
           </div>
         )}
       </div>
