@@ -332,8 +332,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         `;
     };
 
-<<<<<<< Updated upstream
-=======
     // Gerar o HTML da tabela inteira
     const fullTableHTML = generateFullTableHTML();
 
@@ -365,7 +363,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     });
 
->>>>>>> Stashed changes
     const renderTotalizer = () => {
         if (!renderTotalizerResult) return null;
 
