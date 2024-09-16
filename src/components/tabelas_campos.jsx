@@ -360,6 +360,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
             }}
             value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))} // Mantém os valores selecionados
             closeMenuOnSelect={false}
+            styles={customStyles} // Aplica os estilos customizados
           />
 
           <div id='info-click' className={mostrarInfo2 ? 'up show' : 'up'} ref={dicaRef}>

@@ -32,6 +32,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
+    const tableRef = useRef(null);
+    const [columnWidths] = useState({});
 
     const handleSelectTemplate = (key) => {
         setSelectedTemplateKey(key);
@@ -370,34 +372,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     };
 
-    document.querySelectorAll('.resizer').forEach(resizer => {
-        let startX, startWidth, initialMouseX;
-
-        resizer.addEventListener('mousedown', e => {
-            startX = e.clientX;
-            initialMouseX = e.clientX;
-            startWidth = parseInt(document.defaultView.getComputedStyle(resizer.parentNode).width, 10);
-
-            // Adiciona os eventos de mousemove e mouseup no document
-            document.documentElement.addEventListener('mousemove', handleMouseMove);
-            document.documentElement.addEventListener('mouseup', handleMouseUp);
-        });
-
-        function handleMouseMove(e) {
-            const deltaX = e.clientX - initialMouseX;
-            const newWidth = startWidth + deltaX;
-
-            // Atualiza a largura do elemento com a nova largura
-            resizer.parentNode.style.width = `${newWidth}px`;
-        }
-
-        function handleMouseUp() {
-            // Remove os eventos de mousemove e mouseup
-            document.documentElement.removeEventListener('mousemove', handleMouseMove);
-            document.documentElement.removeEventListener('mouseup', handleMouseUp);
-        }
-    });
-
     const renderTotalizer = () => {
         if (!renderTotalizerResult) return null;
 
@@ -444,16 +418,16 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                             onClick={handleGenerateReport}
                             disabled={isLoading}
                         >
-                         {isLoading ? 'Carregando...' : 'Gerar Relatório'}
+                            {isLoading ? 'Carregando...' : 'Gerar Relatório'}
                         </button>
                         {isLoading && (
-                <div className="fixed inset-0 flex flex-col items-center justify-center bg-opacity-50 bg-gray-200 z-50">
-                    <div className="ww-8 h-8 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
-                    <div className="mt-2 text-blue-500">{loadingProgress}%
-                    </div>
-                    <div><button className=" text-blue-500 font-bold z-50 mt-3" onClick={()=> setIsLoading(false)}>Cancelar</button></div>
-                </div>
-            )}
+                            <div className="fixed inset-0 flex flex-col items-center justify-center bg-opacity-50 bg-gray-200 z-50">
+                                <div className="ww-8 h-8 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
+                                <div className="mt-2 text-blue-500">{loadingProgress}%
+                                </div>
+                                <div><button className=" text-blue-500 font-bold z-50 mt-3" onClick={() => setIsLoading(false)}>Cancelar</button></div>
+                            </div>
+                        )}
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleModalSalvarCon}
@@ -544,17 +518,21 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             </div>
             <div className="w-full text-center">
                 <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
-                    <table className="w-full text-sm">
+                    <table ref={tableRef} className="w-full text-sm">
                         {hasData && (
                             <thead className="bg-custom-azul-escuro text-white">
                                 <tr>
                                     {columns.map((column, index) => (
                                         <th
                                             key={index}
-                                            className={`p-2 border-b text-center resizable ${index === columns.length - 1 ? 'no-resize' : ''}`}
+                                            className="p-2 border-b text-center"
+                                            style={{
+                                                resize: index === columns.length - 1 ? 'none' : 'horizontal', // Remove o resize da última coluna
+                                                overflow: 'auto',
+                                                width: columnWidths[index] || 'auto'
+                                            }}
                                         >
                                             {column}
-                                            {index !== columns.length - 1 && <div className="resizer" />}
                                         </th>
                                     ))}
                                 </tr>
@@ -565,7 +543,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                                 tableData[0].values.slice(startIndex, endIndex).map((_, rowIndex) => (
                                     <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
                                         {columns.map((column, colIndex) => (
-                                            <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex]?.values[startIndex + rowIndex]}</td>
+                                            <td
+                                                key={colIndex}
+                                                className="p-2 border-b text-center"
+                                            >
+                                                {tableData[colIndex]?.values[startIndex + rowIndex]}
+                                            </td>
                                         ))}
                                     </tr>
                                 ))
