@@ -164,7 +164,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-1000">
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[10000]">
             <div className="bg-white p-0 rounded-md relative w-[1300px] h-[600px] flex flex-col">
                 <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-5">
                     <h5 className="font-bold mx-2 text-2xl">FILTROS</h5>

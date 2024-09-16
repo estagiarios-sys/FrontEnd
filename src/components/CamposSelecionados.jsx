@@ -128,7 +128,7 @@ function CamposSelecionados({
             >
               <thead className="bg-custom-azul-escuro text-white sticky top-0 z-10">
                 <tr className="bg-custom-azul-escuro text-white ">
-                  <th className="py-2 px-4 text-sm w-[60px]"></th>
+                  <th className=" resize-y py-2 px-4 text-sm w-[60px]"></th>
                   <th className="py-2 px-4 text-sm w-[216px]">Campo</th>
                   <th className="py-2 px-4 text-sm w-[193px]">Ordem</th>
                   <th className="py-2 px-4 text-sm w-[241px]">Totalizador</th>
