@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalModal from "./modais/ModalModal";
+import ModalPersonalizar from "./modais/ModalPersonalizar";
 import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 
@@ -19,6 +20,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false); // Modal para exibir o filtros de selects
     const [isModalPdfOpenView, setIsModalPdfOpenView] = useState(false); // Modal para exibir o PDF_View
     const [isModalExpoOpen, setIsModalExpoOpen] = useState(false); // Modal para exibir o Exportar e suas opções
+    const [isModalOpenPersonalizar, setIsModalOpenPersonalizar] = useState(false); // Modal para exibir o Personalizar
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
@@ -56,6 +58,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalOpenSQL(true);
     };
 
+    const handleModalPersonalizar = () => {
+        setIsModalOpenPersonalizar(true);
+    };
+
     const handleModalPdfView = () => {
         if (isView) {
             setIsModalPdfOpenView(true);
@@ -79,6 +85,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
     const closeModalSql = () => {
         setIsModalOpenSQL(false);
+    };
+
+    const closeModalPersonalizar = () => {
+        setIsModalOpenPersonalizar(false);
     };
 
 
@@ -478,7 +488,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={redirectToPDF} className="flex flex-col justify-center items-center">
+                            <button onClick={handleModalPersonalizar} className="flex flex-col justify-center items-center">
 
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path strokeLinecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
@@ -606,6 +616,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             </div>
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
+            <ModalPersonalizar isOpen={isModalOpenPersonalizar} onClose={closeModalPersonalizar} />
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} fullTableHTML={fullTableHTML} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} fullTableHTML={fullTableHTML} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
