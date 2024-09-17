@@ -2,12 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import "../genericos/DragDrop.jsx";
 import DragDropFile from "../genericos/DragDrop.jsx";
 
-function ModalPersonalizar({ isOpen, onClose }) {
+function ModalPersonalizar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
     const [isHoveredButtonExcluir, setIsHoveredButtonExcluir] = useState(false);
     const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
     const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
     const [title, setTitle] = useState("");
+    const [image, setImage] = useState(null);
+
+    const handleImageUpload = (file) => {
+        setImage(file);
+    };
 
     const resetHoverStates = () => {
         setIsHoveredButtonX(false);
@@ -97,8 +102,8 @@ function ModalPersonalizar({ isOpen, onClose }) {
                         }}
                     />
                     <h5 className="font-medium mb-1 mt-4 ml-1">Logotipo:</h5>
-                    <div className="flex-1 w-full p-2 flex justify-center items-center">
-                        <DragDropFile />
+                    <div className="flex-1 w-full p-2 flex justify-center items-center overflow-auto">
+                        <DragDropFile onFileUpload={handleImageUpload} />
                     </div>
                 </div>
                 <div
@@ -175,6 +180,12 @@ function ModalPersonalizar({ isOpen, onClose }) {
                         }}
                         onMouseEnter={() => setIsHoveredButtonCarregar(true)}
                         onMouseLeave={() => setIsHoveredButtonCarregar(false)}
+                        onClick={() => {
+                            handleTitlePdf(title);
+                            handleImgPdf(image);
+                            handleClose();
+                        }
+                        }
                     >
                         Carregar
                     </button>

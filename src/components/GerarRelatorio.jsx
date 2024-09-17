@@ -36,6 +36,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
     const tableRef = useRef(null);
     const [columnWidths] = useState({});
+    const [titlePdf, setTitlePdf] = useState("");
+    const [imgPdf, setImgPdf] = useState(null);
+    const [base64Image, setBase64Image] = useState("");
+
 
     const handleSelectTemplate = (key) => {
         setSelectedTemplateKey(key);
@@ -354,12 +358,34 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             </table>
         `;
     };
+
+    const handleTitlePdf = (title) => {
+        setTitlePdf(title);
+    };
+
+    const handleImgPdf = (img) => {
+        setImgPdf(img);
+    };
+
+    useEffect(() => {
+        const convertToBase64 = (imgPdf) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(imgPdf);
+          reader.onloadend = () => {
+            setBase64Image(reader.result); // Armazena o Base64 da imagem
+          };
+        };
+    
+        if (imgPdf) {
+          convertToBase64(imgPdf);
+        }
+      }, [imgPdf]);
     
     // Gerar o HTML da tabela inteira
     const combinedData = {
         fullTableHTML: generateFullTableHTML(),
-        titlePDF: '01234567890123456789',
-        imgPDF: 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png'
+        titlePDF: titlePdf,
+        imgPDF: base64Image,
     };
 
     const renderTotalizer = () => {
@@ -592,7 +618,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             </div>
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
-            <ModalPersonalizar isOpen={isModalOpenPersonalizar} onClose={closeModalPersonalizar} />
+            <ModalPersonalizar isOpen={isModalOpenPersonalizar} onClose={closeModalPersonalizar} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedData} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
