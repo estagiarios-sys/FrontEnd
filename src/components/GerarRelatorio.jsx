@@ -41,9 +41,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const tableRef = useRef(null);
     const [columnWidths] = useState({});
     const [titlePdf, setTitlePdf] = useState("");
-    const [imgPdf, setImgPdf] = useState(null);
-    const [base64Image, setBase64Image] = useState("");
-
+    const [imgPdf, setImgPdf] = useState('');
+    const [base64Image, setBase64Image] = useState('');
 
 
     const handleSelectTemplate = (key) => {
@@ -370,19 +369,21 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     };
 
     // Função para gerar o HTML completo da tabela
-    const generateFullTableHTML = () => {
+    const generateFullTableHTML = (maxRows = null) => {
         if (!hasData) return '<p>Nenhum dado encontrado.</p>';
-
+    
         const tableHeaders = columns.map((column) => `<th class="p-2 border-b text-center">${column}</th>`).join('');
 
-        const tableRows = tableData[0].values.map((_, rowIndex) => {
+        const rowCount = maxRows ? Math.min(tableData[0].values.length, maxRows) : tableData[0].values.length;
+    
+        const tableRows = tableData[0].values.slice(0, rowCount).map((_, rowIndex) => {
             const rowHTML = columns.map((column, colIndex) =>
                 `<td class="p-2 border-b text-center">${tableData[colIndex]?.values[rowIndex]}</td>`
             ).join('');
             const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
             return `<tr class="${rowClass}">${rowHTML}</tr>`;
         }).join('');
-
+    
         return `
             <table class="w-full text-sm">
                 <thead class="bg-custom-azul-escuro text-black">
@@ -392,6 +393,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             </table>
         `;
     };
+    
 
     const handleTitlePdf = (title) => {
         setTitlePdf(title);
@@ -415,9 +417,14 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
       }, [imgPdf]);
     
-    // Gerar o HTML da tabela inteira
     const combinedData = {
         fullTableHTML: generateFullTableHTML(),
+        titlePDF: titlePdf,
+        imgPDF: base64Image,
+    };
+
+    const combinedDataPreview = {
+        fullTableHTML: generateFullTableHTML(25),
         titlePDF: titlePdf,
         imgPDF: base64Image,
     };
@@ -653,7 +660,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPersonalizar isOpen={isModalOpenPersonalizar} onClose={closeModalPersonalizar} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
-            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedData} />
+            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreview} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
