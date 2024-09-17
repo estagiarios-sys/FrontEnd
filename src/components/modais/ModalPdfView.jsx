@@ -25,7 +25,7 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify( combinedData ), // Envia o HTML da tabela completa
+        body: JSON.stringify(combinedData), // Envia o HTML da tabela completa
       });
 
       if (!response.ok) {
@@ -44,6 +44,7 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
 
   return (
     <div
+      onClick={onClose}
       style={{
         position: 'fixed',
         top: 0,
@@ -69,26 +70,6 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
           overflowY: 'auto', // Permitindo rolagem se o conteúdo exceder a altura do modal
         }}
       >
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)', // Fundo semi-transparente
-            border: '1px solid #ccc', // Borda cinza clara
-            width: '60px', // Largura do botão
-            height: '30px', // Altura do botão
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontSize: '16px',
-            cursor: 'pointer',
-            zIndex: 1001, // Garantindo que o botão esteja sobre o conteúdo
-          }}
-        >
-          Fechar
-        </button>
         {pdfUrl && (
           <div
             style={{
@@ -98,7 +79,7 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
               flexDirection: 'column', // Colocando os elementos um embaixo do outro
               height: '100%',
             }}
-          >          
+          >
             <iframe src={pdfUrl} width="100%" height="600px" title="PDF Preview" />
           </div>
         )}
