@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
 
 function ModalSql({ isOpen, onClose }) {
+    // O isHoveredButtonX não esta sendo utilizado, mas precisa ser declarado para funcionar o hover no botão de fechar
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
 
-    // Função para resetar os estados de hover
-    const resetHoverStates = () => {
-        setIsHoveredButtonX(false);
-    };
-
-    // Função para fechar o modal
+    // Função para resetar hover e fechar o modal
     const handleClose = () => {
-        resetHoverStates();
+        setIsHoveredButtonX(false);
         onClose();
     };
 
@@ -20,94 +16,36 @@ function ModalSql({ isOpen, onClose }) {
         navigator.clipboard.writeText(SQL)
             .then(() => {
                 setIsCopied(true);
-                setTimeout(() => {
-                    setIsCopied(false); // Volta ao estado original após 3 segundos
-                }, 4000);
+                setTimeout(() => setIsCopied(false), 4000); // Volta ao estado original após 4 segundos
             })
-            .catch((err) => {
-                console.error("Falha ao copiar: ", err);
-            });
+            .catch((err) => console.error("Falha ao copiar: ", err));
     };
 
     // Efeito para impedir o scroll da página quando o modal está aberto
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'; // Impede o scroll da página
-        } else {
-            document.body.style.overflow = 'auto'; // Permite o scroll da página
-        }
-
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
+        document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+        return () => document.body.style.overflow = 'auto';
     }, [isOpen]);
 
-    // Se o modal não estiver aberto, retorna null
     if (!isOpen) return null;
-
-    // Estilos para a div que contém o conteúdo do modal
-    const contentContainerStyle = {
-        width: '500px',
-        height: '500px',
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        marginTop: '20px',
-        position: 'relative',
-    };
 
     const SQL = localStorage.getItem('SQLGeradoFinal');
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 1000,
-            }}
-        >
-            <div
-                style={{
-                    backgroundColor: '#fff',
-                    padding: '0px',
-                    borderRadius: '5px',
-                    position: 'relative',
-                    width: '500px',
-                    height: '500px',
-                }}
-            >
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
+            <div className="bg-white p-0 rounded-[5px] relative w-[500px] h-[500px]">
                 <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">SQL</h5>
                     <button
-                        className="font-bold mx-2"
+                        className="font-bold mx-2 rounded-full cursor-pointer w-[30px] h-[30px] flex justify-center items-center text-[16px] transition-colors duration-300 ease-in bg-[--azul-claro] hover:bg-[--azul]"
                         onClick={handleClose}
-                        style={{
-                            borderRadius: '50px',
-                            cursor: 'pointer',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontSize: '16px',
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
-                        }}
                         onMouseEnter={() => setIsHoveredButtonX(true)}
                         onMouseLeave={() => setIsHoveredButtonX(false)}
                     >
                         X
                     </button>
                 </div>
-                <div style={contentContainerStyle}>
+                <div className="w-[500px] h-[500px] flex flex-row justify-center items-start mt-5 relative">
                     <div className="w-11/12 h-5/6 bg-gray-200 bg-opacity-30 rounded-md">
                         <h5 className="m-6">{SQL}</h5>
                     </div>
