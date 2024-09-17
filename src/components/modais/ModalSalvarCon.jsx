@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import ModalModal from './ModalModal';
+import { getTotalizers } from "../CamposSelecionados";
 
-function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
+
+function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2}) {
     const [inputValue, setInputValue] = useState('');
 
     const [isConfirmModalSaveOpen, setIsModalModalSaveOpen] = useState(false);
@@ -73,12 +75,24 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery }) {
         }
 
         try {
+
+            const totalizersObject = getTotalizers() || {};
+
+            // Transformando o objeto em um array de objetos com o formato desejado
+            const totalizersArray = Object.values(totalizersObject).map(totalizer => ({
+                totalizer
+            }));
+
             const dataToSave = {
                 queryName: inputValue,
-                query: sqlQuery,
+                finalQuery: sqlQuery,
+                totalizersQuery: sql2 || "",
+                totalizers: totalizersArray
             };
 
             const query = JSON.stringify(dataToSave);
+
+            console.log(query)
 
             const response = await fetch('http://localhost:8080/save', {
                 method: 'POST',
