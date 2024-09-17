@@ -14,3 +14,7 @@ body {
 @import './styles/infoHover.css';
 @import './styles/lista.css';
 @import './styles/scroll.css';
+
+body {
+    user-select: none;
+}

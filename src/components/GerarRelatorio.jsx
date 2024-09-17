@@ -8,16 +8,20 @@ import { useNavigate } from 'react-router-dom';
 import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalModal from "./modais/ModalModal";
+import ModalPersonalizar from "./modais/ModalPersonalizar";
 import { getTotalizers } from "./CamposSelecionados";
+import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 
 
-function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage}) {
-
+function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false); // Modal para exibir as views salvas
     const [isModalOpenSQl, setIsModalOpenSQL] = useState(false); // Modal para exibir o SQL
     const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false); // Modal para exibir o filtros de selects
     const [isModalPdfOpenView, setIsModalPdfOpenView] = useState(false); // Modal para exibir o PDF_View
     const [isModalExpoOpen, setIsModalExpoOpen] = useState(false); // Modal para exibir o Exportar e suas opções
+    const [isModalOpenPersonalizar, setIsModalOpenPersonalizar] = useState(false); // Modal para exibir o Personalizar
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
@@ -31,7 +35,14 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
+
     const [sql2, setSql2] = useState('');
+
+    const tableRef = useRef(null);
+    const [columnWidths] = useState({});
+    const [titlePdf, setTitlePdf] = useState("");
+    const [imgPdf, setImgPdf] = useState(null);
+    const [base64Image, setBase64Image] = useState("");
 
 
 
@@ -56,6 +67,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalOpenSQL(true);
     };
 
+    const handleModalPersonalizar = () => {
+        setIsModalOpenPersonalizar(true);
+    };
 
     const handleModalPdfView = () => {
         if (isView) {
@@ -82,6 +96,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalOpenSQL(false);
     };
 
+    const closeModalPersonalizar = () => {
+        setIsModalOpenPersonalizar(false);
+    };
+
 
     const closeModalPdfView = () => {
         setIsModalPdfOpenView(false);
@@ -94,7 +112,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const closeModalFiltro = () => {
         setIsModalOpenFiltro(false);
     };
-
 
     const closeModalSalvos = () => {
         setIsModalOpenSalvos(false);
@@ -132,7 +149,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         });
     };
 
-
     const handleSaveConditions = (conditions) => {
         setCondicoesString(conditions);
     };
@@ -144,18 +160,28 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
     // Função para mudar a página atual
     const changePage = (direction) => {
-        setCurrentPage(prevPage => {
-            if (direction === 'next' && prevPage < totalPages) return prevPage + 1;
-            if (direction === 'prev' && prevPage > 1) return prevPage - 1;
-            return prevPage;
-        });
+        switch (direction) {
+            case 'first':
+                setCurrentPage(1);
+                break;
+            case 'prev':
+                setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+                break;
+            case 'next':
+                setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+                break;
+            case 'last':
+                setCurrentPage(totalPages);
+                break;
+            default:
+                break;
+        }
     };
 
     // Calcular o índice inicial e final dos itens da página atual
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const shouldShowPagination = hasData && tableData[0].values.length > 15;
-
     const orderByString = localStorage.getItem('orderByString');
 
     const fetchData = async () => {
@@ -304,6 +330,18 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     
     
     const handleGenerateReport = async () => {
+        setIsLoading(true);
+        setLoadingProgress(0);
+
+        const progressInterval = setInterval(() => {
+            setLoadingProgress((prevProgress) => {
+                if (prevProgress >= 100) {
+                    clearInterval(progressInterval);
+                    return 100;
+                }
+                return prevProgress + 10;
+            });
+        }, 100);
         try {
             let data;
             if (localStorage.getItem('loadedQuery')) {
@@ -324,7 +362,64 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
+        } finally {
+            clearInterval(progressInterval);
+            setIsLoading(false);
+            setLoadingProgress(100);
         }
+    };
+
+    // Função para gerar o HTML completo da tabela
+    const generateFullTableHTML = () => {
+        if (!hasData) return '<p>Nenhum dado encontrado.</p>';
+
+        const tableHeaders = columns.map((column) => `<th class="p-2 border-b text-center">${column}</th>`).join('');
+
+        const tableRows = tableData[0].values.map((_, rowIndex) => {
+            const rowHTML = columns.map((column, colIndex) =>
+                `<td class="p-2 border-b text-center">${tableData[colIndex]?.values[rowIndex]}</td>`
+            ).join('');
+            const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
+            return `<tr class="${rowClass}">${rowHTML}</tr>`;
+        }).join('');
+
+        return `
+            <table class="w-full text-sm">
+                <thead class="bg-custom-azul-escuro text-black">
+                    <tr>${tableHeaders}</tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        `;
+    };
+
+    const handleTitlePdf = (title) => {
+        setTitlePdf(title);
+    };
+
+    const handleImgPdf = (img) => {
+        setImgPdf(img);
+    };
+
+    useEffect(() => {
+        const convertToBase64 = (imgPdf) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(imgPdf);
+          reader.onloadend = () => {
+            setBase64Image(reader.result); // Armazena o Base64 da imagem
+          };
+        };
+    
+        if (imgPdf) {
+          convertToBase64(imgPdf);
+        }
+      }, [imgPdf]);
+    
+    // Gerar o HTML da tabela inteira
+    const combinedData = {
+        fullTableHTML: generateFullTableHTML(),
+        titlePDF: titlePdf,
+        imgPDF: base64Image,
     };
 
     const renderTotalizer = () => {
@@ -333,8 +428,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         const totalizerKeys = Object.keys(renderTotalizerResult);
 
         return (
-            <tfoot className= "border-t border-black">
-                <tr className="bg-gray-200 text-center">
+
+            <tfoot className="border-t border-black">
+                <tr className="bg-custom-azul-claro text-center">
                     <td className="p-2 border-t-2 border-black" colSpan={columns.length}>
                         <table className="w-full ">
                             <tbody>
@@ -345,13 +441,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         </table>
                     </td>
                 </tr>
-                <tr className="bg-gray-200 text-center">
+                <tr className="bg-custom-azul-claro text-center">
                     {columns.map((column, index) => {
                         const totalizerKey = totalizerKeys.find(key => key.includes(column));
                         return (
-                            <td 
-                            className="font-regular text-black pb-3"
-                            key={index}>
+                            <td
+                                className="font-regular text-black pb-3"
+                                key={index}>
                                 {totalizerKey ? renderTotalizerResult[totalizerKey] : ""}
                             </td>
                         );
@@ -370,9 +466,18 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleGenerateReport}
+                            disabled={isLoading}
                         >
-                            Gerar Relatório
+                            {isLoading ? 'Carregando...' : 'Gerar Relatório'}
                         </button>
+                        {isLoading && (
+                            <div className="fixed inset-0 flex flex-col items-center justify-center bg-opacity-50 bg-gray-200 z-50">
+                                <div className="ww-8 h-8 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
+                                <div className="mt-2 text-blue-500">{loadingProgress}%
+                                </div>
+                                <div><button className=" text-blue-500 font-bold z-50 mt-3" onClick={() => setIsLoading(false)}>Cancelar</button></div>
+                            </div>
+                        )}
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleModalSalvarCon}
@@ -419,7 +524,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={redirectToPDF} className="flex flex-col justify-center items-center">
+                            <button onClick={handleModalPersonalizar} className="flex flex-col justify-center items-center">
 
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path strokeLinecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
@@ -462,12 +567,22 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             </div>
             <div className="w-full text-center">
                 <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
-                    <table className="w-full text-sm">
+                    <table ref={tableRef} className="w-full text-sm">
                         {hasData && (
                             <thead className="bg-custom-azul-escuro text-white">
                                 <tr>
                                     {columns.map((column, index) => (
-                                        <th key={index} className="p-2 border-b text-center">{column}</th>
+                                        <th
+                                            key={index}
+                                            className="p-2 border-b text-center"
+                                            style={{
+                                                resize: index === columns.length - 1 ? 'none' : 'horizontal', // Remove o resize da última coluna
+                                                overflow: 'auto',
+                                                width: columnWidths[index] || 'auto'
+                                            }}
+                                        >
+                                            {column}
+                                        </th>
                                     ))}
                                 </tr>
                             </thead>
@@ -477,7 +592,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                                 tableData[0].values.slice(startIndex, endIndex).map((_, rowIndex) => (
                                     <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
                                         {columns.map((column, colIndex) => (
-                                            <td key={colIndex} className="p-2 border-b text-center">{tableData[colIndex]?.values[startIndex + rowIndex]}</td>
+                                            <td
+                                                key={colIndex}
+                                                className="p-2 border-b text-center"
+                                            >
+                                                {tableData[colIndex]?.values[startIndex + rowIndex]}
+                                            </td>
                                         ))}
                                     </tr>
                                 ))
@@ -491,31 +611,50 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                     </table>
                 </div>
                 {shouldShowPagination && (
-                    <div className="flex justify-center mt-4 mb-4">
+                    <div className="flex justify-center mt-4 mb-4 items-center">
+                        <button
+                            onClick={() => changePage('first')}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                            title="Ir para a primeira página"
+                        >
+                            <FaAngleDoubleLeft />
+                        </button>
                         <button
                             onClick={() => changePage('prev')}
                             disabled={currentPage === 1}
                             className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                            title="Ir para a página anterior"
                         >
-                            Anterior
+                            <FaAngleLeft />
                         </button>
-                        <span className="flex items-center">
+                        <span className="flex items-center mx-2">
                             Página {currentPage} de {totalPages}
                         </span>
                         <button
                             onClick={() => changePage('next')}
                             disabled={currentPage === totalPages}
                             className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                            title="Ir para a página seguinte"
                         >
-                            Próxima
+                            <FaAngleRight />
+                        </button>
+                        <button
+                            onClick={() => changePage('last')}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
+                            title="Ir para a última página"
+                        >
+                            <FaAngleDoubleRight />
                         </button>
                     </div>
                 )}
             </div>
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
-            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} table={tableData} templateKey={selectedTemplateKey} /> {/* Passa a chave do template selecionado */}
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} templateKey={selectedTemplateKey} />
+            <ModalPersonalizar isOpen={isModalOpenPersonalizar} onClose={closeModalPersonalizar} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
+            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedData} />
+            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
             <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}  sql2={sql2}/>
