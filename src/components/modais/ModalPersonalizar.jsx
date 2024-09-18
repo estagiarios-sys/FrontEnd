@@ -91,6 +91,7 @@ function ModalPersonalizar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
                     <h5 className="font-medium mb-1 mt-4 ml-1">Título:</h5>
                     <input
                         type="text"
+                        maxLength={20}
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Digite..."
