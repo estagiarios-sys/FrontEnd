@@ -3,7 +3,7 @@ import ModalModal from './ModalModal';
 import { getTotalizers } from "../CamposSelecionados";
 
 
-function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2}) {
+function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
     const [inputValue, setInputValue] = useState('');
 
     const [isConfirmModalSaveOpen, setIsModalModalSaveOpen] = useState(false);
@@ -59,7 +59,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2}) {
     };
 
     const saveQuery = async () => {
-
         if (inputValue.length === 0 && sqlQuery.length === 0) {
             setModalMessage('Faça uma consulta para salvar.');
             handleModalModalAviso();
@@ -73,46 +72,50 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2}) {
             handleModalModalAviso();
             return;
         }
-
+    
         try {
-
             const totalizersObject = getTotalizers() || {};
-
-            // Transformando o objeto em um array de objetos com o formato desejado
             const totalizersArray = Object.values(totalizersObject).map(totalizer => ({
                 totalizer
             }));
-
+    
+            // Criar o objeto JSON com os dados da consulta
             const dataToSave = {
                 queryName: inputValue,
                 finalQuery: sqlQuery,
                 totalizersQuery: sql2 || "",
+                titlePDF: titlePdf,
                 totalizers: totalizersArray
             };
-
-            const query = JSON.stringify(dataToSave);
-
-            console.log(query)
-
+    
+            // Criar um FormData
+            const formData = new FormData();
+    
+            // Adicionar o JSON como uma string
+            formData.append('queryData', JSON.stringify(dataToSave));  // Os dados JSON são enviados como string
+    
+            // Adicionar a imagem
+            formData.append('imgPDF', img);  // A imagem é enviada como um arquivo binário
+    
+            // Enviar a requisição com fetch
             const response = await fetch('http://localhost:8080/save', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: query,
+                body: formData,  // Enviando tudo com FormData
             });
-
+    
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-
+    
             const result = await response.json();
             console.log('Success:', result);
             handleModalModalSave();
         } catch (error) {
+            console.error('Error:', error);
             handleModalModalUpdate();
         }
     };
+    
 
 
     const updateQuery = async () => {
