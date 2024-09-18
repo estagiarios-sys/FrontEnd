@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import CustomSelect from './genericos/CustomSelect';
 
@@ -18,20 +18,14 @@ const TotalizerOptions = [
 let totalizers = [];
 
 export function removeSelectedTotalizers(camposParaRemover) {
-
-  console.log('camposParaRemover', camposParaRemover);
-
   camposParaRemover.forEach((campo) => {
-    console.log('campo removido asadasdasdads', campo);
     const campoSemApelido = campo.replace(/\s+as\s+.*$/, ''); // Remove o apelido do campo
     delete totalizers[campoSemApelido];
   });
-  console.log('totalizadorString', totalizers);
 }
 
 export function resetTotalizers() {
   totalizers = {};
-  console.log('totalizadorString', totalizers);
 }
 
 export function getTotalizers() {
@@ -43,29 +37,25 @@ function CamposSelecionados({
   onDragEnd,
   handleCheckboxChange,
   checkedCampos = [],
-  onSelectedCamposChange
+  onSelectedCamposChange,
 }) {
-  const selectedCamposSemApelido = selectedCampos.map((campo) => campo.replace(/\s+as\s+.*$/, ''));
-  const [selectedOrder, setSelectedOrder] = useState(null); // Estado para a seleção atual
-  const [customNames, setCustomNames] = useState({}); // Estado para os nomes personalizados
-  const selectRefs = useRef({}); // Referências para os componentes CustomSelect
-  const selectTotalizerRefs = useRef({}); // Referências para os componentes CustomSelect
+  const selectedCamposSemApelido = selectedCampos.map((campo) =>
+    campo.replace(/\s+as\s+.*$/, '')
+  );
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [customNames, setCustomNames] = useState({});
+  const selectRefs = useRef({});
+  const selectTotalizerRefs = useRef({});
 
   const handleTotalizerSave = (selectedOption, campo) => {
-
-    const campoSemApelido = campo.replace(/\s+as\s+.*$/, ''); // Remove o apelido do campo
+    const campoSemApelido = campo.replace(/\s+as\s+.*$/, '');
 
     if (selectedOption) {
-      // Se uma opção for selecionada, adiciona ou atualiza o totalizador no objeto
       totalizers[campoSemApelido] = selectedOption.value;
     } else {
-      // Se a opção for desmarcada (ou seja, o totalizador foi removido), remove o campo do objeto
       delete totalizers[campoSemApelido];
     }
-
-    console.log('totalizadorString', totalizers);
   };
-
 
   const handleOrderBySave = (selectedOption, fieldName) => {
     const newOrder = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
@@ -99,7 +89,6 @@ function CamposSelecionados({
     }));
 
     const updatedCampos = selectedCampos.map((selectedCampo) => {
-
       const campoSemApelidoComparacao = selectedCampo.replace(/\s+as\s+.*$/, '');
       const campoSemApelido = campo.replace(/\s+as\s+.*$/, '');
 
@@ -115,9 +104,25 @@ function CamposSelecionados({
 
   const showCheckboxColumn = selectedCampos.length > 0;
 
+  const handleScroll = () => {
+    // Fecha todos os menus abertos do CustomSelect
+    Object.values(selectRefs.current).forEach((ref) => {
+      if (ref && ref.closeMenu) {
+        ref.closeMenu();
+      }
+    });
+    Object.values(selectTotalizerRefs.current).forEach((ref) => {
+      if (ref && ref.closeMenu) {
+        ref.closeMenu();
+      }
+    });
+  };
+
   return (
     <div
-      style={{ maxHeight: '280px', overflowY: 'auto', position: 'relative' }}>
+      style={{ maxHeight: '280px', overflowY: 'auto', position: 'relative' }}
+      onScroll={handleScroll}
+    >
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="droppable" type="list" direction="vertical">
           {(provided) => (
@@ -204,7 +209,10 @@ function CamposSelecionados({
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={showCheckboxColumn ? 3 : 2} className="py-2 px-4 border-b border-gray-300 text-sm text-gray-500 whitespace-nowrap">
+                    <td
+                      colSpan={showCheckboxColumn ? 3 : 2}
+                      className="py-2 px-4 border-b border-gray-300 text-sm text-gray-500 whitespace-nowrap"
+                    >
                       Nenhum campo selecionado
                     </td>
                   </tr>
