@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 
-function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport }) {
+function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownloadPDF }) {
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
     const [isHoveredButtonExcluir, setIsHoveredButtonExcluir] = useState(false);
     const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
@@ -69,9 +69,12 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport }) {
     //     setShowDropdown(false);
     // };
 
-    const handleOptionClick = (option) => {
+    const handleOptionClick = async (option) => {
         if (option === 'Gerar') {
-            onGenerateReport(); // Chama a função recebida como prop
+            await onGenerateReport();
+        } else if (option === 'Gerar e Baixar') {
+            await onGenerateReport(); 
+            await onDownloadPDF();
         }
         setShowDropdown(false);
     };
