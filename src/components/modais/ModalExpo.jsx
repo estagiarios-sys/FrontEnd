@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Papa from 'papaparse';
-import ModalModal from './ModalModal';
+import ModalModal from './ModalAlert';
 import { FiFile, FiDownload } from 'react-icons/fi';
 
 function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {

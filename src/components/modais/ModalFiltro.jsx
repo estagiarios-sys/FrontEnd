@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Select, { components } from 'react-select';
-import ModalModal from './ModalModal';
+import ModalModal from './ModalAlert';
 
 const ordenacaoOptions = [
     { value: '>', label: 'Maior' },

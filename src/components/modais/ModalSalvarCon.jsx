@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import ModalModal from './ModalModal';
+import ModalAlert from './ModalAlert';
 import { getTotalizers } from "../CamposSelecionados";
 
 
 function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
     const [inputValue, setInputValue] = useState('');
 
-    const [isConfirmModalSaveOpen, setIsModalModalSaveOpen] = useState(false);
-    const [isConfirmModalUpdateOpen, setIsModalModalUpdateOpen] = useState(false);
-    const [isConfirmModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
+    const [isConfirmModalSaveOpen, setIsModalAlertSaveOpen] = useState(false);
+    const [isConfirmModalUpdateOpen, setIsModalAlertUpdateOpen] = useState(false);
+    const [isConfirmModalAvisoOpen, setIsModalAlertOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
     const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
@@ -24,18 +24,18 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
 
     };
 
-    const handleModalModalSave = () => {
+    const handleModalAlertSave = () => {
         setModalMessage('Consulta salva!');
-        setIsModalModalSaveOpen(true);
+        setIsModalAlertSaveOpen(true);
     };
 
-    const handleModalModalUpdate = () => {
+    const handleModalAlertUpdate = () => {
         setModalMessage('Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
-        setIsModalModalUpdateOpen(true);
+        setIsModalAlertUpdateOpen(true);
     };
 
-    const handleModalModalAviso = () => {
-        setIsModalModalAvisoOpen(true);
+    const handleModalAlert = () => {
+        setIsModalAlertOpen(true);
     }
 
     const contentContainerStyle = {
@@ -61,15 +61,15 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
     const saveQuery = async () => {
         if (inputValue.length === 0 && sqlQuery.length === 0) {
             setModalMessage('Faça uma consulta para salvar.');
-            handleModalModalAviso();
+            handleModalAlert();
             return;
         } else if (inputValue.length > 0 && sqlQuery.length === 0) {
             setModalMessage('Faça uma consulta para salvar.');
-            handleModalModalAviso();
+            handleModalAlert();
             return;
         } else if (inputValue.length === 0 && sqlQuery.length > 0) {
             setModalMessage('Digite um nome para salvar a consulta.');
-            handleModalModalAviso();
+            handleModalAlert();
             return;
         }
     
@@ -109,10 +109,10 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
     
             const result = await response.json();
             console.log('Success:', result);
-            handleModalModalSave();
+            handleModalAlertSave();
         } catch (error) {
             console.error('Error:', error);
-            handleModalModalUpdate();
+            handleModalAlertUpdate();
         }
     };
     
@@ -272,9 +272,9 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
                     </button>
                 </div>
             </div>
-            <ModalModal modalType="SUCESSO"
+            <ModalAlert modalType="SUCESSO"
                 isOpen={isConfirmModalSaveOpen}
-                onClose={() => setIsModalModalSaveOpen(false)}
+                onClose={() => setIsModalAlertSaveOpen(false)}
                 onConfirm={onClose}
                 confirmText="Ok"
                 message={modalMessage}
@@ -283,9 +283,9 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
                     ok: "bg-gray-600 hover:bg-red-700 focus:ring-gray-600",
                 }}
             />
-            <ModalModal modalType="ALERTA"
+            <ModalAlert modalType="ALERTA"
                 isOpen={isConfirmModalUpdateOpen}
-                onClose={() => setIsModalModalUpdateOpen(false)}
+                onClose={() => setIsModalAlertUpdateOpen(false)}
                 onConfirm={updateQuery}
                 confirmText="Substituir"
                 message={modalMessage}
@@ -294,10 +294,10 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
                     ok: "bg-red-600 hover:bg-red-700 focus:ring-gray-600",
                 }}
             />
-            <ModalModal modalType="ALERTA"
+            <ModalAlert modalType="ALERTA"
                 isOpen={isConfirmModalAvisoOpen}
-                onClose={() => setIsModalModalAvisoOpen(false)}
-                onConfirm={() => setIsModalModalAvisoOpen(false)}
+                onClose={() => setIsModalAlertOpen(false)}
+                onConfirm={() => setIsModalAlertOpen(false)}
                 confirmText="Ok"
                 message={modalMessage}
                 title="Aviso"

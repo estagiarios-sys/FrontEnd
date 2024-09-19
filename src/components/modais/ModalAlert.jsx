@@ -1,19 +1,6 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState } from "react";
 
-interface ModalProps {
-    isOpen?: boolean;
-    onClose?: () => void;
-    onConfirm?: (name?: string) => void; // Agora aceita um nome como parâmetro opcional
-    message?: string;
-    modalType?: "APAGAR" | "ALERTA" | "DIGITAR_NOME" | "SUCESSO";
-    onNameChange?: (value: string) => void;
-    confirmText?: string;  // Nova propriedade opcional para o texto do botão de confirmação
-}
-
-const modalTypes: Record<
-    string,
-    { title: string; defaultConfirmText: string; cancelText: string | null; isAlert: boolean }
-> = {
+const modalTypes = {
     APAGAR: {
         title: "Confirmar Exclusão",
         defaultConfirmText: "Confirmar",
@@ -40,7 +27,7 @@ const modalTypes: Record<
     },
 };
 
-const ModalModal: React.FC<ModalProps> = ({
+const ModalAlert = ({
     isOpen = false,
     onClose = () => { },
     onConfirm = () => { },
@@ -49,17 +36,18 @@ const ModalModal: React.FC<ModalProps> = ({
     onNameChange = () => { },
     confirmText, // Agora pode receber o texto do botão diretamente
 }) => {
-    const [inputValue, setInputValue] = useState<string>("");
-    const [error, setError] = useState<string | null>(null);
+    const [inputValue, setInputValue] = useState("");
+    const [error, setError] = useState(null);
 
     if (!isOpen) return null;
 
-    const { title, defaultConfirmText, cancelText, isAlert } = modalTypes[modalType] || modalTypes.ALERTA;
+    const { title, defaultConfirmText, cancelText, isAlert } =
+        modalTypes[modalType] || modalTypes.ALERTA;
 
     // Usa o confirmText passado, ou o defaultConfirmText se confirmText não for fornecido
     const finalConfirmText = confirmText || defaultConfirmText;
 
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e) => {
         setInputValue(e.target.value);
         onNameChange(e.target.value);
     };
@@ -70,7 +58,7 @@ const ModalModal: React.FC<ModalProps> = ({
             return;
         }
         setError(null);
-	// Passa o nome do template se o tipo for DIGITAR_NOME
+        // Passa o nome do template se o tipo for DIGITAR_NOME
         if (modalType === "DIGITAR_NOME") {
             onConfirm(inputValue);
         } else {
@@ -96,7 +84,9 @@ const ModalModal: React.FC<ModalProps> = ({
                                 placeholder="Digite um nome"
                                 className="mt-2 w-full border border-custom-azul-escuro rounded p-1 focus:ring-1 focus:ring-custom-azul-escuro focus:outline-none"
                             />
-                            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                            {error && (
+                                <p className="text-red-500 text-sm mt-2">{error}</p>
+                            )}
                         </>
                     )}
                 </div>
@@ -110,9 +100,8 @@ const ModalModal: React.FC<ModalProps> = ({
                                 {cancelText}
                             </button>
                             {cancelText && (
-
                                 <button
-                                    className="text-white font-semibold py-2 px-4 rounded-lg bg- bg-custom-vermelho hover:bg-custom-vermelho-escuro focus:ring-custom-vermelho"
+                                    className="text-white font-semibold py-2 px-4 rounded-lg bg-custom-vermelho hover:bg-custom-vermelho-escuro focus:ring-custom-vermelho"
                                     onClick={handleConfirm}
                                 >
                                     {finalConfirmText}
@@ -137,4 +126,4 @@ const ModalModal: React.FC<ModalProps> = ({
     );
 };
 
-export default ModalModal;
+export default ModalAlert;

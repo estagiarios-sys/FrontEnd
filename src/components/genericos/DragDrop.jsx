@@ -1,7 +1,7 @@
 //DragDrop do modal criar para seleção e visualização da imagem.
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import ModalModal from '../modais/ModalModal';
+import ModalModal from '../modais/ModalAlert';
 import PropTypes from 'prop-types';
 
 function DragDropFile({ isOpen, onClose, onFileUpload }) {

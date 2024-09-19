@@ -5,9 +5,8 @@ import ModalExpo from "./modais/ModalExpo";
 import ModalSalvos from "./modais/ModalSalvos";
 import ModalFiltro from "./modais/ModalFiltro";
 import { useNavigate } from 'react-router-dom';
-import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
-import ModalModal from "./modais/ModalModal";
+import ModalAlert from "./modais/ModalAlert";
 import ModalPersonalizar from "./modais/ModalPersonalizar";
 import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
@@ -31,7 +30,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [selectedTemplateKey, setSelectedTemplateKey] = useState(null);
     const [isModalSalvarConOpen, setIsModalSalvarCon] = useState(false);
     const [sqlQuery, setSqlQuery] = useState('');
-    const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false); // ModalModal para exibir avisos
+    const [isModalAlertOpen, setIsModalAlertOpen] = useState(false); // ModalAlert para exibir avisos
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
@@ -44,11 +43,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
 
-
-    const handleSelectTemplate = (key) => {
-        setSelectedTemplateKey(key);
-        setIsModalModeloOpen(false);
-    };
 
     const handleModalFiltro = () => {
         setIsModalOpenFiltro(true);
@@ -75,17 +69,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             setIsModalPdfOpenView(true);
         } else {
             setIsModalPdfOpenView(false);
-            setIsModalModalAvisoOpen(true);
+            setIsModalAlertOpen(true);
         }
     };
 
     const handleModalSalvarCon = () => {
         setIsModalSalvarCon(true);
     }
-
-    const handleModalModelo = () => {
-        setIsModalModeloOpen(true);
-    };
 
     const closeModalExpo = () => {
         setIsModalExpoOpen(false);
@@ -104,8 +94,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalPdfOpenView(false);
     };
 
-    const closeModalModalAviso = () => {
-        setIsModalModalAvisoOpen(false);
+    const closeModalAlert = () => {
+        setIsModalAlertOpen(false);
     };
 
     const closeModalFiltro = () => {
@@ -119,10 +109,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const closeModalSalvarCon = () => {
         setIsModalSalvarCon(false);
     }
-
-    const closeModalModelo = () => {
-        setIsModalModeloOpen(false);
-    };
 
     const navigate = useNavigate();
 
@@ -563,16 +549,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={handleModalModelo} className="flex flex-col justify-center items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                </svg>
-                                <label htmlFor="mais">Modelos</label>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
                             <button onClick={handleModalPdfView} className="flex flex-col justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Zm3.75 11.625a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
@@ -684,11 +660,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreview} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
-            <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
-
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}  sql2={sql2} img={imgPdf} titlePdf={titlePdf}/>
-
-            <ModalModal isOpen={isModalModalAvisoOpen} onClose={closeModalModalAviso} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
+            <ModalAlert isOpen={isModalAlertOpen} onClose={closeModalAlert} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
         </div>
     );
 }

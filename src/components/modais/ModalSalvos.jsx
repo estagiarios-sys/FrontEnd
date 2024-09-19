@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Select from 'react-select';
-import ModalModal from './ModalModal';
+import ModalAlert from './ModalAlert';
 import { getTotalizers } from "../CamposSelecionados";
 
 function ModalSalvos({ isOpen, onClose, generateReport }) {
     const [selectedCampo, setSelectedCampo] = useState(null); // Agora armazena apenas um valor
     const [campoOptions, setCampoOptions] = useState([]);
-    const [isConfirmModalOpen, setIsModalModalOpen] = useState(false);
-    const [isConfirmModalOkOpen, setIsModalModalOkOpen] = useState(false);
+    const [isConfirmModalOpen, setIsModalAlertOpen] = useState(false);
+    const [isConfirmModalOkOpen, setIsModalAlertOkOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [excludeCampo, setExcludeCampo] = useState(null); // Um único valor
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
@@ -68,17 +68,17 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
         } catch (error) {
             console.error('Erro ao excluir a consulta salva:', error);
         } finally {
-            setIsModalModalOpen(false); // Fecha o modal de confirmação
+            setIsModalAlertOpen(false); // Fecha o modal de confirmação
         }
     }
 
     const handleApagar = () => {
         if (selectedCampo) {
             setModalMessage('Você tem certeza de que deseja apagar essa consulta?');
-            setIsModalModalOpen(true);
+            setIsModalAlertOpen(true);
         } else {
             setModalMessage('Selecione uma consulta para apagar.');
-            setIsModalModalOkOpen(true);
+            setIsModalAlertOkOpen(true);
         }
     };
 
@@ -99,14 +99,14 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
         if (selectedCampo && selectedCampo.finalQuery) {
             localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo))
             setModalMessage('Consulta carregada!');
-            setIsModalModalOkOpen(true);
+            setIsModalAlertOkOpen(true);
     
             if (generateReport) {
                 await generateReport();
             }
         } else {
             setModalMessage('Selecione uma consulta para carregar.');
-            setIsModalModalOkOpen(true);
+            setIsModalAlertOkOpen(true);
         }
     }
 
@@ -289,10 +289,10 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                     </button>
                 </div>
             </div>
-            <ModalModal
+            <ModalAlert
                 modalType="APAGAR"
                 isOpen={isConfirmModalOpen}
-                onClose={() => setIsModalModalOpen(false)}
+                onClose={() => setIsModalAlertOpen(false)}
                 onConfirm={deleteSavedQuery}
                 confirmText="Excluir"
                 message={modalMessage}
@@ -302,11 +302,11 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                     cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
                 }}
             />
-            <ModalModal
+            <ModalAlert
                 isOpen={isConfirmModalOkOpen}
-                onClose={() => setIsModalModalOkOpen(false)}
+                onClose={() => setIsModalAlertOkOpen(false)}
                 onConfirm={() => {
-                    setIsModalModalOkOpen(false);
+                    setIsModalAlertOkOpen(false);
                     onClose();
                 }}
                 confirmText="Confirmar"
