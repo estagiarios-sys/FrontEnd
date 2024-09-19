@@ -162,6 +162,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
+                zIndex: 1000,
             }}
         >
             <div
