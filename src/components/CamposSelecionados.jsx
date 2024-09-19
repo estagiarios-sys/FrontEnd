@@ -115,6 +115,7 @@ function CamposSelecionados({
           };
         }
       return selectedCampo;
+      }
     });
 
     onSelectedCamposChange(updatedCampos);
