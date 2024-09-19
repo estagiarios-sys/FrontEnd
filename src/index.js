@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './index.css';
 import Main from './main';
-import Nova from './components/PDF/pdfme'; 
 
 
 function App() {
@@ -19,7 +18,6 @@ function App() {
             </>
           } 
         />
-        <Route path="/pdfme" element={<Nova />} />
       </Routes>
     </Router>
   );

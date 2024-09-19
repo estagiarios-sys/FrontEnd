@@ -1,45 +1,47 @@
-import React, { useState } from "react";
-import ModalModal from "./ModalModal";
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import Papa from 'papaparse';
+import ModalModal from './ModalAlert';
+import { FiFile, FiDownload } from 'react-icons/fi';
 
 function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
-    const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false);
-    const [modalMessage, setModalMessage] = useState("");
-    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
-    const [isHoveredButtonPDF, setIsHoveredButtonPDF] = useState(false);
-    const [isHoveredButtonCSC, setIsHoveredButtonCSC] = useState(false);
+    const [isModalAvisoOpen, setIsModalAvisoOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
 
-    const handleModalModalAviso = (message) => {
+    const handleModalAviso = (message) => {
         setModalMessage(message);
-        setIsModalModalAvisoOpen(true);
+        setIsModalAvisoOpen(true);
     };
 
-    const closeModalModalAviso = () => {
-        setIsModalModalAvisoOpen(false);
-    };
-
-    const resetHoverStates = () => {
-        setIsHoveredButtonX(false);
+    const closeModalAviso = () => {
+        setIsModalAvisoOpen(false);
     };
 
     const handleClose = () => {
-        resetHoverStates();
         onClose();
     };
 
-    const handleDownloadPDF = async () => {
+    const downloadFile = (blob, filename) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    };
 
+    const handleDownloadPDF = async () => {
         if (!table || table.length === 0) {
-            handleModalModalAviso("Por favor, selecione uma tabela e certifique-se de que há dados para exportar.");
+            handleModalAviso('Por favor, selecione uma tabela e certifique-se de que há dados para exportar.');
             return;
         }
 
         try {
-            const response = await fetch('http://localhost:8080/pdf/generate', { // Backend Java
+            const response = await fetch('http://localhost:8080/pdf/generate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify( combinedData ), // Envia o HTML da tabela completa
+                body: JSON.stringify(combinedData),
             });
 
             if (!response.ok) {
@@ -47,200 +49,80 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
             }
 
             const blob = await response.blob();
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'relatorio.pdf';
-            link.click();
+            const fileName = `relatorio_${new Date().toISOString()}.pdf`;
+            downloadFile(blob, fileName);
         } catch (error) {
+            handleModalAviso('Erro ao baixar o PDF. Por favor, tente novamente.');
             console.error('Erro ao baixar o PDF:', error);
         }
     };
 
-    // Função para converter os dados em CSV
     const convertToCSV = (columns, tableData) => {
         if (!columns || !tableData || tableData.length === 0) {
-            console.error("Columns or tableData are not properly defined.");
+            console.error('As colunas ou os dados da tabela não estão definidos corretamente.');
             return '';
         }
 
-        let csvContent = columns.join(",") + "\n"; // Adiciona o cabeçalho das colunas
+        const data = tableData[0].values.map((_, rowIndex) => {
+            return columns.reduce((acc, col, colIndex) => {
+                acc[col] = tableData[colIndex]?.values[rowIndex] || '';
+                return acc;
+            }, {});
+        });
 
-        const numRows = tableData[0]?.values?.length || 0;
-
-        for (let i = 0; i < numRows; i++) {
-            let row = [];
-            for (let j = 0; j < columns.length; j++) {
-                row.push(tableData[j]?.values[i] || ""); // Se `values` estiver indefinido, insere uma string vazia
-            }
-            csvContent += row.join(",") + "\n";
-        }
-
-        return csvContent;
+        return Papa.unparse(data);
     };
 
-    // Verifique se a função `downloadCSV` só está definida uma vez
-    const downloadCSV = (columns, tableData) => {
+    const downloadCSV = async (columns, tableData) => {
         if (!columns || columns.length === 0 || !tableData || tableData.length === 0) {
-            handleModalModalAviso("Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.");
+            handleModalAviso('Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.');
             return;
         }
 
         const csvContent = convertToCSV(columns, tableData);
 
-        if (!csvContent || csvContent.trim() === "") {
-            handleModalModalAviso("O arquivo CSV está vazio. Verifique se os dados foram carregados corretamente.");
+        if (!csvContent || csvContent.trim() === '') {
+            handleModalAviso('O arquivo CSV está vazio. Verifique se os dados foram carregados corretamente.');
             return;
         }
 
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "relatorio.csv");
-        link.style.visibility = "hidden";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const fileName = `relatorio_${new Date().toISOString()}.csv`;
+        downloadFile(blob, fileName);
     };
 
     if (!isOpen) return null;
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 1000,
-            }}
-        >
-            <div
-                style={{
-                    backgroundColor: '#fff',
-                    padding: '0px',
-                    borderRadius: '5px',
-                    position: 'relative',
-                    width: '400px',
-                    height: '160px', // Definindo a altura como 500px
-                }}
-            >
-                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-3">
-                    <h5 className="font-bold mx-2">EXPORTAR AQUIVO</h5>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white rounded-lg w-96 h-40 relative">
+                <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-3">
+                    <h5 className="font-bold mx-2">EXPORTAR ARQUIVO</h5>
                     <button
-                        className="font-bold mx-2"
+                        className="font-bold mx-2 w-8 h-8 flex justify-center items-center text-lg rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
                         onClick={handleClose}
-                        style={{
-                            borderRadius: '50px',
-                            hover: 'pointer',
-                            hoverBackgroundColor: '#0A7F8E',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontSize: '16px',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
-                        }}
-                        onMouseEnter={() => setIsHoveredButtonX(true)}
-                        onMouseLeave={() => setIsHoveredButtonX(false)}
+                        aria-label="Fechar modal"
                     >
-                        X
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginTop: '20px',
-                        gap: '60px',
-                    }}
-                >
-                    <button onClick={() => handleDownloadPDF()}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonPDF ? 'rgba(0, 170, 181, 0.1)' : 'rgba(229, 231, 235, 0.3)',
-                            borderRadius: '5px',
-                            padding: '10px',
-                            cursor: 'pointer',
-                            border: 'none',
-                        }}
-                        onMouseEnter={() => setIsHoveredButtonPDF(true)}
-                        onMouseLeave={() => setIsHoveredButtonPDF(false)}
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="feather feather-file"
-                        >
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                        <span>Baixar PDF</span>
-                    </button>
-
-                    <button onClick={() => downloadCSV(selectedColumns, table)}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: isHoveredButtonCSC ? 'rgba(0, 170, 181, 0.1)' : 'rgba(229, 231, 235, 0.3)',
-                            borderRadius: '5px',
-                            padding: '10px',
-                            cursor: 'pointer',
-                            border: 'none',
-                        }}
-                        onMouseEnter={() => setIsHoveredButtonCSC(true)}
-                        onMouseLeave={() => setIsHoveredButtonCSC(false)}
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="feather feather-download"
-                        >
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        <span>Baixar CSV</span>
-                    </button>
+                <div className="flex flex-row justify-center items-center mt-5 gap-16">
+                    <DownloadButton
+                        onClick={handleDownloadPDF}
+                        icon={<FiFile size={24} />}
+                        label="Baixar PDF"
+                    />
+                    <DownloadButton
+                        onClick={() => downloadCSV(selectedColumns, table)}
+                        icon={<FiDownload size={24} />}
+                        label="Baixar CSV"
+                    />
                 </div>
             </div>
 
             <ModalModal
-                isOpen={isModalModalAvisoOpen}
-                onClose={closeModalModalAviso}
+                isOpen={isModalAvisoOpen}
+                onClose={closeModalAviso}
                 message={modalMessage}
                 modalType="ALERTA"
                 confirmText="Fechar"
@@ -248,5 +130,41 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
         </div>
     );
 }
+
+function DownloadButton({ onClick, icon, label }) {
+    return (
+        <button
+            onClick={onClick}
+            className="flex flex-col items-center bg-gray-200 hover:bg-gray-300 rounded-md p-2 transition-colors duration-300"
+            aria-label={label}
+        >
+            {icon}
+            <span>{label}</span>
+        </button>
+    );
+}
+
+DownloadButton.propTypes = {
+    onClick: PropTypes.func.isRequired,
+    icon: PropTypes.node.isRequired,
+    label: PropTypes.string.isRequired,
+};
+
+ModalExpo.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    table: PropTypes.arrayOf(
+        PropTypes.shape({
+            values: PropTypes.array.isRequired,
+        })
+    ),
+    selectedColumns: PropTypes.arrayOf(PropTypes.string),
+    combinedData: PropTypes.object,
+};
+
+ModalExpo.defaultProps = {
+    table: [],
+    selectedColumns: [],
+};
 
 export default ModalExpo;

@@ -5,18 +5,20 @@ import ModalExpo from "./modais/ModalExpo";
 import ModalSalvos from "./modais/ModalSalvos";
 import ModalFiltro from "./modais/ModalFiltro";
 import { useNavigate } from 'react-router-dom';
-import ModalModelo from "./modais/ModalModelo";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
-import ModalModal from "./modais/ModalModal";
+import ModalAlert from "./modais/ModalAlert";
 import ModalPersonalizar from "./modais/ModalPersonalizar";
 import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
+import ModalGerar from "./modais/ModalGerar";
+import { data } from "autoprefixer";
 
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpenSalvos, setIsModalOpenSalvos] = useState(false); // Modal para exibir as views salvas
+    const [isModalOpenGerar, setIsModalOpenGerar] = useState(false); // Modal para exibir o Gerar
     const [isModalOpenSQl, setIsModalOpenSQL] = useState(false); // Modal para exibir o SQL
     const [isModalOpenFiltro, setIsModalOpenFiltro] = useState(false); // Modal para exibir o filtros de selects
     const [isModalPdfOpenView, setIsModalPdfOpenView] = useState(false); // Modal para exibir o PDF_View
@@ -27,15 +29,15 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [columns, setColumns] = useState([]);
     const [condicoesString, setCondicoesString] = useState('');
     const [isView, setIsView] = useState(false);
-    const [isModalModeloOpen, setIsModalModeloOpen] = useState(false); // Modal para exibir os modelos de pdf
     const [selectedTemplateKey, setSelectedTemplateKey] = useState(null);
     const [isModalSalvarConOpen, setIsModalSalvarCon] = useState(false);
     const [sqlQuery, setSqlQuery] = useState('');
-    const [isModalModalAvisoOpen, setIsModalModalAvisoOpen] = useState(false); // ModalModal para exibir avisos
+    const [isModalAlertOpen, setIsModalAlertOpen] = useState(false); // ModalAlert para exibir avisos
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
     const [columnWidths, setColumnWidths] = useState([]);
+    const [tempoEstimado, setTempoEstimado] = useState(null);
 
     const [sql2, setSql2] = useState('');
 
@@ -45,17 +47,16 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [base64Image, setBase64Image] = useState('');
 
 
-    const handleSelectTemplate = (key) => {
-        setSelectedTemplateKey(key);
-        setIsModalModeloOpen(false);
-    };
-
     const handleModalFiltro = () => {
         setIsModalOpenFiltro(true);
     };
 
     const handleModalSalvos = () => {
         setIsModalOpenSalvos(true);
+    };
+
+    const handleModalGerar = () => {
+        setIsModalOpenGerar(true);
     };
 
     const handleModalExpo = () => {
@@ -75,17 +76,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             setIsModalPdfOpenView(true);
         } else {
             setIsModalPdfOpenView(false);
-            setIsModalModalAvisoOpen(true);
+            setIsModalAlertOpen(true);
         }
     };
 
     const handleModalSalvarCon = () => {
         setIsModalSalvarCon(true);
     }
-
-    const handleModalModelo = () => {
-        setIsModalModeloOpen(true);
-    };
 
     const closeModalExpo = () => {
         setIsModalExpoOpen(false);
@@ -104,8 +101,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalPdfOpenView(false);
     };
 
-    const closeModalModalAviso = () => {
-        setIsModalModalAvisoOpen(false);
+    const closeModalAlert = () => {
+        setIsModalAlertOpen(false);
     };
 
     const closeModalFiltro = () => {
@@ -116,13 +113,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         setIsModalOpenSalvos(false);
     };
 
+    const closeModalGerar = () => {
+        setIsModalOpenGerar(false);
+    };
+
     const closeModalSalvarCon = () => {
         setIsModalSalvarCon(false);
     }
-
-    const closeModalModelo = () => {
-        setIsModalModeloOpen(false);
-    };
 
     const navigate = useNavigate();
 
@@ -323,18 +320,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     };
 
     const handleGenerateReport = async () => {
-        setIsLoading(true);
-        setLoadingProgress(0);
-
-        const progressInterval = setInterval(() => {
-            setLoadingProgress((prevProgress) => {
-                if (prevProgress >= 100) {
-                    clearInterval(progressInterval);
-                    return 100;
-                }
-                return prevProgress + 10;
-            });
-        }, 100);
         try {
             let data;
             if (localStorage.getItem('loadedQuery')) {
@@ -356,9 +341,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             console.error('Erro ao buscar os dados:', error);
             setIsView(false);
         } finally {
-            clearInterval(progressInterval);
             setIsLoading(false);
-            setLoadingProgress(100);
         }
     };
 
@@ -448,6 +431,65 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         imgPDF: base64Image,
     };
 
+    const sendData = async () => {
+        try {
+            const jsonRequest = {
+                table: selectTable,
+                columns: selectedColumns,
+                conditions: condicoesString,
+                orderBy: orderByString,
+                joins: [],
+                totalizers: getTotalizers(),
+            };
+
+            if (selectedRelacionada && relationshipData.length > 0) {
+                selectedRelacionada.forEach((tablePair) => {
+                    const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
+                    if (relationship) {
+                        jsonRequest.joins.push(relationship.join);
+                    }
+                });
+            }
+
+            console.log('JSON enviado:', JSON.stringify(jsonRequest, null, 2)); // Visualize o JSON de forma legível
+
+            const url = 'http://localhost:8080/find/analysis';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonRequest),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
+            }
+
+            const tempoEstimadoBack = await response.json();
+            console.log('Resposta do servidor:', tempoEstimadoBack);
+
+            // Armazena o tempo estimado retornado pelo backend no estado
+            setTempoEstimado(tempoEstimadoBack);
+
+            // Abrir o modal depois que o tempo estimado for recebido
+            setIsModalOpenGerar(true);
+
+        } catch (error) {
+            console.error('Erro ao enviar os dados:', error);
+        }
+    };
+
+    // Handler do botão
+    const clickButton = () => {
+        sendData();
+        setIsModalOpenGerar(true)
+    };
+
+
+
+
     const renderTotalizer = () => {
         if (!renderTotalizerResult) return null;
 
@@ -510,6 +552,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                         >
                             Salvar Consulta
                         </button>
+                        <button
+                            className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
+                            onClick={clickButton}
+                        >
+                            Clique
+                        </button>
                     </div>
                 </div>
                 <div className="flex mr-36 justify-center items-center">
@@ -556,16 +604,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                                     <path strokeLinecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
                                 <label htmlFor="mais">Criar</label>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
-                            <button onClick={handleModalModelo} className="flex flex-col justify-center items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                </svg>
-                                <label htmlFor="mais">Modelos</label>
                             </button>
                         </div>
                     </div>
@@ -682,9 +720,9 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreview} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
-            <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
-            <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery} sql2={sql2} />
-            <ModalModal isOpen={isModalModalAvisoOpen} onClose={closeModalModalAviso} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
+            <ModalGerar isOpen={isModalOpenGerar} onClose={closeModalGerar} tempoEstimado={tempoEstimado} onGenerateReport={handleGenerateReport} />
+            <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}  sql2={sql2} img={imgPdf} titlePdf={titlePdf}/>
+            <ModalAlert isOpen={isModalAlertOpen} onClose={closeModalAlert} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
         </div>
     );
 }
