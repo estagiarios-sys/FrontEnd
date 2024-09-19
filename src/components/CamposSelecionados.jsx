@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import CustomSelect from './genericos/CustomSelect';
+import { type } from '@testing-library/user-event/dist/type';
 
 const ordenacaoOptions = [
   { value: 'ASC', label: 'ASC' },
@@ -14,6 +15,24 @@ const TotalizerOptions = [
   { value: 'MIN', label: 'MÍNIMO' },
   { value: 'MAX', label: 'MÁXIMO' },
 ];
+
+const getFilteredTotalizerOptions = (type) => {
+  switch (type) {
+    case 'TINYINT UNSIGNED':
+    case 'TINYINT':
+    case 'INT':
+    case 'FLOAT':
+    case 'DOUBLE':
+    case 'DECIMAL':
+      return TotalizerOptions;
+    case 'VARCHAR':
+    case 'TEXT':
+    case 'CHAR':
+      return TotalizerOptions.filter(option => option.value === 'COUNT');
+    default:
+      return [];
+  }
+};
 
 let totalizers = [];
 
@@ -45,15 +64,17 @@ function CamposSelecionados({
   checkedCampos = [],
   onSelectedCamposChange
 }) {
-  const selectedCamposSemApelido = selectedCampos.map((campo) => campo.replace(/\s+as\s+.*$/, ''));
+  const selectedCamposSemApelido = selectedCampos.map((campo) => ({
+    value: campo.value.replace(/\s+as\s+.*$/i, ''),  // Remove o apelido se houver
+    type: campo.type  // Mantém o tipo original
+  }));
   const [selectedOrder, setSelectedOrder] = useState(null); // Estado para a seleção atual
-  const [customNames, setCustomNames] = useState({}); // Estado para os nomes personalizados
   const selectRefs = useRef({}); // Referências para os componentes CustomSelect
   const selectTotalizerRefs = useRef({}); // Referências para os componentes CustomSelect
 
   const handleTotalizerSave = (selectedOption, campo) => {
 
-    const campoSemApelido = campo.replace(/\s+as\s+.*$/, ''); // Remove o apelido do campo
+    const campoSemApelido = campo.value.replace(/\s+as\s+.*$/, ''); // Remove o apelido do campo
 
     if (selectedOption) {
       // Se uma opção for selecionada, adiciona ou atualiza o totalizador no objeto
@@ -93,21 +114,20 @@ function CamposSelecionados({
       value = value.substring(0, 40);
     }
 
-    setCustomNames((prevCustomNames) => ({
-      ...prevCustomNames,
-      [campo]: value,
-    }));
-
     const updatedCampos = selectedCampos.map((selectedCampo) => {
 
-      const campoSemApelidoComparacao = selectedCampo.replace(/\s+as\s+.*$/, '');
-      const campoSemApelido = campo.replace(/\s+as\s+.*$/, '');
-
-      if (campoSemApelidoComparacao === campoSemApelido) {
-        return value ? `${campoSemApelido} as '${value} '` : campoSemApelido;
-      } else {
-        return selectedCampo;
+      if (selectedCampo && selectedCampo.value && campo && campo.value) {
+        const campoSemApelidoComparacao = selectedCampo.value.replace(/\s+as\s+.*$/i, ''); // Remove o apelido do campo atual
+        const campoSemApelido = campo.value.replace(/\s+as\s+.*$/i, ''); // Remove o apelido do campo em questão
+    
+        if (campoSemApelidoComparacao === campoSemApelido) {
+          return {
+            value: value ? `${campoSemApelido} as '${value} '` : campoSemApelido,
+            type: selectedCampo.type // Mantém o tipo do selectedCampo
+          };
+        }
       }
+      return selectedCampo; // Se o campo for inválido, apenas retorna o valor original
     });
 
     onSelectedCamposChange(updatedCampos);
@@ -136,8 +156,8 @@ function CamposSelecionados({
               </thead>
               <tbody>
                 {selectedCamposSemApelido.length > 0 ? (
-                  selectedCamposSemApelido.map((campo, index) => (
-                    <Draggable key={campo} draggableId={campo} index={index}>
+                  selectedCamposSemApelido.map(({ value, type }, index) => (
+                    <Draggable key={value} draggableId={value} index={index}>
                       {(provided) => (
                         <tr
                           ref={provided.innerRef}
@@ -149,8 +169,8 @@ function CamposSelecionados({
                             <td className="py-2 px-4 border-b border-custom-azul text-sm">
                               <input
                                 type="checkbox"
-                                checked={checkedCampos.includes(campo)}
-                                onChange={() => handleCheckboxChange(campo)}
+                                checked={checkedCampos.includes(value)}
+                                onChange={() => handleCheckboxChange(value)}
                                 className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
                               />
                             </td>
@@ -158,24 +178,24 @@ function CamposSelecionados({
                           <td className="py-2 px-4 border-b border-custom-azul text-sm">
                             <input
                               type="text"
-                              onBlur={(e) => handleCustomNameChange(e, campo)}
+                              onBlur={(e) => handleCustomNameChange(e, { value })}
                               className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none"
-                              placeholder={campo}
+                              placeholder={value}
                             />
                           </td>
                           <td
                             className="py-2 px-4 border-b border-custom-azul text-sm"
-                            onClick={() => handleTdClick(campo)}
+                            onClick={() => handleTdClick(value)}
                           >
                             <CustomSelect
-                              ref={(ref) => (selectRefs.current[campo] = ref)}
+                              ref={(ref) => (selectRefs.current[value] = ref)}
                               options={ordenacaoOptions}
                               value={
-                                selectedOrder && selectedOrder.fieldName === campo
+                                selectedOrder && selectedOrder.fieldName === value
                                   ? { value: selectedOrder.value, label: selectedOrder.value }
                                   : null
                               }
-                              onChange={(selectedOption) => handleOrderBySave(selectedOption, campo)}
+                              onChange={(selectedOption) => handleOrderBySave(selectedOption, value)}
                               placeholder="Selecione..."
                               className="basic-single"
                               classNamePrefix="select"
@@ -185,12 +205,12 @@ function CamposSelecionados({
                           </td>
                           <td
                             className="py-2 px-4 border-b border-custom-azul text-sm"
-                            onClick={() => handleTotalizerClick(campo)}
+                            onClick={() => handleTotalizerClick(value)}
                           >
                             <CustomSelect
-                              ref={(ref) => (selectTotalizerRefs.current[campo] = ref)}
-                              options={TotalizerOptions}
-                              onChange={(selectedOption) => handleTotalizerSave(selectedOption, campo)}
+                              ref={(ref) => (selectTotalizerRefs.current[value] = ref)}
+                              options={getFilteredTotalizerOptions(type)}
+                              onChange={(selectedOption) => handleTotalizerSave(selectedOption, { value })}
                               placeholder="Selecione..."
                               className="basic-single"
                               classNamePrefix="select"

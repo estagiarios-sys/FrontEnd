@@ -11,6 +11,34 @@ const ordenacaoOptions = [
     { value: '!=', label: 'Diferente' },
 ];
 
+const getInputType = (type) => {
+    switch (type) {
+        case 'VARCHAR':
+        case 'TEXT':
+        case 'CHAR':
+            return 'text';
+        case 'INT':
+        case 'FLOAT':
+        case 'DOUBLE':
+        case 'TINYINT':
+        case 'TINYINT UNSIGNED':
+        case 'DECIMAL':
+            return 'number';
+        case 'DATE':
+            return 'date';
+        case 'DATETIME':
+            return 'datetime-local';
+        case 'TIMESTAMP':
+            return 'datetime-local';
+        case 'TIME':
+            return 'time';
+        case 'YEAR':
+            return 'number';
+        default:
+            return 'text';
+    }
+};
+
 const CustomSingleValue = (props) => (
     <components.SingleValue {...props}>
         <div>{props.data.label}</div>
@@ -28,8 +56,9 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
 
     const campoOptions = columns.map(col => ({
-        value: col,
-        label: col,
+        value: col.value,  
+        label: col.value,
+        type: col.type, 
     }));
 
     const handleCampoChange = (selectedOptions) => {
@@ -39,7 +68,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     const handleAddSelectedCampos = () => {
         const camposToAdd = selectedCampos.map(value => {
             const option = campoOptions.find(option => option.value === value);
-            return { value: option.value, label: option.label, checked: false };
+            return { value: option.value, type: option.type, checked: false, valor: '', ordenacao: '' };
         });
         setAddedCampos([...addedCampos, ...camposToAdd]);
         setSelectedCampos([]);
@@ -274,7 +303,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                                                     />
                                                 </td>
                                                 <td className="py-2 px-4 border-b border-custom-azul text-sm">
-                                                    {campo.label}
+                                                    {campo.value}
                                                 </td>
                                                 <td className="py-2 px-4 border-b border-custom-azul text-sm">
                                                     <Select
@@ -288,7 +317,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                                                 </td>
                                                 <td className="py-2 px-4 border-b border-custom-azul text-sm">
                                                     <input
-                                                        type="text"
+                                                        type={getInputType(campo.type)}
                                                         value={campo.valor || ''}
                                                         onChange={(e) => handleValorChange(index, e.target.value)}
                                                         onKeyDown={(e) => handleValorKeyDown(index, e)}

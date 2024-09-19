@@ -182,12 +182,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const endIndex = startIndex + itemsPerPage;
     const shouldShowPagination = hasData && tableData[0].values.length > 15;
     const orderByString = localStorage.getItem('orderByString');
+    const selectedColumnsValues = selectedColumns.map(column => column.value);
 
     const fetchData = async () => {
         try {
             const jsonRequest = {
                 table: selectTable,
-                columns: selectedColumns,
+                columns: selectedColumnsValues, // Adicione as colunas selecionadas aqui
                 conditions: condicoesString, // Adicione a condição aqui
                 orderBy: orderByString, // Adicione a ordenação conforme necessário
                 joins: [], // Adicione os joins conforme necessário
@@ -195,9 +196,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             };
 
             if (selectedRelacionada && relationshipData.length > 0) {
-
-                console.log('tabelas selecionadas:', selectedRelacionada);
-
                 selectedRelacionada.forEach((tablePair) => {
                     const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
                     if (relationship) {

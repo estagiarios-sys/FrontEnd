@@ -172,8 +172,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
     const options = new Map();
 
     if (selectedTabela && jsonData[selectedTabela]) {
-      jsonData[selectedTabela].forEach(campo => {
-        options.set(`${selectedTabela}.${campo}`, { value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}` });
+      Object.keys(jsonData[selectedTabela]).forEach(campo => {
+        options.set(`${selectedTabela}.${campo}`, { value: `${selectedTabela}.${campo}`, label: `${selectedTabela} - ${campo}`, type: jsonData[selectedTabela][campo] });
       });
     }
 
@@ -188,8 +188,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
             tabelas.forEach(table => {
               if (table !== selectedTabela && table === relacionadaTabela && jsonData[table]) {
-                jsonData[table].forEach(campo => {
-                  options.set(`${table}.${campo}`, { value: `${table}.${campo}`, label: `${table} - ${campo}` });
+                Object.keys(jsonData[table]).forEach(campo => {
+                  options.set(`${table}.${campo}`, { value: `${table}.${campo}`, label: `${table} - ${campo}`, type: jsonData[table][campo] });
                 });
               }
             });
@@ -294,7 +294,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   }, []);
 
   const handleChange = (selectedOptions) => {
-    setSelectedCampos(selectedOptions ? selectedOptions.map(option => option.value) : []);
+    setSelectedCampos(selectedOptions ? selectedOptions.map(option => ({value: option.value, type: option.type})) : []);
     // Mantém o menu aberto após a seleção
     setMenuIsOpen(true);
   };
@@ -384,7 +384,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."
             onChange={handleChange}
-            value={campoOptions.filter(option => selectedCampos.includes(option.value))} // Exibe os campos selecionados
+            value={campoOptions.filter(option => 
+              selectedCampos.some(selected => selected.value === option.value) // Filtra pelos objetos em selectedCampos
+            )}
             menuIsOpen={menuIsOpen} // Controla a visibilidade do menu
             onMenuOpen={() => setMenuIsOpen(true)} // Abre o menu
             onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
