@@ -29,20 +29,24 @@ function Main() {
 
   // Remove campos selecionados com checkbox marcado e adiciona de volta aos disponíveis
   const handleIndividualLeftClick = () => {
-    const camposParaRemover = selectedCampos.filter(campo => checkedCampos.includes(campo.replace(/\s+as\s+.*$/, '')));
-    const camposRestantes = selectedCampos.filter(campo => !checkedCampos.includes(campo.replace(/\s+as\s+.*$/, '')));
+    const camposParaRemover = selectedCampos.filter(campo => 
+      typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, ''))
+    );
+    const camposRestantes = selectedCampos.filter(campo => 
+      !(typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, '')))
+    );
     const orderByString = localStorage.getItem('orderByString') || '';
-
-    removeSelectedTotalizers(camposParaRemover);
-
-    if (camposParaRemover.some(campo => orderByString.includes(campo))) {
+  
+    removeSelectedTotalizers(camposParaRemover.map(campo => campo.value));
+  
+    if (camposParaRemover.some(campo => orderByString.includes(campo.value))) {
       localStorage.setItem('orderByString', '');
     }
-
+  
     setAvailableCampos([...availableCampos, ...camposParaRemover]);
     setSelectedCampos(camposRestantes);
     setCheckedCampos([]);
-  };
+  };  
 
   // Move todos os campos disponíveis para a lista de campos selecionados e limpa a lista de disponíveis
   const handleAllRightClick = () => {
@@ -83,11 +87,11 @@ function Main() {
   };
 
   // Alterna o estado dos checkboxes
-  const handleCheckboxChange = (campo) => {
+  const handleCheckboxChange = (campoValue) => {
     setCheckedCampos(prevChecked =>
-      prevChecked.includes(campo)
-        ? prevChecked.filter(item => item !== campo)
-        : [...prevChecked, campo]
+      prevChecked.includes(campoValue)
+        ? prevChecked.filter(item => item !== campoValue)
+        : [...prevChecked, campoValue]
     );
   };
 
