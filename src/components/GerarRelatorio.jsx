@@ -10,7 +10,6 @@ import ModalAlert from "./modais/ModalAlert";
 import ModalPersonalizar from "./modais/ModalPersonalizar";
 import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
-
 import ModalGerar from "./modais/ModalGerar";
 import { data } from "autoprefixer";
 
@@ -30,7 +29,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [columns, setColumns] = useState([]);
     const [condicoesString, setCondicoesString] = useState('');
     const [isView, setIsView] = useState(false);
-    const [isModalModeloOpen, setIsModalModeloOpen] = useState(false); // Modal para exibir os modelos de pdf
     const [selectedTemplateKey, setSelectedTemplateKey] = useState(null);
     const [isModalSalvarConOpen, setIsModalSalvarCon] = useState(false);
     const [sqlQuery, setSqlQuery] = useState('');
@@ -724,13 +722,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreview} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
-            <ModalGerar
-                isOpen={isModalOpenGerar}
-                onClose={closeModalGerar}
-                tempoEstimado={tempoEstimado}
-                onGenerateReport={handleGenerateReport} // Certifique-se de que handleGenerateReport é uma função
-            />
-            <ModalModelo isOpen={isModalModeloOpen} onClose={closeModalModelo} onSelect={handleSelectTemplate} />
+            <ModalGerar isOpen={isModalOpenGerar} onClose={closeModalGerar} tempoEstimado={tempoEstimado} onGenerateReport={handleGenerateReport} />
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}  sql2={sql2} img={imgPdf} titlePdf={titlePdf}/>
             <ModalAlert isOpen={isModalAlertOpen} onClose={closeModalAlert} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
         </div>
