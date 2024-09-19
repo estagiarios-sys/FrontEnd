@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { FaCaretDown } from "react-icons/fa";
 
 function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownloadPDF }) {
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
@@ -9,13 +8,19 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
     const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [progress, setProgress] = useState(0); // Estado para o progresso da barra
-    const [intervalId, setIntervalId] = useState(null); // Estado para armazenar o ID do intervalo
+    const [progress, setProgress] = useState(0);
+    const [intervalId, setIntervalId] = useState(null);
     const dropdownRef = useRef(null);
+    const [isClicked, setIsClicked] = useState(false);
+
+    const handleClick = () => {
+        setIsClicked(!isClicked);
+        mostrarOpcoes();
+    };
 
     const contentContainerStyle = {
         width: '500px',
-        height: '250px', // Ajustado para incluir a barra de carregamento
+        height: '250px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -59,15 +64,10 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
         }
     };
 
-    const toggleDropdown = () => {
-        setShowDropdown((prevState) => !prevState);
-        setIsDropdownOpen(prev => !prev);
+    const mostrarOpcoes = () => {
+        setShowDropdown(prev => !prev); // Alterna o estado de visibilidade do dropdown
+        setIsDropdownOpen(prev => !prev); // Alterna o ícone de seta para cima/baixo
     };
-
-    // const handleOptionClick = (option) => {
-    //     console.log(option);
-    //     setShowDropdown(false);
-    // };
 
     const handleOptionClick = async (option) => {
         if (option === 'Gerar') {
@@ -76,13 +76,14 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
             await onGenerateReport(); 
             await onDownloadPDF();
         }
-        setShowDropdown(false);
+        setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
     };
 
-    // Função para fechar o dropdown ao clicar fora
     const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             setShowDropdown(false);
+            setIsDropdownOpen(false);
+            setIsClicked(false);
         }
     };
 
@@ -99,7 +100,6 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
     }, [showDropdown]);
 
     useEffect(() => {
-        // Se o tempo estimado é maior que 0, inicializa a barra de carregamento
         if (tempoEstimado > 0) {
             const interval = setInterval(() => {
                 setProgress((prevProgress) => {
@@ -107,9 +107,9 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
                         clearInterval(interval);
                         return 100;
                     }
-                    return prevProgress + (100 / (tempoEstimado / 1000)); // Incrementa baseado no tempo estimado
+                    return prevProgress + (100 / (tempoEstimado / 1000));
                 });
-            }, 1000); // Atualiza a cada segundo
+            }, 1000);
 
             setIntervalId(interval);
         }
@@ -122,14 +122,11 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
     }, [tempoEstimado]);
 
     const formatTime = (seconds) => {
-        const totalSeconds = Math.floor(seconds); // Trunca os segundos para remover frações
-    
+        const totalSeconds = Math.floor(seconds);
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const secs = totalSeconds % 60;
-    
         const formatNumber = (num) => String(num).padStart(2, '0');
-    
         return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(secs)}`;
     };
 
@@ -187,7 +184,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
                 </div>
                 <div style={contentContainerStyle}>
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4">
-                    <p className="font-medium mb-4">
+                        <p className="font-medium mb-4">
                             O tempo estimado para gerar o relatório é de {formatTime(tempoEstimado)}. Deseja realmente gerar?
                         </p>
                         <div style={{
@@ -259,94 +256,77 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
                                 border: 'none',
                                 borderRadius: '5px',
                                 color: '#fff',
-                                width: '90px',
+                                width: '120px',
                                 height: '40px',
                                 fontSize: '13px',
                                 cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                padding: '0 10px',
                                 transition: 'background-color 0.3s ease',
                                 backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center', // Centraliza o texto e o ícone
+                                gap: '8px', // Espaçamento entre o texto e o ícone
                             }}
                             onMouseEnter={() => setIsHoveredButtonCarregar(true)}
                             onMouseLeave={() => setIsHoveredButtonCarregar(false)}
-                            onClick={toggleDropdown}
+                            onClick={handleClick}
                         >
                             Opções
-                            <FontAwesomeIcon
-                                icon={faCaretDown}
+                            <FaCaretDown
                                 style={{
                                     transition: 'transform 0.3s ease',
-                                    transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                                    transform: isClicked ? 'rotate(180deg)' : 'rotate(0deg)',
                                 }}
                             />
                         </button>
-                        {showDropdown && (
-                            <div
-                                ref={dropdownRef} // Adiciona a referência aqui
-                                style={{
-                                    position: 'absolute',
-                                    bottom: '50px',
-                                    right: '2px',
-                                    backgroundColor: '#f8f9fa', // Cor de fundo mais clara para contraste
-                                    border: '2px solid rgba(0, 105, 115, 0.4)', // Borda azul mais forte
-                                    borderRadius: '5px',
-                                    boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.4)', // Sombra mais pronunciada
-                                    marginBottom: '15px',
-                                    zIndex: 999,
-                                    width: '150px', // Define uma largura fixa para o dropdown
-                                }}
-                            >
-                                <button
-                                    style={{
-                                        fontWeight: '500',
-                                        display: 'block',
-                                        padding: '10px',
-                                        width: '100%',
-                                        fontSize: '13px',
-                                        backgroundColor: '#f9f9f9',
-                                        border: 'none',
-                                        borderBottom: '1px solid #ddd',
-                                        cursor: 'pointer',
-                                        textAlign: 'left',
-                                        borderRadius: '5px 5px 0 0', // Bordas arredondadas no topo
-                                        transition: 'background-color 0.3s ease',
-                                    }}
-                                    onClick={() => {
-                                        console.log('Gerar: ', onGenerateReport); // Adicione o log aqui
-                                        handleOptionClick('Gerar'); // Chame a função handleOptionClick
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eee'} // Hover
-                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'} // Hover
-                                >
-                                    Gerar
-                                </button>
-                                <button
-                                    style={{
-                                        fontWeight: '500',
-                                        display: 'block',
-                                        padding: '10px',
-                                        width: '100%',
-                                        fontSize: '13px',
-                                        backgroundColor: '#f9f9f9',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        textAlign: 'left',
-                                        borderRadius: '0 0 5px 5px', // Bordas arredondadas na parte inferior
-                                        transition: 'background-color 0.3s ease',
-                                    }}
-                                    onClick={() => handleOptionClick('Gerar e Baixar')}
-                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eee'} // Hover
-                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'} // Hover
-                                >
-                                    Gerar e Baixar
-                                </button>
-                            </div>
-                        )}
                     </div>
                 </div>
+
+                {showDropdown && (
+                    <div
+                        ref={dropdownRef}
+                        style={{
+                            position: 'absolute',
+                            bottom: '60px',
+                            right: '20px',
+                            backgroundColor: '#fff',
+                            border: '1px solid #ccc',
+                            borderRadius: '5px',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            zIndex: 1000,
+                        }}
+                    >
+                        <button
+                            style={{
+                                display: 'block',
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: '#f8f9fa',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                            }}
+                            onClick={() => handleOptionClick('Gerar')}
+                        >
+                            Gerar
+                        </button>
+                        <button
+                            style={{
+                                display: 'block',
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: '#f8f9fa',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                            }}
+                            onClick={() => handleOptionClick('Cancelar')}
+                        >
+                            Gerar e Baixar
+                        </button>
+                    </div>
+                )}
+
             </div>
         </div>
     );
