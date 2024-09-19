@@ -38,6 +38,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
     const [columnWidths, setColumnWidths] = useState([]);
     const [tempoEstimado, setTempoEstimado] = useState(null);
+    let combinedData = {};
+    let combinedDataPreview = {};
 
     const [sql2, setSql2] = useState('');
 
@@ -239,11 +241,26 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             setSqlQuery(sql);
             setColumns(colunasAtualizada);
 
-            return colunasAtualizada.map((column, index) => ({
-                column,
-                values: data.map(row => row[index]),
+            const  dataFormat = colunasAtualizada.map((column, index) => {
+                return {
+                    column,
+                    values: data.map(row => row[index]),
+                };
+            });
 
-            }));
+            combinedData = {
+                fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat),
+                titlePDF: titlePdf,
+                imgPDF: base64Image,
+            };
+
+            combinedDataPreview = {
+                fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat, 15),
+                titlePDF: titlePdf,
+                imgPDF: base64Image,
+            };
+
+            return dataFormat;
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             return [];
@@ -345,20 +362,18 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     };
 
-    // Função para gerar o HTML completo da tabela
-    const generateFullTableHTML = (maxRows = null) => {
-        if (!hasData) return '<p>Nenhum dado encontrado.</p>';
-
-        // Assume que `columnWidths` já está disponível no escopo
-        const tableHeaders = columns.map((column, index) =>
+    const generateFullTableHTML = (column, dataFormat, maxRows = null) => {
+    if (!dataFormat || dataFormat.length === 0) return '<p>Nenhum dado encontrado.</p>';
+    
+        const tableHeaders = column.map((column, index) =>
             `<th class="p-2 border-b text-center" style="width: ${columnWidths[index] || 'auto'}">${column}</th>`
         ).join('');
-
-        const rowCount = maxRows ? Math.min(tableData[0].values.length, maxRows) : tableData[0].values.length;
-
-        const tableRows = tableData[0].values.slice(0, rowCount).map((_, rowIndex) => {
-            const rowHTML = columns.map((column, colIndex) =>
-                `<td class="p-2 border-b text-center">${tableData[colIndex]?.values[rowIndex]}</td>`
+    
+        const rowCount = maxRows ? Math.min(dataFormat[0].values.length, maxRows) : dataFormat[0].values.length;
+    
+        const tableRows = dataFormat[0].values.slice(0, rowCount).map((_, rowIndex) => {
+            const rowHTML = column.map((column, colIndex) =>
+                `<td class="p-2 border-b text-center">${dataFormat[colIndex]?.values[rowIndex]}</td>`
             ).join('');
             const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
             return `<tr class="${rowClass}">${rowHTML}</tr>`;
@@ -419,16 +434,35 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     }, [imgPdf]);
 
-    const combinedData = {
-        fullTableHTML: generateFullTableHTML(),
-        titlePDF: titlePdf,
-        imgPDF: base64Image,
+    const downloadFile = (blob, filename) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
     };
 
-    const combinedDataPreview = {
-        fullTableHTML: generateFullTableHTML(15),
-        titlePDF: titlePdf,
-        imgPDF: base64Image,
+    const handleDownloadPDF = async () => {
+
+        try {
+            const response = await fetch('http://localhost:8080/pdf/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(combinedData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao gerar o PDF.');
+            }
+
+            const blob = await response.blob();
+            const fileName = `relatorio_${new Date().toISOString()}.pdf`;
+            downloadFile(blob, fileName);
+        } catch (error) {
+            console.error('Erro ao baixar o PDF:', error);
+        }
     };
 
     const sendData = async () => {
@@ -720,7 +754,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreview} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
-            <ModalGerar isOpen={isModalOpenGerar} onClose={closeModalGerar} tempoEstimado={tempoEstimado} onGenerateReport={handleGenerateReport} />
+            <ModalGerar isOpen={isModalOpenGerar} onClose={closeModalGerar} tempoEstimado={tempoEstimado} onGenerateReport={handleGenerateReport} onDownloadPDF = {handleDownloadPDF}/>
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}  sql2={sql2} img={imgPdf} titlePdf={titlePdf}/>
             <ModalAlert isOpen={isModalAlertOpen} onClose={closeModalAlert} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
         </div>
