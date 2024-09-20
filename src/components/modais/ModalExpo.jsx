@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Papa from 'papaparse';
-import ModalModal from './ModalAlert';
+import ModalAlert from './ModalAlert';
 import { FiFile, FiDownload } from 'react-icons/fi';
 
 export async function downloadPDF (combinedData, handleModalAviso) {
@@ -122,7 +122,7 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
                 </div>
             </div>
 
-            <ModalModal
+            <ModalAlert
                 isOpen={isModalAvisoOpen}
                 onClose={closeModalAviso}
                 message={modalMessage}
