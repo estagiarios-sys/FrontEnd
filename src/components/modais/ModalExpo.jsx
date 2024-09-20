@@ -79,7 +79,8 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
             return;
         }
 
-        const csvContent = convertToCSV(columns, tableData);
+        const columnsName = columns.map((col) => col.value);
+        const csvContent = convertToCSV(columnsName, tableData);
 
         if (!csvContent || csvContent.trim() === '') {
             handleModalAviso('O arquivo CSV está vazio. Verifique se os dados foram carregados corretamente.');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaCaretDown } from "react-icons/fa";
 
-function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport }) {
+function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownloadPDF }) {
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
     const [isHoveredButtonExcluir, setIsHoveredButtonExcluir] = useState(false);
     const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
@@ -69,9 +69,12 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport }) {
         setIsDropdownOpen(prev => !prev); // Alterna o ícone de seta para cima/baixo
     };
 
-    const handleOptionClick = (option) => {
+    const handleOptionClick = async (option) => {
         if (option === 'Gerar') {
-            onGenerateReport(); // Chama a função recebida como prop
+            await onGenerateReport();
+        } else if (option === 'Gerar e Baixar') {
+            await onGenerateReport(); 
+            await onDownloadPDF();
         }
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
     };
@@ -317,7 +320,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport }) {
                                 cursor: 'pointer',
                                 textAlign: 'left',
                             }}
-                            onClick={() => handleOptionClick('Cancelar')}
+                            onClick={() => handleOptionClick('Gerar e Baixar')}
                         >
                             Gerar e Baixar
                         </button>
