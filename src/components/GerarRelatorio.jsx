@@ -368,7 +368,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 await fetchData();
             }
 
-            if (data && data.length > 0) {
+            if (tableData.length > 0 && tableData[0].values) {
                 setIsView(true);
                 setCurrentPage(1);
             } else {
