@@ -4,6 +4,78 @@ import Papa from 'papaparse';
 import ModalModal from './ModalAlert';
 import { FiFile, FiDownload } from 'react-icons/fi';
 
+export async function downloadPDF (combinedData, handleModalAviso) {
+    if (!combinedData || Object.keys(combinedData).length === 0) {
+        handleModalAviso('Por favor, selecione pelo menos uma tabela e certifique-se de que há dados para exportar.');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8080/pdf/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(combinedData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao gerar o PDF.');
+        }
+
+        const blob = await response.blob();
+        const fileName = `relatorio_${new Date().toISOString()}.pdf`;
+        downloadFile(blob, fileName);
+    } catch (error) {
+        handleModalAviso('Erro ao baixar o PDF. Por favor, tente novamente.');
+        console.error('Erro ao baixar o PDF:', error);
+    }
+};
+
+export function downloadCSV(columns, tableData, handleModalAviso) {
+
+    if (!columns || columns.length === 0 || !tableData || tableData.length === 0) {
+        handleModalAviso('Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.');
+        return;
+    }
+
+    const columnsName = columns.map((col) => col.value);
+    const csvContent = convertToCSV(columnsName, tableData);
+
+    if (!csvContent || csvContent.trim() === '') {
+        handleModalAviso('O arquivo CSV está vazio. Verifique se os dados foram carregados corretamente.');
+        return;
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const fileName = `relatorio_${new Date().toISOString()}.csv`;
+    downloadFile(blob, fileName);
+};
+
+const downloadFile = (blob, filename) => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+};
+
+const convertToCSV = (columns, tableData) => {
+    if (!columns || !tableData || tableData.length === 0) {
+        console.error('As colunas ou os dados da tabela não estão definidos corretamente.');
+        return '';
+    }
+
+    const data = tableData[0].values.map((_, rowIndex) => {
+        return columns.reduce((acc, col, colIndex) => {
+            acc[col] = tableData[colIndex]?.values[rowIndex] || '';
+            return acc;
+        }, {});
+    });
+
+    return Papa.unparse(data);
+};
+
 function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
     const [isModalAvisoOpen, setIsModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
@@ -19,77 +91,6 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
 
     const handleClose = () => {
         onClose();
-    };
-
-    const downloadFile = (blob, filename) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(link.href);
-    };
-
-    const handleDownloadPDF = async () => {
-        if (!table || table.length === 0) {
-            handleModalAviso('Por favor, selecione uma tabela e certifique-se de que há dados para exportar.');
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost:8080/pdf/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(combinedData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao gerar o PDF.');
-            }
-
-            const blob = await response.blob();
-            const fileName = `relatorio_${new Date().toISOString()}.pdf`;
-            downloadFile(blob, fileName);
-        } catch (error) {
-            handleModalAviso('Erro ao baixar o PDF. Por favor, tente novamente.');
-            console.error('Erro ao baixar o PDF:', error);
-        }
-    };
-
-    const convertToCSV = (columns, tableData) => {
-        if (!columns || !tableData || tableData.length === 0) {
-            console.error('As colunas ou os dados da tabela não estão definidos corretamente.');
-            return '';
-        }
-
-        const data = tableData[0].values.map((_, rowIndex) => {
-            return columns.reduce((acc, col, colIndex) => {
-                acc[col] = tableData[colIndex]?.values[rowIndex] || '';
-                return acc;
-            }, {});
-        });
-
-        return Papa.unparse(data);
-    };
-
-    const downloadCSV = async (columns, tableData) => {
-        if (!columns || columns.length === 0 || !tableData || tableData.length === 0) {
-            handleModalAviso('Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.');
-            return;
-        }
-
-        const columnsName = columns.map((col) => col.value);
-        const csvContent = convertToCSV(columnsName, tableData);
-
-        if (!csvContent || csvContent.trim() === '') {
-            handleModalAviso('O arquivo CSV está vazio. Verifique se os dados foram carregados corretamente.');
-            return;
-        }
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const fileName = `relatorio_${new Date().toISOString()}.csv`;
-        downloadFile(blob, fileName);
     };
 
     if (!isOpen) return null;
@@ -109,12 +110,12 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
                 </div>
                 <div className="flex flex-row justify-center items-center mt-5 gap-16">
                     <DownloadButton
-                        onClick={handleDownloadPDF}
+                        onClick={() => downloadPDF(combinedData, handleModalAviso)}
                         icon={<FiFile size={24} />}
                         label="Baixar PDF"
                     />
                     <DownloadButton
-                        onClick={() => downloadCSV(selectedColumns, table)}
+                        onClick={() => downloadCSV(selectedColumns, table, handleModalAviso)}
                         icon={<FiDownload size={24} />}
                         label="Baixar CSV"
                     />
