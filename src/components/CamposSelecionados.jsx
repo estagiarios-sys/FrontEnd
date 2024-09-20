@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import CustomSelect from './genericos/CustomSelect';
 import { type } from '@testing-library/user-event/dist/type';
+
+let exportedSelectedCampos = [];
 
 const ordenacaoOptions = [
   { value: 'ASC', label: 'ASC' },
@@ -18,15 +20,15 @@ const TotalizerOptions = [
 
 const getFilteredTotalizerOptions = (type) => {
   switch (type) {
-    case 'TINYINT UNSIGNED':
-    case 'TINYINT':
-    case 'INT':
+    case 'NUMBER':
     case 'FLOAT':
     case 'DOUBLE':
-    case 'DECIMAL':
+    case 'BINARY_FLOAT':
+    case 'BINARY_DOUBLE':
       return TotalizerOptions;
-    case 'VARCHAR':
-    case 'TEXT':
+    case 'DATE':
+    case 'VARCHAR2':
+    case 'CLOB':
     case 'CHAR':
       return TotalizerOptions.filter(option => option.value === 'COUNT');
     default:
@@ -62,10 +64,13 @@ function CamposSelecionados({
     value: campo.value.replace(/\s+as\s+.*$/i, ''),
     type: campo.type  // Mantém o tipo original
   }));
+
+  exportedSelectedCampos = selectedCampos;
+
   const [selectedOrder, setSelectedOrder] = useState(null);
   const selectRefs = useRef({});
   const selectTotalizerRefs = useRef({});
-  
+
   const handleTotalizerSave = (selectedOption, campo) => {
   const campoSemApelido = campo.value.replace(/\s+as\s+.*$/, '');
 
@@ -103,11 +108,11 @@ function CamposSelecionados({
     }
 
     const updatedCampos = selectedCampos.map((selectedCampo) => {
-      
+
       if (selectedCampo && selectedCampo.value && campo && campo.value) {
         const campoSemApelidoComparacao = selectedCampo.value.replace(/\s+as\s+.*$/i, '');
         const campoSemApelido = campo.value.replace(/\s+as\s+.*$/i, '');
-    
+
         if (campoSemApelidoComparacao === campoSemApelido) {
           return {
             value: value ? `${campoSemApelido} as '${value} '` : campoSemApelido,
@@ -245,5 +250,8 @@ function CamposSelecionados({
     </div>
   );
 }
+export const getSelectedCampos = () => {
+  return exportedSelectedCampos;
+};
 
 export default CamposSelecionados;
