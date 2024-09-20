@@ -320,7 +320,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
                                 cursor: 'pointer',
                                 textAlign: 'left',
                             }}
-                            onClick={() => handleOptionClick('Cancelar')}
+                            onClick={() => handleOptionClick('Gerar e Baixar')}
                         >
                             Gerar e Baixar
                         </button>

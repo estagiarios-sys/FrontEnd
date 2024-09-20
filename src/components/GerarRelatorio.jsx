@@ -38,6 +38,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
     const [columnWidths, setColumnWidths] = useState([]);
     const [tempoEstimado, setTempoEstimado] = useState(null);
+    const [combinedDataExpo, setcombinedDataExpo] = useState(null);
     let combinedData = {};
     let combinedDataPreview = {};
 
@@ -253,6 +254,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 titlePDF: titlePdf,
                 imgPDF: base64Image,
             };
+
+            setcombinedDataExpo(combinedData);
 
             combinedDataPreview = {
                 fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat, 15),
@@ -752,7 +755,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPersonalizar isOpen={isModalOpenPersonalizar} onClose={closeModalPersonalizar} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreview} />
-            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
+            <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedDataExpo} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
             <ModalGerar isOpen={isModalOpenGerar} onClose={closeModalGerar} tempoEstimado={tempoEstimado} onGenerateReport={handleGenerateReport} onDownloadPDF = {handleDownloadPDF}/>
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}  sql2={sql2} img={imgPdf} titlePdf={titlePdf}/>
