@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalAlert from './ModalAlert';
-import { getTotalizers } from "../CamposSelecionados";
 
 function ModalSalvos({ isOpen, onClose, generateReport }) {
-    const [selectedCampo, setSelectedCampo] = useState(null); // Agora armazena apenas um valor
+    const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
-    const [isConfirmModalOpen, setIsModalAlertOpen] = useState(false);
-    const [isConfirmModalOkOpen, setIsModalAlertOkOpen] = useState(false);
+    const [excludeCampo, setExcludeCampo] = useState(null);
+    const [modalType, setModalType] = useState(null);
     const [modalMessage, setModalMessage] = useState('');
-    const [excludeCampo, setExcludeCampo] = useState(null); // Um único valor
-    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
-    const [isHoveredButtonExcluir, setIsHoveredButtonExcluir] = useState(false);
-    const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
-    const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
+
+    // Impedir scroll da página quando o modal está aberto
+    useEffect(() => {
+        document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+        document.body.style.paddingRight = isOpen ? '6px' : '';
+        
+        return () => {
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '';
+        };
+    }, [isOpen]);
 
     useEffect(() => {
         async function fetchSavedQueries() {
@@ -36,9 +41,6 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                         "totalizers": item.totalizers.map(totalizerObj => totalizerObj.totalizer)
                     }
                 }));
-
-                
-
                 setCampoOptions(options);
             } catch (error) {
                 console.error('Erro ao buscar as consultas salvas:', error);
@@ -58,135 +60,63 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                 throw new Error(`Erro na requisição: ${response.statusText}`);
             }
 
-            console.log('Consulta excluída com sucesso');
-            console.log(excludeCampo);
-
-            // Atualiza as opções removendo o item excluído
             setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo));
-            setSelectedCampo(null); // Limpa a seleção
+            setSelectedCampo(null);
 
         } catch (error) {
             console.error('Erro ao excluir a consulta salva:', error);
         } finally {
-            setIsModalAlertOpen(false); // Fecha o modal de confirmação
+            setModalType(null); // Fechar o modal após a exclusão
         }
     }
 
     const handleApagar = () => {
         if (selectedCampo) {
             setModalMessage('Você tem certeza de que deseja apagar essa consulta?');
-            setIsModalAlertOpen(true);
+            setModalType('confirmDelete'); // Definir modal de confirmação
         } else {
             setModalMessage('Selecione uma consulta para apagar.');
-            setIsModalAlertOkOpen(true);
+            setModalType('warning'); // Definir modal de aviso
         }
     };
 
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, [isOpen]);
-
     async function handleCarregar(generateReport) {
-        console.log(selectedCampo)
         if (selectedCampo && selectedCampo.finalQuery) {
-            localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo))
+            localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo));
             setModalMessage('Consulta carregada!');
-            setIsModalAlertOkOpen(true);
-    
+            setModalType('warning'); // Definir modal de aviso
+
             if (generateReport) {
                 await generateReport();
             }
         } else {
             setModalMessage('Selecione uma consulta para carregar.');
-            setIsModalAlertOkOpen(true);
+            setModalType('warning'); // Definir modal de aviso
         }
     }
 
     if (!isOpen) return null;
 
-    const contentContainerStyle = {
-        width: '500px',
-        height: '200px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        marginTop: '20px',
-        paddingBottom: '60px',
-    };
-
-    const resetHoverStates = () => {
-        setIsHoveredButtonX(false);
-        setIsHoveredButtonExcluir(false);
-        setIsHoveredButtonCancelar(false);
-        setIsHoveredButtonCarregar(false);
-    };
-
-    const handleClose = () => {
-        resetHoverStates();
-        setSelectedCampo('');
-        onClose();
-    };
-
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 1000,
-            }}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+        onClick={onClose}
         >
-            <div
-                style={{
-                    backgroundColor: '#fff',
-                    padding: '0px',
-                    borderRadius: '5px',
-                    position: 'relative',
-                    width: '500px',
-                    height: '250px',
-                }}
-            >
+            <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
                 <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">CONSULTAS SALVAS</h5>
                     <button
-                        className="font-bold mx-2"
-                        onClick={handleClose}
-                        style={{
-                            borderRadius: '50px',
-                            hover: 'pointer',
-                            hoverBackgroundColor: '#0A7F8E',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontSize: '16px',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
+                        className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
+                        onClick={() => {
+                            onClose();
+                            setSelectedCampo('');
                         }}
-                        onMouseEnter={() => setIsHoveredButtonX(true)}
-                        onMouseLeave={() => setIsHoveredButtonX(false)}
+                        aria-label="Fechar modal"
                     >
-                        X
+                        ×
                     </button>
                 </div>
-                <div style={contentContainerStyle}>
-                    <div className="w-11/12 bg-gray-200 bg-opacity-30  rounded-md p-4">
+                <div className="flex flex-col items-center mt-5 pb-16">
+                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4">
                         <h5 className="font-medium mb-4">Nome do Relatório</h5>
                         <Select
                             name="campos"
@@ -195,124 +125,68 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                             classNamePrefix="Select"
                             placeholder="Selecione o Campo..."
                             onChange={(selectedOption) => {
-                                setSelectedCampo(selectedOption); // Armazena o objeto selecionado
-                                setExcludeCampo(selectedOption ? selectedOption.label : null); // Armazena o label para exclusão
+                                setSelectedCampo(selectedOption);
+                                setExcludeCampo(selectedOption ? selectedOption.label : null);
                             }}
-                            value={selectedCampo} // Usa o objeto selecionado
-                            getOptionLabel={(option) => option.label} // Define como mostrar o label
-                            getOptionValue={(option) => option.value} // Define como obter o valor
+                            value={selectedCampo}
+                            getOptionLabel={(option) => option.label}
+                            getOptionValue={(option) => option.label}
                         />
                     </div>
                 </div>
                 {/* Botões de Excluir, Cancelar e Salvar */}
-
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        padding: '10px',
-                        position: 'absolute',
-                        bottom: '0',
-                        right: '0',
-                        boxSizing: 'border-box',
-                        backgroundColor: '#fff',
-                    }}
-                >
-                    <button 
-                        style={{
-                            fontWeight: 'bold',
-                            backgroundColor: '#ED1846',
-                            border: 'none',
-                            borderRadius: '5px',
-                            color: '#fff',
-                            width: '80px',
-                            height: '40px',
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                            marginRight: '220px',
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonExcluir ? '#B11236' : '#ED1846'
-                        }}
-                        onMouseEnter={() => setIsHoveredButtonExcluir(true)}
-                        onMouseLeave={() => setIsHoveredButtonExcluir(false)}
-                        onClick={handleApagar}
-                    >
-                        Excluir
-                    </button>
-                    <button className="align-left"
-                        style={{
-                            fontWeight: 'bold',
-                            backgroundColor: '#6c757d',
-                            border: 'none',
-                            borderRadius: '5px',
-                            color: '#fff',
-                            width: '80px',
-                            height: '40px',
-                            padding: '0', // Remover padding para garantir que o tamanho definido seja exato
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                            marginRight: '10px',
-                            display: 'flex', // Usar flexbox para alinhamento
-                            alignItems: 'center', // Alinhamento vertical
-                            justifyContent: 'center', // Alinhamento horizontal
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonCancelar ? '#5a6268' : '#6c757d'
-                        }}
-                        onClick={() => {onClose(); setSelectedCampo('')}}
-                        onMouseEnter={() => setIsHoveredButtonCancelar(true)}
-                        onMouseLeave={() => setIsHoveredButtonCancelar(false)}
-                    >
-                        Cancelar
-                    </button>
-                    <button className="align-left"
-                        style={{
-                            fontWeight: 'bold',
-                            border: 'none',
-                            color: '#fff',
-                            borderRadius: '5px',
-                            width: '80px',
-                            height: '40px',
-                            padding: '0',
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                            display: 'flex', // Usar flexbox para alinhamento
-                            alignItems: 'center', // Alinhamento vertical
-                            justifyContent: 'center', // Alinhamento horizontal
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
-                        }}
-                        onClick={() => handleCarregar(generateReport)}
-                        onMouseEnter={() => setIsHoveredButtonCarregar(true)}
-                        onMouseLeave={() => setIsHoveredButtonCarregar(false)}
-                    >
-                        Carregar
-                    </button>
+                <div className="flex p-2 rounded-b-lg absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
+                    <div className="flex items-center">
+                        <button
+                            className="align-right font-bold text-white rounded-lg w-20 h-10 text-sm cursor-pointer mr-[220px] bg-custom-vermelho hover:bg-custom-vermelho-escuro transition-colors duration-300"
+                            onClick={handleApagar}
+                        >
+                            Excluir
+                        </button>
+                    </div>
+                    <div className="flex items-center">
+                        <button
+                            className="align-left font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
+                            onClick={() => { onClose(); setSelectedCampo('') }}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            className="align-left font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
+                            onClick={() => handleCarregar(generateReport)}
+                        >
+                            Carregar
+                        </button>
+                    </div>
                 </div>
             </div>
-            <ModalAlert
-                modalType="APAGAR"
-                isOpen={isConfirmModalOpen}
-                onClose={() => setIsModalAlertOpen(false)}
-                onConfirm={deleteSavedQuery}
-                confirmText="Excluir"
-                message={modalMessage}
-                title="Confirmação"
-                buttonColors={{
-                    confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
-                    cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
-                }}
-            />
-            <ModalAlert
-                isOpen={isConfirmModalOkOpen}
-                onClose={() => setIsModalAlertOkOpen(false)}
-                onConfirm={() => {
-                    setIsModalAlertOkOpen(false);
-                    onClose();
-                }}
-                confirmText="Confirmar"
-                message={modalMessage}
-                title="Aviso"
-            />
+            {/* Modais */}
+            {modalType === 'confirmDelete' && (
+                <ModalAlert
+                    modalType="APAGAR"
+                    isOpen={true}
+                    onClose={() => setModalType(null)}
+                    onConfirm={deleteSavedQuery}
+                    confirmText="Excluir"
+                    message={modalMessage}
+                    title="Confirmação"
+                    buttonColors={{
+                        confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
+                        cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
+                    }}
+                />
+            )}
+            {/* Modal de Aviso */}
+            {modalType === 'warning' && (
+                <ModalAlert
+                    isOpen={true}
+                    onClose={() => setModalType(null)}
+                    onConfirm={() => setModalType(null)}
+                    confirmText="Confirmar"
+                    message={modalMessage}
+                    title="Aviso"
+                />
+            )}
         </div>
     );
 }

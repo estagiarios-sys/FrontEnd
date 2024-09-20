@@ -1,59 +1,59 @@
 import React, { useState, useEffect } from "react";
 
 function ModalSql({ isOpen, onClose }) {
-    // O isHoveredButtonX não esta sendo utilizado, mas precisa ser declarado para funcionar o hover no botão de fechar
-    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
 
-    // Função para resetar hover e fechar o modal
-    const handleClose = () => {
-        setIsHoveredButtonX(false);
-        onClose();
-    };
+    const SQL = localStorage.getItem('SQLGeradoFinal') || '';
 
-    // Função para copiar o SQL gerado para a área de transferência
-    const handleCopy = () => {
-        navigator.clipboard.writeText(SQL)
-            .then(() => {
-                setIsCopied(true);
-                setTimeout(() => setIsCopied(false), 4000); // Volta ao estado original após 4 segundos
-            })
-            .catch((err) => console.error("Falha ao copiar: ", err));
-    };
-
-    // Efeito para impedir o scroll da página quando o modal está aberto
+    // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
         document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-        return () => document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = isOpen ? '6px' : '';
+        
+        return () => {
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '';
+        };
     }, [isOpen]);
+
+    // Copiar o SQL gerado para a área de transferência
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(SQL);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 4000); // Reseta após 4 segundos
+        } catch (err) {
+            console.error("Falha ao copiar: ", err);
+        }
+    };
 
     if (!isOpen) return null;
 
-    const SQL = localStorage.getItem('SQLGeradoFinal');
-
     return (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
-            <div className="bg-white p-0 rounded-[5px] relative w-[500px] h-[500px]">
-                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
+            <div className="bg-white rounded-lg relative w-[500px] h-[500px]">
+                <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">SQL</h5>
                     <button
-                        className="font-bold mx-2 rounded-full cursor-pointer w-[30px] h-[30px] flex justify-center items-center text-[16px] transition-colors duration-300 ease-in bg-[--azul-claro] hover:bg-[--azul]"
-                        onClick={handleClose}
-                        onMouseEnter={() => setIsHoveredButtonX(true)}
-                        onMouseLeave={() => setIsHoveredButtonX(false)}
+                        className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
+                        onClick={onClose}
+                        aria-label="Fechar modal"
                     >
-                        X
+                        ×
                     </button>
                 </div>
-                <div className="w-[500px] h-[500px] flex flex-row justify-center items-start mt-5 relative">
-                    <div className="w-11/12 h-5/6 bg-gray-200 bg-opacity-30 rounded-md">
-                        <h5 className="m-6">{SQL}</h5>
+                <div className="w-full h-[410px] flex flex-col justify-center items-center mt-5 relative">
+                    <div className="w-11/12 h-full bg-gray-200 bg-opacity-30 rounded-md p-4 overflow-auto">
+                        <p>{SQL}</p>
                     </div>
-                    <div className="absolute bottom-20 right-3 mt-4">
+                    <div className="absolute bottom-5 right-5">
                         <button
                             onClick={handleCopy}
-                            className={`${isCopied ? "bg-white text-custom-azul-escuro border-custom-azul-escuro border" : "bg-custom-azul-escuro hover:bg-custom-azul text-white"
-                                } font-bold py-1 px-2 rounded flex items-center`}
+                            className={`font-bold py-1 px-2 rounded flex items-center transition-colors duration-300 ${
+                                isCopied
+                                    ? "bg-white text-custom-azul-escuro border border-custom-azul-escuro"
+                                    : "bg-custom-azul-escuro text-white hover:bg-custom-azul"
+                            }`}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,9 @@ function ModalSql({ isOpen, onClose }) {
                                 viewBox="0 0 24 24"
                                 strokeWidth="1.5"
                                 stroke="currentColor"
-                                className={`${isCopied ? "text-custom-azul-escuro" : "text-white"} w-6 h-6 mr-2`}
+                                className={`w-6 h-6 mr-2 ${
+                                    isCopied ? "text-custom-azul-escuro" : "text-white"
+                                }`}
                             >
                                 <path
                                     strokeLinecap="round"

@@ -1,4 +1,3 @@
-// CustomSelect.js
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import Select from 'react-select';
 
@@ -9,6 +8,7 @@ const CustomSelect = forwardRef(({ width = "10rem", ...props }, ref) => {
     openMenu: () => {
       if (selectRef.current) {
         selectRef.current.focus();
+        selectRef.current.openMenu();
       }
     },
     closeMenu: () => {
