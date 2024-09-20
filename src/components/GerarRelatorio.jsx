@@ -39,6 +39,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [columnWidths, setColumnWidths] = useState([]);
     const [tempoEstimado, setTempoEstimado] = useState(null);
     const [combinedDataExpo, setcombinedDataExpo] = useState(null);
+    const [combinedDataPreviewExpo, setcombinedDataPreviewExpo] = useState(null);
     let combinedData = {};
     let combinedDataPreview = {};
 
@@ -250,7 +251,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             });
 
             combinedData = {
-                fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat),
+                fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat, resultTotalizer),
                 titlePDF: titlePdf,
                 imgPDF: base64Image,
             };
@@ -258,10 +259,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             setcombinedDataExpo(combinedData);
 
             combinedDataPreview = {
-                fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat, 15),
+                fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat, resultTotalizer, 15),
                 titlePDF: titlePdf,
                 imgPDF: base64Image,
             };
+
+            setcombinedDataPreviewExpo(combinedDataPreview);
 
             return dataFormat;
         } catch (error) {
@@ -365,7 +368,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     };
 
-    const generateFullTableHTML = (column, dataFormat, maxRows = null) => {
+    const generateFullTableHTML = (column, dataFormat, resultTotalizer, maxRows = null) => {
     if (!dataFormat || dataFormat.length === 0) return '<p>Nenhum dado encontrado.</p>';
     
         const tableHeaders = column.map((column, index) =>
@@ -382,12 +385,15 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             return `<tr class="${rowClass}">${rowHTML}</tr>`;
         }).join('');
 
+        const totalizerHTML = renderTotalizerHTML(column, resultTotalizer);
+
         return `
             <table class="w-full text-sm">
                 <thead class="bg-custom-azul-escuro text-black">
                     <tr>${tableHeaders}</tr>
                 </thead>
                 <tbody>${tableRows}</tbody>
+                ${totalizerHTML ? totalizerHTML : ''}
             </table>
         `;
     };
@@ -525,7 +531,39 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     };
 
 
-
+    const renderTotalizerHTML = (column, resultTotalizer) => {
+        if (!resultTotalizer) return '';
+    
+        const totalizerKeys = Object.keys(resultTotalizer);
+    
+        return `
+            <tfoot class="border-t border-black">
+                <tr class="bg-custom-azul-claro text-center">
+                    <td class="p-2 border-t-2 border-black" colspan="${column.length}">
+                        <table class="w-full">
+                            <tbody>
+                                <tr>
+                                    <td class="text-left font-semibold text-custom-azul-escuro">
+                                        TOTALIZADORES:
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr class="bg-custom-azul-claro text-center">
+                    ${column.map((col, index) => {
+                        const totalizerKey = totalizerKeys.find(key => key.includes(col));
+                        return `
+                            <td class="font-regular text-black pb-3">
+                                ${totalizerKey ? resultTotalizer[totalizerKey] : ""}
+                            </td>
+                        `;
+                    }).join('')}
+                </tr>
+            </tfoot>
+        `;
+    };
 
     const renderTotalizer = () => {
         if (!renderTotalizerResult) return null;
@@ -533,7 +571,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         const totalizerKeys = Object.keys(renderTotalizerResult);
 
         return (
-
             <tfoot className="border-t border-black">
                 <tr className="bg-custom-azul-claro text-center">
                     <td className="p-2 border-t-2 border-black" colSpan={columns.length}>
@@ -754,7 +791,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalFiltro isOpen={isModalOpenFiltro} onClose={closeModalFiltro} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={isModalOpenSQl} onClose={closeModalSql} />
             <ModalPersonalizar isOpen={isModalOpenPersonalizar} onClose={closeModalPersonalizar} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
-            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreview} />
+            <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreviewExpo} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedDataExpo} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
             <ModalGerar isOpen={isModalOpenGerar} onClose={closeModalGerar} tempoEstimado={tempoEstimado} onGenerateReport={handleGenerateReport} onDownloadPDF = {handleDownloadPDF}/>
