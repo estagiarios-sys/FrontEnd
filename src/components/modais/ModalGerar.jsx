@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaCaretDown } from "react-icons/fa";
 
-function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownloadPDF }) {
+function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
     const [isHoveredButtonExcluir, setIsHoveredButtonExcluir] = useState(false);
     const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
@@ -71,10 +71,11 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
 
     const handleOptionClick = async (option) => {
         if (option === 'Gerar') {
-            await onGenerateReport();
-        } else if (option === 'Gerar e Baixar') {
-            await onGenerateReport(); 
-            await onDownloadPDF();
+            await onFetchData();
+        } else if (option === 'Gerar e Baixar PDF') {
+            await onFetchData('PDF'); 
+        } else if (option === 'Gerar e Baixar CSV') {
+            await onFetchData('CSV');
         }
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
     };
@@ -320,9 +321,23 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onGenerateReport, onDownlo
                                 cursor: 'pointer',
                                 textAlign: 'left',
                             }}
-                            onClick={() => handleOptionClick('Gerar e Baixar')}
+                            onClick={() => handleOptionClick('Gerar e Baixar PDF')}
                         >
-                            Gerar e Baixar
+                            Gerar e Baixar PDF
+                        </button>
+                        <button
+                            style={{
+                                display: 'block',
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: '#f8f9fa',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                            }}
+                            onClick={() => handleOptionClick('Gerar e Baixar CSV')}
+                        >
+                            Gerar e Baixar CSV
                         </button>
                     </div>
                 )}

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ModalSql from "./modais/ModalSql";
 import ModalPdfView from "./modais/ModalPdfView";
-import ModalExpo from "./modais/ModalExpo";
+import ModalExpo, { downloadCSV, downloadPDF } from "./modais/ModalExpo";
 import ModalSalvos from "./modais/ModalSalvos";
 import ModalFiltro from "./modais/ModalFiltro";
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,6 @@ import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 import ModalGerar from "./modais/ModalGerar";
 import { data } from "autoprefixer";
-
 
 function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, handleLoadFromLocalStorage }) {
     const [loadingProgress, setLoadingProgress] = useState(0);
@@ -49,7 +48,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [titlePdf, setTitlePdf] = useState("");
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
+    const [isModalAvisoOpen, setIsModalAvisoOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
 
+    const handleModalAviso = (message) => {
+        setModalMessage(message);
+        setIsModalAvisoOpen(true);
+    };
 
     const handleModalFiltro = () => {
         setIsModalOpenFiltro(true);
@@ -185,7 +190,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
 
-    const fetchData = async () => {
+    const fetchData = async (option) => {
         try {
             const jsonRequest = {
                 table: selectTable,
@@ -266,7 +271,21 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
             setcombinedDataPreviewExpo(combinedDataPreview);
 
-            return dataFormat;
+            const colunasMap = colunasAtualizada.map((column, index) => {
+                return {
+                    value: column, 
+                };
+            });
+
+            if (option === 'CSV') {
+                downloadCSV(colunasMap, dataFormat, handleModalAviso);
+            }
+
+            if (option === 'PDF') {
+                downloadPDF(combinedData, handleModalAviso);
+            }
+
+            setTableData(dataFormat);
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             return [];
@@ -333,8 +352,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 // Opcional: Salvar no localStorage se precisar
                 localStorage.setItem('totalizers', JSON.stringify(resultTotalizer));
             }
-
-            return transformedData;
+            setTableData(transformedData);
 
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
@@ -344,13 +362,10 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
     const handleGenerateReport = async () => {
         try {
-            let data;
             if (localStorage.getItem('loadedQuery')) {
-                data = await fetchLoadQuery();
-                setTableData(data);
+                await fetchLoadQuery();
             } else {
-                data = await fetchData();
-                setTableData(data);
+                await fetchData();
             }
 
             if (data && data.length > 0) {
@@ -442,37 +457,6 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             convertToBase64(imgPdf);
         }
     }, [imgPdf]);
-
-    const downloadFile = (blob, filename) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(link.href);
-    };
-
-    const handleDownloadPDF = async () => {
-
-        try {
-            const response = await fetch('http://localhost:8080/pdf/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(combinedData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao gerar o PDF.');
-            }
-
-            const blob = await response.blob();
-            const fileName = `relatorio_${new Date().toISOString()}.pdf`;
-            downloadFile(blob, fileName);
-        } catch (error) {
-            console.error('Erro ao baixar o PDF:', error);
-        }
-    };
 
     const sendData = async () => {
         try {
@@ -794,7 +778,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             <ModalPdfView isOpen={isModalPdfOpenView} onClose={closeModalPdfView} combinedData={combinedDataPreviewExpo} />
             <ModalExpo isOpen={isModalExpoOpen} onClose={closeModalExpo} table={tableData} selectedColumns={selectedColumns} combinedData={combinedDataExpo} />
             <ModalSalvos isOpen={isModalOpenSalvos} onClose={closeModalSalvos} generateReport={handleGenerateReport} />
-            <ModalGerar isOpen={isModalOpenGerar} onClose={closeModalGerar} tempoEstimado={tempoEstimado} onGenerateReport={handleGenerateReport} onDownloadPDF = {handleDownloadPDF}/>
+            <ModalGerar isOpen={isModalOpenGerar} onClose={closeModalGerar} tempoEstimado={tempoEstimado} onFetchData={fetchData}/>
             <ModalSalvarCon isOpen={isModalSalvarConOpen} onClose={closeModalSalvarCon} sqlQuery={sqlQuery}  sql2={sql2} img={imgPdf} titlePdf={titlePdf}/>
             <ModalAlert isOpen={isModalAlertOpen} onClose={closeModalAlert} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
         </div>
