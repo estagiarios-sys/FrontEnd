@@ -48,24 +48,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [titlePdf, setTitlePdf] = useState("");
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
-    const [isModalAvisoOpen, setIsModalAvisoOpen] = useState(false);
-    const [modalMessage, setModalMessage] = useState('');
-
-    const handleModalAviso = (message) => {
-        setModalMessage(message);
-        setIsModalAvisoOpen(true);
-    };
-
+    
     const handleModalFiltro = () => {
         setIsModalOpenFiltro(true);
     };
 
     const handleModalSalvos = () => {
         setIsModalOpenSalvos(true);
-    };
-
-    const handleModalGerar = () => {
-        setIsModalOpenGerar(true);
     };
 
     const handleModalExpo = () => {
@@ -278,11 +267,11 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             });
 
             if (option === 'CSV') {
-                downloadCSV(colunasMap, dataFormat, handleModalAviso);
+                downloadCSV(colunasMap, dataFormat);
             }
 
             if (option === 'PDF') {
-                downloadPDF(combinedData, handleModalAviso);
+                downloadPDF(combinedData);
             }
 
             setTableData(dataFormat);
@@ -367,13 +356,8 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
             } else {
                 await fetchData();
             }
-
-            if (tableData.length > 0 && tableData[0].values) {
-                setIsView(true);
-                setCurrentPage(1);
-            } else {
-                setIsView(false);
-            }
+            setIsView(true);
+            setCurrentPage(1);
 
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
@@ -462,7 +446,7 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         try {
             const jsonRequest = {
                 table: selectTable,
-                columns: selectedColumns,
+                columns: selectedColumnsValues,
                 conditions: condicoesString,
                 orderBy: orderByString,
                 joins: [],
@@ -508,8 +492,11 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
         }
     };
 
-    // Handler do botão
-    const clickButton = () => {
+    const handleModalGerar = () => {
+        if (selectedColumns.length === 0) {
+            setIsModalAlertOpen(true);
+            return;
+        }
         sendData();
         setIsModalOpenGerar(true)
     };
@@ -591,30 +578,15 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                     <div className="flex mt-3">
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
-                            onClick={handleGenerateReport}
-                            disabled={isLoading}
+                            onClick={handleModalGerar}
                         >
-                            {isLoading ? 'Carregando...' : 'Gerar Relatório'}
+                            Gerar Relatório
                         </button>
-                        {isLoading && (
-                            <div className="fixed inset-0 flex flex-col items-center justify-center bg-opacity-50 bg-gray-200 z-50">
-                                <div className="ww-8 h-8 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
-                                <div className="mt-2 text-blue-500">{loadingProgress}%
-                                </div>
-                                <div><button className=" text-blue-500 font-bold z-50 mt-3" onClick={() => setIsLoading(false)}>Cancelar</button></div>
-                            </div>
-                        )}
                         <button
                             className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
                             onClick={handleModalSalvarCon}
                         >
                             Salvar Consulta
-                        </button>
-                        <button
-                            className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
-                            onClick={clickButton}
-                        >
-                            Clique
                         </button>
                     </div>
                 </div>
