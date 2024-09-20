@@ -50,13 +50,17 @@ function Main() {
 
   // Move todos os campos disponíveis para a lista de campos selecionados e limpa a lista de disponíveis
   const handleAllRightClick = () => {
-    setSelectedCampos(prevSelectedCampos => [
-      ...prevSelectedCampos,
-      ...availableCampos
-    ]);
+    setSelectedCampos(prevSelectedCampos => {
+      const newCampos = availableCampos.filter(campo => {
+        return !prevSelectedCampos.some(selected => selected.value === campo.value);
+      });
+  
+      // Retorna a nova lista de campos selecionados
+      return [...prevSelectedCampos, ...newCampos];
+    });
+  
     setAvailableCampos([]);
-
-    // Limpa os campos selecionados no componente TabelaCampos
+  
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('clearSelectedCampos'));
     }

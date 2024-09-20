@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import CustomSelect from './genericos/CustomSelect';
 import { type } from '@testing-library/user-event/dist/type';
+
+let exportedSelectedCampos = [];
 
 const ordenacaoOptions = [
   { value: 'ASC', label: 'ASC' },
@@ -62,6 +64,9 @@ function CamposSelecionados({
     value: campo.value.replace(/\s+as\s+.*$/i, ''),
     type: campo.type  // Mantém o tipo original
   }));
+
+  exportedSelectedCampos = selectedCampos;
+
   const [selectedOrder, setSelectedOrder] = useState(null);
   const selectRefs = useRef({});
   const selectTotalizerRefs = useRef({});
@@ -245,5 +250,8 @@ function CamposSelecionados({
     </div>
   );
 }
+export const getSelectedCampos = () => {
+  return exportedSelectedCampos;
+};
 
 export default CamposSelecionados;
