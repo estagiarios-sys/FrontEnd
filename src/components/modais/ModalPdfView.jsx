@@ -3,18 +3,27 @@ import React, { useEffect, useState } from "react";
 function ModalPdfView({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
 
+  // Impedir scroll da página quando o modal está aberto
   useEffect(() => {
-    if (isOpen) {
-      HandlePreviewPDF(); // Chama a função para gerar o PDF
-      document.body.style.overflow = 'hidden'; // Impede o scroll da página
-    } else {
-      document.body.style.overflow = 'auto'; // Permite o scroll da página
-    }
-
+    if (isOpen) HandlePreviewPDF();
+    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+    document.body.style.paddingRight = isOpen ? '6px' : '';
+    
     return () => {
-      document.body.style.overflow = 'auto'; // Permite o scroll da página
+        document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = '';
     };
-  }, [isOpen]);
+}, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -43,43 +52,12 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
   };
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000,
-      }}
+    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000]"
+      onClick={onClose} // Fecha o modal ao clicar fora dele
     >
-      <div
-        style={{
-          backgroundColor: '#fff',
-          padding: '0px', // Adicionando padding para espaçamento interno, removi para ocultar o fundo branco
-          borderRadius: '5px',
-          position: 'relative',
-          width: '80%',
-          maxWidth: '600px', // Aumentando o limite máximo para a largura
-          maxHeight: '90%', // Garantindo que a altura não exceda 90% da tela
-          overflowY: 'auto', // Permitindo rolagem se o conteúdo exceder a altura do modal
-        }}
-      >
+      <div className="bg-white p-0 rounded-md relative w-4/5 max-w-[600px] max-h-[90%] overflow-y-auto">
         {pdfUrl && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'column', // Colocando os elementos um embaixo do outro
-              height: '100%',
-            }}
-          >
+          <div class="flex justify-center items-center flex-col h-full">
             <iframe src={pdfUrl} width="100%" height="600px" title="PDF Preview" />
           </div>
         )}
