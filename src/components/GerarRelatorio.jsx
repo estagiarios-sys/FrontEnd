@@ -27,17 +27,19 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     const [sqlQuery, setSqlQuery] = useState('');
     const [isModalAlertOpen, setIsModalAlertOpen] = useState(false); // ModalAlert para exibir avisos
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 15;
     const [renderTotalizerResult, setRenderTotalizerResult] = useState(null); // Usar useState para o totalizador
     const [columnWidths, setColumnWidths] = useState([]);
     const [tempoEstimado, setTempoEstimado] = useState(null);
     const [combinedDataExpo, setcombinedDataExpo] = useState(null);
     const [combinedDataPreviewExpo, setcombinedDataPreviewExpo] = useState(null);
     const [sql2, setSql2] = useState('');
-    const tableRef = useRef(null);
     const [titlePdf, setTitlePdf] = useState("");
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
+    const [fullTableHTML, setFullTableHTML] = useState('');
+    const [fullTableHTMLPreview, setFullTableHTMLPreview] = useState('');
+    const tableRef = useRef(null);
+    const itemsPerPage = 15;
     const hasData = tableData.length > 0 && tableData[0].values;
     const totalPages = hasData ? Math.ceil(tableData[0].values.length / itemsPerPage) : 0;
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -55,6 +57,13 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
     };
 
     const handleModalExpo = () => {
+
+        const combinedData = {
+            fullTableHTML: fullTableHTML,
+            titlePDF: titlePdf,
+            imgPDF: base64Image,
+        };
+        setcombinedDataExpo(combinedData);
         setIsModalExpoOpen(true);
     };
 
@@ -68,6 +77,12 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
 
     const handleModalPdfView = () => {
         if (tableData.length > 0) {
+            const combinedData = {
+                fullTableHTML: fullTableHTMLPreview,
+                titlePDF: titlePdf,
+                imgPDF: base64Image,
+            };
+            setcombinedDataPreviewExpo(combinedData);
             setIsModalPdfOpenView(true);
         } else {
             setIsModalPdfOpenView(false);
@@ -216,21 +231,18 @@ function GerarRelatorio({ selectedColumns, selectTable, selectedRelacionada, han
                 };
             });
 
+            const fullTableHTML = generateFullTableHTML(colunasAtualizada, dataFormat, resultTotalizer);
+            const fullTableHTMLPreview = generateFullTableHTML(colunasAtualizada, dataFormat, resultTotalizer, 15);
+            setFullTableHTML(fullTableHTML);
+            setFullTableHTMLPreview(fullTableHTMLPreview);
+
             const combinedData = {
-                fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat, resultTotalizer),
+                fullTableHTML: fullTableHTML,
                 titlePDF: titlePdf,
                 imgPDF: base64Image,
             };
 
             setcombinedDataExpo(combinedData);
-
-            const combinedDataPreview = {
-                fullTableHTML: generateFullTableHTML(colunasAtualizada, dataFormat, resultTotalizer, 15),
-                titlePDF: titlePdf,
-                imgPDF: base64Image,
-            };
-
-            setcombinedDataPreviewExpo(combinedDataPreview);
 
             const colunasMap = colunasAtualizada.map((column, index) => {
                 return {
