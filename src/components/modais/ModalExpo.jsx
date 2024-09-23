@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Papa from 'papaparse';
 import ModalAlert from './ModalAlert';
 import { FiFile, FiDownload } from 'react-icons/fi';
 
-export async function downloadPDF (combinedData, handleModalAviso) {
+export async function downloadPDF(combinedData, handleModalAviso) {
     if (!combinedData || Object.keys(combinedData).length === 0) {
         handleModalAviso('Por favor, selecione pelo menos uma tabela e certifique-se de que há dados para exportar.');
         return;
@@ -88,6 +88,26 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
     const closeModalAviso = () => {
         setIsModalAvisoOpen(false);
     };
+
+    // Impedir scroll da página quando o modal está aberto
+    useEffect(() => {
+        const hasScroll = document.body.scrollHeight > window.innerHeight;
+
+        if (isOpen) {
+            if (hasScroll) {
+                document.body.style.paddingRight = "6px"; // Adiciona padding
+            }
+            document.body.style.overflow = "hidden"; // Desativa o scroll
+        } else {
+            document.body.style.overflow = ""; // Restaura o scroll
+            document.body.style.paddingRight = ""; // Remove o padding
+        }
+
+        return () => {
+            document.body.style.overflow = ""; // Limpeza no fechamento
+            document.body.style.paddingRight = ""; // Limpeza no fechamento
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
