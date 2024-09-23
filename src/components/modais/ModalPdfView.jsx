@@ -5,15 +5,23 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
 
   // Impedir scroll da página quando o modal está aberto
   useEffect(() => {
-    if (isOpen) HandlePreviewPDF();
-    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-    document.body.style.paddingRight = isOpen ? '6px' : '';
-    
+    const hasScroll = document.body.scrollHeight > window.innerHeight;
+
+    if (isOpen) {
+      if (hasScroll) {
+        document.body.style.paddingRight = "6px"; // Adiciona padding
+      }
+      document.body.style.overflow = "hidden"; // Desativa o scroll
+    } else {
+      document.body.style.overflow = ""; // Restaura o scroll
+      document.body.style.paddingRight = ""; // Remove o padding
+    }
+
     return () => {
-        document.body.style.overflow = 'auto';
-        document.body.style.paddingRight = '';
+      document.body.style.overflow = ""; // Limpeza no fechamento
+      document.body.style.paddingRight = ""; // Limpeza no fechamento
     };
-}, [isOpen]);
+  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {

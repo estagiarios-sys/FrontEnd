@@ -13,6 +13,26 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const dropdownRef = useRef(null);
     const [isClicked, setIsClicked] = useState(false);
 
+    // Impedir scroll da página quando o modal está aberto
+    useEffect(() => {
+        const hasScroll = document.body.scrollHeight > window.innerHeight;
+
+        if (isOpen) {
+            if (hasScroll) {
+                document.body.style.paddingRight = "6px"; // Adiciona padding
+            }
+            document.body.style.overflow = "hidden"; // Desativa o scroll
+        } else {
+            document.body.style.overflow = ""; // Restaura o scroll
+            document.body.style.paddingRight = ""; // Remove o padding
+        }
+
+        return () => {
+            document.body.style.overflow = ""; // Limpeza no fechamento
+            document.body.style.paddingRight = ""; // Limpeza no fechamento
+        };
+    }, [isOpen]);
+
     const handleClick = () => {
         setIsClicked(!isClicked);
         mostrarOpcoes();
@@ -73,7 +93,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         if (option === 'Gerar') {
             await onFetchData();
         } else if (option === 'Gerar e Baixar PDF') {
-            await onFetchData('PDF'); 
+            await onFetchData('PDF');
         } else if (option === 'Gerar e Baixar CSV') {
             await onFetchData('CSV');
         }

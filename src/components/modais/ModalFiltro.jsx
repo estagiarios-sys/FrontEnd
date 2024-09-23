@@ -138,9 +138,24 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         setModal(prev => ({ ...prev, isOpen: false }));
     }, [modal.type, onClose]);
 
+    // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
-        document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-        return () => { document.body.style.overflow = 'auto'; };
+        const hasScroll = document.body.scrollHeight > window.innerHeight;
+
+        if (isOpen) {
+            if (hasScroll) {
+                document.body.style.paddingRight = "6px"; // Adiciona padding
+            }
+            document.body.style.overflow = "hidden"; // Desativa o scroll
+        } else {
+            document.body.style.overflow = ""; // Restaura o scroll
+            document.body.style.paddingRight = ""; // Remove o padding
+        }
+
+        return () => {
+            document.body.style.overflow = ""; // Limpeza no fechamento
+            document.body.style.paddingRight = ""; // Limpeza no fechamento
+        };
     }, [isOpen]);
 
     if (!isOpen) return null;

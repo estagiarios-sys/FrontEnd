@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DragDropFile from "../genericos/DragDrop.jsx";
 
-function ModalPersonalizar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
+function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
     const [title, setTitle] = useState("");
     const [image, setImage] = useState(null);
 
@@ -9,15 +9,23 @@ function ModalPersonalizar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
         setImage(file);
     };
 
+    // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
+        const hasScroll = document.body.scrollHeight > window.innerHeight;
+
         if (isOpen) {
-            document.body.style.overflow = "hidden";
+            if (hasScroll) {
+                document.body.style.paddingRight = "6px"; // Adiciona padding
+            }
+            document.body.style.overflow = "hidden"; // Desativa o scroll
         } else {
-            document.body.style.overflow = "auto";
+            document.body.style.overflow = ""; // Restaura o scroll
+            document.body.style.paddingRight = ""; // Remove o padding
         }
 
         return () => {
-            document.body.style.overflow = "auto";
+            document.body.style.overflow = ""; // Limpeza no fechamento
+            document.body.style.paddingRight = ""; // Limpeza no fechamento
         };
     }, [isOpen]);
 
@@ -25,10 +33,10 @@ function ModalPersonalizar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded relative flex flex-col w-[500px] h-[550px]">
+            <div className="bg-white rounded-lg relative flex flex-col w-[500px] h-[550px]">
                 {/* Cabeçalho */}
-                <div className="w-full bg-[#0A7F8E] flex justify-between items-center text-white p-2 rounded-t">
-                    <h5 className="font-bold mx-2">PERSONALIZAR</h5>
+                <div className="w-full bg-[#0A7F8E] flex justify-between items-center text-white p-2">
+                    <h5 className="font-bold mx-2">EDITAR</h5>
                     <button
                         className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
                         onClick={onClose}
@@ -104,4 +112,4 @@ function ModalPersonalizar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
     );
 }
 
-export default ModalPersonalizar;
+export default ModalEditar;
