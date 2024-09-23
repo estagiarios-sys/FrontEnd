@@ -89,10 +89,6 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
         setIsModalAvisoOpen(false);
     };
 
-    const handleClose = () => {
-        onClose();
-    };
-
     if (!isOpen) return null;
 
     return (
@@ -101,9 +97,10 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
                 <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-3">
                     <h5 className="font-bold mx-2">EXPORTAR ARQUIVO</h5>
                     <button
-                        className="font-bold mx-2 w-8 h-8 flex justify-center items-center text-lg rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
-                        onClick={handleClose}
+                        className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
+                        onClick={onClose}
                         aria-label="Fechar modal"
+                        title="Fechar"
                     >
                         <span aria-hidden="true">×</span>
                     </button>
