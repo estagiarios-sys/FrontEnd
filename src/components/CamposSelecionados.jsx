@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import CustomSelect from './genericos/CustomSelect';
-import { type } from '@testing-library/user-event/dist/type';
 
 let exportedSelectedCampos = [];
 
+// Suas opções de ordenação e totalizadores
 const ordenacaoOptions = [
   { value: 'ASC', label: 'ASC' },
   { value: 'DESC', label: 'DESC' },
@@ -18,6 +18,7 @@ const TotalizerOptions = [
   { value: 'MAX', label: 'MÁXIMO' },
 ];
 
+// Função para obter opções filtradas
 const getFilteredTotalizerOptions = (type) => {
   switch (type) {
     case 'NUMBER':
@@ -40,7 +41,7 @@ let totalizers = [];
 
 export function removeSelectedTotalizers(camposParaRemover) {
   camposParaRemover.forEach((campo) => {
-    const campoSemApelido = campo.replace(/\s+as\s+.*$/, ''); // Remove o apelido do campo
+    const campoSemApelido = campo.replace(/\s+as\s+.*$/, '');
     delete totalizers[campoSemApelido];
   });
 }
@@ -62,12 +63,13 @@ function CamposSelecionados({
 }) {
   const selectedCamposSemApelido = selectedCampos.map((campo) => ({
     value: campo.value.replace(/\s+as\s+.*$/i, ''),
-    type: campo.type  // Mantém o tipo original
+    type: campo.type,
   }));
 
   exportedSelectedCampos = selectedCampos;
 
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [openSelect, setOpenSelect] = useState(null); // Para rastrear qual select está aberto
   const selectRefs = useRef({});
   const selectTotalizerRefs = useRef({});
 
@@ -84,19 +86,22 @@ function CamposSelecionados({
   const handleOrderBySave = (selectedOption, fieldName) => {
     const newOrder = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
     localStorage.setItem('orderByString', newOrder);
-
     setSelectedOrder(selectedOption ? { fieldName, value: selectedOption.value } : null);
   };
 
   const handleTdClick = (campo) => {
-    if (selectRefs.current[campo]) {
-      selectRefs.current[campo].openMenu(); // Abre o menu do CustomSelect
+    const isOpen = openSelect === campo;
+    setOpenSelect(isOpen ? null : campo); // Fecha se já estiver aberto, ou abre se estiver fechado
+    if (selectRefs.current[campo] && !isOpen) {
+      selectRefs.current[campo].openMenu();
     }
   };
 
   const handleTotalizerClick = (campo) => {
-    if (selectTotalizerRefs.current[campo]) {
-      selectTotalizerRefs.current[campo].openMenu(); // Abre o menu do CustomSelect
+    const isOpen = openSelect === campo;
+    setOpenSelect(isOpen ? null : campo); // Fecha se já estiver aberto, ou abre se estiver fechado
+    if (selectTotalizerRefs.current[campo] && !isOpen) {
+      selectTotalizerRefs.current[campo].openMenu();
     }
   };
 
@@ -108,7 +113,6 @@ function CamposSelecionados({
     }
 
     const updatedCampos = selectedCampos.map((selectedCampo) => {
-
       if (selectedCampo && selectedCampo.value && campo && campo.value) {
         const campoSemApelidoComparacao = selectedCampo.value.replace(/\s+as\s+.*$/i, '');
         const campoSemApelido = campo.value.replace(/\s+as\s+.*$/i, '');
@@ -121,6 +125,7 @@ function CamposSelecionados({
         }
         return selectedCampo;
       }
+      return selectedCampo;
     });
 
     onSelectedCamposChange(updatedCampos);
@@ -140,6 +145,7 @@ function CamposSelecionados({
         ref.closeMenu();
       }
     });
+    setOpenSelect(null); // Reseta o estado
   };
 
   return (
@@ -157,7 +163,7 @@ function CamposSelecionados({
             >
               <thead className="bg-custom-azul-escuro text-white sticky top-0 z-10">
                 <tr className="bg-custom-azul-escuro text-white ">
-                  <th className=" resize-y py-2 px-4 text-sm w-[60px]"></th>
+                  <th className="resize-y py-2 px-4 text-sm w-[60px]"></th>
                   <th className="py-2 px-4 text-sm w-[216px]">Campo</th>
                   <th className="py-2 px-4 text-sm w-[193px]">Ordem</th>
                   <th className="py-2 px-4 text-sm w-[241px]">Totalizador</th>
@@ -250,6 +256,7 @@ function CamposSelecionados({
     </div>
   );
 }
+
 export const getSelectedCampos = () => {
   return exportedSelectedCampos;
 };
