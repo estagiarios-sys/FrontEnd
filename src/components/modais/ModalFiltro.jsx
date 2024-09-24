@@ -40,8 +40,25 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     const [selectedCampos, setSelectedCampos] = useState([]);
     const [addedCampos, setAddedCampos] = useState([]);
     const [modal, setModal] = useState({ isOpen: false, message: "", type: "ALERTA" });
+    const [condicoesStringComparacao, setCondicoesStringComparacao] = useState('');
     const selectRefs = useRef([]);
     const containerRef = useRef(null);
+    let comparacao = 0;
+
+    if (condicoesStringComparacao !== '') {
+        comparacao = condicoesStringComparacao.split(' AND ').length;
+    } else {
+        comparacao = 0;
+    }
+
+    const handleClose = useCallback(() => {
+        const hasEmptyFields = addedCampos.some(campo => !campo.valor.trim() || !campo.ordenacao);
+        if (comparacao < addedCampos.length || hasEmptyFields) {
+            setModal({ isOpen: true, message: "Os dados carregados não foram salvos, deseja realmente sair?", type: "CONFIRMAR" });
+            return;
+        }
+        onClose();
+    }, [onClose]);
 
     const handleScroll = () => {
         // Fecha todos os selects abertos ao scrollar
@@ -77,6 +94,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     }, [selectedCampos, campoOptions]);
 
     const handleRemoveAllCampos = useCallback(() => {
+        setCondicoesStringComparacao('');
         setAddedCampos([]);
         onSave?.("");
     }, [onSave]);
@@ -92,6 +110,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         const condicoesString = updatedCampos
             .map(({ value, ordenacao, valor }) => `${value.split(/\sas\s/)[0].trim()} ${ordenacao} '${valor.trim().replace(/'/g, "\\'")}'`)
             .join(' AND ');
+        setCondicoesStringComparacao(condicoesString);
         setAddedCampos(updatedCampos);
         onSave?.(condicoesString);
     }, [addedCampos, onSave]);
@@ -126,13 +145,15 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         const condicoesString = addedCampos
             .map(({ value, ordenacao, valor }) => `${value.split(/\sas\s/)[0].trim()} ${ordenacao} '${valor.trim().replace(/'/g, "\\'")}'`)
             .join(' AND ');
-
+        setCondicoesStringComparacao(condicoesString);
         setModal({ isOpen: true, message: "Filtro salvo com sucesso", type: "SUCESSO" });
         onSave?.(condicoesString);
     }, [addedCampos, onSave]);
 
     const handleConfirm = useCallback(() => {
         if (modal.type === "SUCESSO") {
+            onClose();
+        } else if (modal.type === "CONFIRMAR") {
             onClose();
         }
         setModal(prev => ({ ...prev, isOpen: false }));
@@ -168,7 +189,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     <h5 className="font-bold text-2xl">FILTROS</h5>
                     <button
                         className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
-                        onClick={onClose}
+                        onClick={handleClose}
                         aria-label="Fechar modal"
                         title="Fechar"
                     >
@@ -345,7 +366,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     isOpen={modal.isOpen}
                     onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
                     onConfirm={handleConfirm}
-                    type={modal.type}
+                    modalType={modal.type}
                     message={modal.message}
                 />
             </div>

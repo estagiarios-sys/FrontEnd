@@ -7,19 +7,26 @@ const modalTypes = {
     title: 'Confirmar Exclusão',
     defaultConfirmText: 'Confirmar',
     cancelText: 'Cancelar',
-    isAlert: false,
   },
   ALERTA: {
     title: 'Atenção',
     defaultConfirmText: 'Confirmar',
     cancelText: null,
-    isAlert: true,
   },
   SUCESSO: {
     title: 'Sucesso',
     defaultConfirmText: 'Confirmar',
     cancelText: null,
-    isAlert: true,
+  },
+  CONFIRMAR: {
+    title: 'Confirmação',
+    defaultConfirmText: 'Confirmar',
+    cancelText: 'Cancelar',
+  },
+  ERRO: {
+    title: 'MODAL NÃO CONFIGURADO CORRETAMENTE',
+    defaultConfirmText: 'Confirmar',
+    cancelText: null,
   },
 };
 
@@ -50,8 +57,7 @@ const ModalAlert = ({
 
   if (!isOpen) return null;
 
-  const { title, defaultConfirmText, cancelText, isAlert } =
-    modalTypes[modalType] || modalTypes.ALERTA;
+  const { title, defaultConfirmText, cancelText } = modalTypes[modalType] || modalTypes.ERRO;
 
   const finalConfirmText = confirmText || defaultConfirmText;
 
@@ -80,7 +86,7 @@ const ModalAlert = ({
           )}
           <button
             className={`text-white font-semibold py-2 px-4 rounded-lg ${
-              isAlert
+              modalType === 'ALERTA' || modalType === 'CONFIRMAR' || modalType === 'SUCESSO'
                 ? 'bg-custom-azul-escuro hover:bg-custom-azul focus:ring-custom-azul-escuro'
                 : 'bg-custom-vermelho hover:bg-custom-vermelho-escuro focus:ring-custom-vermelho'
             }`}
@@ -103,14 +109,6 @@ ModalAlert.propTypes = {
   modalType: PropTypes.oneOf(['APAGAR', 'ALERTA', 'SUCESSO']),
   confirmText: PropTypes.string,
   children: PropTypes.node,
-};
-
-ModalAlert.defaultProps = {
-  isOpen: false,
-  onClose: () => {},
-  onConfirm: () => {},
-  message: '',
-  modalType: 'ALERTA',
 };
 
 export default ModalAlert;

@@ -1,12 +1,63 @@
 import React, { useState, useEffect } from "react";
 import DragDropFile from "../genericos/DragDrop.jsx";
+import ModalAlert from "./ModalAlert.jsx";
 
 function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
-    const [title, setTitle] = useState("");
+    const [title, setTitle] = useState('');
     const [image, setImage] = useState(null);
+    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
 
     const handleImageUpload = (file) => {
         setImage(file);
+    };
+
+    const handleConfirmar = () => {
+        if (modal.type === 'ALERTA') {
+            setModal({ isOpen: false, type: '', message: '' });
+        } else if (modal.type === 'APAGAR') {
+            setTitle('');
+            setImage(null);
+            handleTitlePdf('');
+            handleImgPdf('');
+            setModal({ isOpen: false, type: '', message: '' });
+        } else if (modal.type === 'CONFIRMAR') {
+            setTitle('');
+            setImage(null);
+            setModal({ isOpen: false, type: '', message: '' });
+            onClose();
+        } else if (modal.type === 'SUCESSO') {
+            setModal({ isOpen: false, type: '', message: '' });
+            onClose();
+        }
+    };
+
+    const handleClose = () => {
+        if (title !== '' || image !== null) {
+            setModal({ isOpen: true, type: 'CONFIRMAR', message: 'Os dados carregados não foram salvos, deseja realmente sair?' });
+            return;
+        }
+        onClose();
+    };
+
+    const handleCarregar = () => {
+        if (title === '' && image === null) {
+            setModal({ isOpen: true, type: 'ALERTA', message: 'Nenhum dado inserido para carregar.' });
+            return;
+        } else {
+            handleTitlePdf(title);
+            handleImgPdf(image);
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'Dados carregados com sucesso!' });
+        }
+    };
+
+    const handleExcluir = () => {
+        if (title === '' && image === null) {
+            setModal({ isOpen: true, type: 'ALERTA', message: 'Nenhum dado carregado para excluir.' });
+            return;
+        } else {
+            setModal({ isOpen: true, type: 'APAGAR', message: 'Deseja realmente apagar os dados carregados?' });
+        }
+
     };
 
     // Impedir scroll da página quando o modal está aberto
@@ -39,7 +90,7 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
                     <h5 className="font-bold mx-2">EDITAR</h5>
                     <button
                         className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
-                        onClick={onClose}
+                        onClick={handleClose}
                         aria-label="Fechar modal"
                         title="Fechar"
                     >
@@ -82,7 +133,7 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
                         <button
                             className="align-right font-bold text-white rounded-lg w-20 h-10 text-sm cursor-pointer mr-[220px] bg-custom-vermelho hover:bg-custom-vermelho-escuro transition-colors duration-300"
                             onClick={() => {
-                                // Lógica para Excluir
+                                handleExcluir();
                             }}
                         >
                             Excluir
@@ -90,17 +141,9 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
                     </div>
                     <div className="flex items-center">
                         <button
-                            className="align-left font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
-                            onClick={onClose}
-                        >
-                            Cancelar
-                        </button>
-                        <button
                             className="align-left font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
                             onClick={() => {
-                                handleTitlePdf(title);
-                                handleImgPdf(image);
-                                onClose();
+                                handleCarregar();
                             }}
                         >
                             Carregar
@@ -108,6 +151,14 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
                     </div>
                 </div>
             </div>
+            {/* Modal de Alerta */}
+            <ModalAlert
+                isOpen={modal.isOpen}
+                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={handleConfirmar}
+                modalType={modal.type}
+                message={modal.message}
+            />
         </div>
     );
 }
