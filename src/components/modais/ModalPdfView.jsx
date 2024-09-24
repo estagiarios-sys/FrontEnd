@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
+import Loading from "../genericos/Loading";
 
 function ModalPdfView({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Impedir scroll da página quando o modal está aberto
   useEffect(() => {
     const hasScroll = document.body.scrollHeight > window.innerHeight;
 
     if (isOpen) {
+      setIsLoading(true); // Começa o carregamento
+      handlePreviewPDF(); // Gera o PDF ao abrir o modal
       if (hasScroll) {
         document.body.style.paddingRight = "6px"; // Adiciona padding
       }
@@ -35,7 +39,7 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
 
   if (!isOpen) return null;
 
-  const HandlePreviewPDF = async () => {
+  const handlePreviewPDF = async () => {
     try {
       const response = await fetch('http://localhost:8080/pdf/preview', { // Backend Java
         method: 'POST',
@@ -50,12 +54,12 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
       }
 
       const blob = await response.blob();
-      console.log('Blob gerado:', blob);
       const url = URL.createObjectURL(blob);
-      console.log('PDF gerado:', url);
       setPdfUrl(url); // Atualiza para usar o URL do PDF
     } catch (error) {
       console.error('Erro ao gerar o PDF:', error);
+    } finally {
+      setIsLoading(false); // Finaliza o carregamento após o PDF ser gerado
     }
   };
 
@@ -64,10 +68,14 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
       onClick={onClose} // Fecha o modal ao clicar fora dele
     >
       <div className="bg-white p-0 rounded-md relative w-4/5 max-w-[600px] max-h-[90%] overflow-y-auto">
-        {pdfUrl && (
-          <div class="flex justify-center items-center flex-col h-full">
-            <iframe src={pdfUrl} width="100%" height="600px" title="PDF Preview" />
-          </div>
+        {isLoading ? (
+          <Loading /> // Exibe o loading enquanto carrega o PDF
+        ) : (
+          pdfUrl && (
+            <div className="flex justify-center items-center flex-col h-full">
+              <iframe src={pdfUrl} width="100%" height="600px" title="PDF Preview" />
+            </div>
+          )
         )}
       </div>
     </div>
