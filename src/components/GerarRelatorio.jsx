@@ -23,15 +23,29 @@ function useModal() {
         expo: false,
         editar: false,
         salvarCon: false,
-        alert: false,
+        alert: { isOpen: false, modalType: 'ALERTA', message: '' }, // Estado do modal alert com tipo e mensagem
     });
 
-    const openModal = (modalName) => {
-        setModals((prev) => ({ ...prev, [modalName]: true }));
+    const openModal = (modalName, modalType = 'ALERTA', message = '') => {
+        if (modalName === 'alert') {
+            setModals((prev) => ({
+                ...prev,
+                alert: { isOpen: true, modalType, message },
+            }));
+        } else {
+            setModals((prev) => ({ ...prev, [modalName]: true }));
+        }
     };
 
     const closeModal = (modalName) => {
-        setModals((prev) => ({ ...prev, [modalName]: false }));
+        if (modalName === 'alert') {
+            setModals((prev) => ({
+                ...prev,
+                alert: { isOpen: false, modalType: 'ALERTA', message: '' },
+            }));
+        } else {
+            setModals((prev) => ({ ...prev, [modalName]: false }));
+        }
     };
 
     return { modals, openModal, closeModal };
@@ -60,7 +74,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const selectedColumnsValues = selectedColumns.map(column => column.value);
 
     const confirmModalAlert = () => {
-        openModal('alert');
+        closeModal('alert');
     };
     
     // Utilizando useMemo para otimizar cálculos
@@ -373,14 +387,14 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
         } catch (error) {
             setLoading(false);
-            openModal('alert');
+            openModal('alert', 'ALERTA', 'Erro ao enviar os dados. Por favor, tente novamente.');
             console.error('Erro ao enviar os dados:', error);
         }
     };
 
     const handleModalGenerate = () => {
         if (selectedColumns.length === 0) {
-            openModal('alert');
+            openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
             return;
         }
         sendAnalysisData();
@@ -501,7 +515,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={() => {
                                 if (selectedColumns.length === 0) {
-                                    openModal('alert');
+                                    openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
                                 } else {
                                     openModal('filtro');
                                 }
@@ -533,7 +547,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={() => {
                                 if (tableData.length === 0) {
-                                    openModal('alert');
+                                    openModal('alert', 'ALERTA', 'Gere o relatório para visualizar a prévia.');
                                 } else {
                                     const combinedData = {
                                         fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, 15),
@@ -556,7 +570,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={() => {
                                 if (tableData.length === 0) {
-                                    openModal('alert');
+                                    openModal('alert', 'ALERTA', 'Gere o relatório antes de exportar.');
                                 } else {
                                     const combinedData = {
                                         fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults),
@@ -671,7 +685,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
-            <ModalAlert isOpen={modals.alert} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
+            <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
     );
 }

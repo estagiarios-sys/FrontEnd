@@ -152,13 +152,7 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
                 </div>
             </div>
             {/* Modal de Alerta */}
-            <ModalAlert
-                isOpen={modal.isOpen}
-                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
-                onConfirm={handleConfirmar}
-                modalType={modal.type}
-                message={modal.message}
-            />
+            <ModalAlert isOpen={modal.isOpen} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} onConfirm={handleConfirmar} modalType={modal.type} message={modal.message}/>
         </div>
     );
 }
