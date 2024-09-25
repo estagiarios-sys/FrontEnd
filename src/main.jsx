@@ -156,7 +156,7 @@ function Main() {
         <GerarRelatorio
           selectedColumns={selectedCampos}
           selectTable={selectedTabela}
-          selectedRelacionada={selectedRelacionada}
+          selectedRelatedTables={selectedRelacionada}
           handleLoadFromLocalStorage={handleLoadFromLocalStorage}
         />
         <footer className="footer">

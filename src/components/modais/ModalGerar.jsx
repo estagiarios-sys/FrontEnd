@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaCaretDown } from "react-icons/fa";
+import ModalAlert from "./ModalAlert";
 
 function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [showDropdown, setShowDropdown] = useState(false);
@@ -9,6 +10,12 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [isClicked, setIsClicked] = useState(false);
     const [isCarregando, setIsCarregando] = useState(false); // Estado para controlar se o carregamento está ativo
     const [visivel, setVisivel] = useState(true);
+    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
+
+    const handleConfirmar = () => {
+        setModal({ isOpen: false, type: '', message: '' });
+        onClose();
+    };
 
     // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
@@ -93,7 +100,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
         setIsCarregando(false); // Reset o estado de carregamento
         setVisivel(true);
-        onClose();
+        setModal({ isOpen: true, type: 'SUCESSO', message: 'Relatório gerado com sucesso!' });
     };
 
     const handleClickOutside = (event) => {
@@ -257,6 +264,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                 )}
 
             </div>
+            <ModalAlert isOpen={modal.isOpen} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} onConfirm={handleConfirmar} modalType={modal.type} message={modal.message}/>
         </div>
     );
 }
