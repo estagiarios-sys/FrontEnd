@@ -48,17 +48,16 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const [totalizerResults, setTotalizerResults] = useState(null);
     const [columnWidths, setColumnWidths] = useState([]);
     const [estimatedTime, setEstimatedTime] = useState(null);
-    const [combinedDataExpo, setCombinedDataExpo] = useState(null);
-    const [combinedDataPreviewExpo, setCombinedDataPreviewExpo] = useState(null);
+    const [combinedData, setCombinedData] = useState(null);
     const [sql2, setSql2] = useState('');
     const [titlePdf, setTitlePdf] = useState('');
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
+    const [loading, setLoading] = useState(false);
     const tableRef = useRef(null);
     const itemsPerPage = 15;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
-    const [loading, setLoading] = useState(false);
 
     const confirmModalAlert = () => {
         openModal('alert');
@@ -181,7 +180,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             }));
 
             if (option === 'CSV') {
-                downloadCSV(columnsMap, dataFormat);
+                downloadCSV(columnsMap, dataFormat, setLoading);
             }
 
             if (option === 'PDF') {
@@ -190,7 +189,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     titlePDF: titlePdf,
                     imgPDF: base64Image,
                 };
-                downloadPDF(combinedData);
+                downloadPDF(combinedData, setLoading);
             }
 
             setTableData(dataFormat);
@@ -373,6 +372,8 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             openModal('gerar');
 
         } catch (error) {
+            setLoading(false);
+            openModal('alert');
             console.error('Erro ao enviar os dados:', error);
         }
     };
@@ -535,11 +536,11 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                                     openModal('alert');
                                 } else {
                                     const combinedData = {
-                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults),
+                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, 15),
                                         titlePDF: titlePdf,
                                         imgPDF: base64Image,
                                     };
-                                    setCombinedDataExpo(combinedData);
+                                    setCombinedData(combinedData);
                                     openModal('pdfView');
                                 }
                             }} className="flex flex-col justify-center items-center">
@@ -562,7 +563,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                                         titlePDF: titlePdf,
                                         imgPDF: base64Image,
                                     };
-                                    setCombinedDataExpo(combinedData);
+                                    setCombinedData(combinedData);
                                     openModal('expo');
                                 }
                             }} className="flex flex-col justify-center items-center">
@@ -665,8 +666,8 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
-            <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedDataPreviewExpo} />
-            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedDataExpo} />
+            <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
+            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />

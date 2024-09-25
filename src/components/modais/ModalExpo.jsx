@@ -3,14 +3,16 @@ import PropTypes from 'prop-types';
 import Papa from 'papaparse';
 import ModalAlert from './ModalAlert';
 import { FiFile, FiDownload } from 'react-icons/fi';
+import Loading from '../genericos/Loading';
 
-export async function downloadPDF(combinedData, handleModalAviso) {
+export async function downloadPDF(combinedData, setLoading, handleModalAviso) {
     if (!combinedData || Object.keys(combinedData).length === 0) {
         handleModalAviso('Por favor, selecione pelo menos uma tabela e certifique-se de que há dados para exportar.');
         return;
     }
 
     try {
+        setLoading(true);
         const response = await fetch('http://localhost:8080/pdf/generate', {
             method: 'POST',
             headers: {
@@ -25,20 +27,22 @@ export async function downloadPDF(combinedData, handleModalAviso) {
 
         const blob = await response.blob();
         const fileName = `relatorio_${new Date().toISOString()}.pdf`;
+        setLoading(false);
         downloadFile(blob, fileName);
     } catch (error) {
+        setLoading(false);
         handleModalAviso('Erro ao baixar o PDF. Por favor, tente novamente.');
         console.error('Erro ao baixar o PDF:', error);
     }
 };
 
-export function downloadCSV(columns, tableData, handleModalAviso) {
-
+export function downloadCSV(columns, tableData, setLoading,  handleModalAviso) { 
     if (!columns || columns.length === 0 || !tableData || tableData.length === 0) {
         handleModalAviso('Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.');
         return;
     }
 
+    setLoading(true);
     const columnsName = columns.map((col) => col.value);
     const csvContent = convertToCSV(columnsName, tableData);
 
@@ -49,6 +53,7 @@ export function downloadCSV(columns, tableData, handleModalAviso) {
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const fileName = `relatorio_${new Date().toISOString()}.csv`;
+    setLoading(false);
     downloadFile(blob, fileName);
 };
 
@@ -79,6 +84,8 @@ const convertToCSV = (columns, tableData) => {
 function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
     const [isModalAvisoOpen, setIsModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+
 
     const handleModalAviso = (message) => {
         setModalMessage(message);
@@ -127,16 +134,17 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
                 </div>
                 <div className="flex flex-row justify-center items-center mt-5 gap-16">
                     <DownloadButton
-                        onClick={() => downloadPDF(combinedData, handleModalAviso)}
+                        onClick={() => downloadPDF(combinedData, setLoading, handleModalAviso)}
                         icon={<FiFile size={24} />}
                         label="Baixar PDF"
                     />
                     <DownloadButton
-                        onClick={() => downloadCSV(selectedColumns, table, handleModalAviso)}
+                        onClick={() => downloadCSV(selectedColumns, table, setLoading, handleModalAviso)}
                         icon={<FiDownload size={24} />}
                         label="Baixar CSV"
                     />
                 </div>
+                {loading && <Loading />} {/* Add loading indicator */}
             </div>
 
             <ModalAlert
