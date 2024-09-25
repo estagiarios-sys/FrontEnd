@@ -9,13 +9,15 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [intervalId, setIntervalId] = useState(null);
     const dropdownRef = useRef(null);
     const [isClicked, setIsClicked] = useState(false);
+    const [isCarregando, setIsCarregando] = useState(false); // Estado para controlar se o carregamento está ativo
+    const [visivel, setVisivel] = useState(true);
 
     // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
+        setProgress(0); // Reseta o progresso ao abrir o modal
 
         if (isOpen) {
             if (hasScroll) {
@@ -78,10 +80,16 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     };
 
     const closeModal = () => {
-        resetHoverStates();
-        if (onClose) {
-            onClose();
-        }
+        setShowDropdown(false);
+        setProgress(0); // Reseta o progresso ao fechar o modal
+        setIsCarregando(false); // Garante que o carregamento não esteja ativo
+        onClose();
+    };
+
+    const handleCancel = () => {
+        setIsCarregando(false); // Desativa o estado de carregamento
+        setProgress(0); // Reseta o progresso para 0
+        setVisivel(true);
     };
 
     const mostrarOpcoes = () => {
@@ -90,6 +98,13 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     };
 
     const handleOptionClick = async (option) => {
+        if (isCarregando) return; // Não faz nada se já estiver carregando
+        setIsCarregando(true); // Define que o carregamento está ativo
+        setProgress(0); // Reseta o progresso ao iniciar o carregamento
+        setVisivel(false);
+        setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
+
+        // Realiza a operação com base na opção selecionada
         if (option === 'Gerar') {
             await onFetchData();
         } else if (option === 'Gerar e Baixar PDF') {
@@ -97,7 +112,30 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         } else if (option === 'Gerar e Baixar CSV') {
             await onFetchData('CSV');
         }
+
+        const totalTime = tempoEstimado * 1000; // Converte o tempo estimado em milissegundos
+        const intervalTime = 100; // Intervalo de tempo em milissegundos
+        const steps = totalTime / intervalTime; // Número total de passos
+        const progressIncrement = 100 / steps; // Quanto o progresso deve aumentar a cada intervalo
+
+        // Função para atualizar o progresso
+        const updateProgress = (currentProgress) => {
+            if (currentProgress >= 100) return; // Para se já atingiu 100%
+
+            setProgress((prev) => Math.min(prev + progressIncrement, 100)); // Aumenta o progresso
+            setTimeout(() => updateProgress(currentProgress + progressIncrement), intervalTime); // Chama novamente após o intervalo
+        };
+
+        // Inicia a atualização do progresso após a operação
+        updateProgress(0);
+
+        // Aguarda o tempo estimado antes de concluir o carregamento
+        await new Promise((resolve) => setTimeout(resolve, totalTime));
+
+        setProgress(100); // Define o progresso final como 100%
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
+        setIsCarregando(false); // Reset o estado de carregamento
+        setVisivel(true);
     };
 
     const handleClickOutside = (event) => {
@@ -120,28 +158,6 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         };
     }, [showDropdown]);
 
-    useEffect(() => {
-        if (tempoEstimado > 0) {
-            const interval = setInterval(() => {
-                setProgress((prevProgress) => {
-                    if (prevProgress >= 100) {
-                        clearInterval(interval);
-                        return 100;
-                    }
-                    return prevProgress + (100 / (tempoEstimado / 1000));
-                });
-            }, 1000);
-
-            setIntervalId(interval);
-        }
-
-        return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-            }
-        };
-    }, [tempoEstimado]);
-
     const formatTime = (seconds) => {
         const totalSeconds = Math.floor(seconds);
         const hours = Math.floor(totalSeconds / 3600);
@@ -156,153 +172,73 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     }
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 1000,
-            }}
-        >
-            <div
-                style={{
-                    backgroundColor: '#fff',
-                    padding: '0px',
-                    borderRadius: '5px',
-                    position: 'relative',
-                    width: '500px',
-                    height: '300px',
-                }}
-            >
-                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
-                    <h5 className="font-bold mx-2">por enquanto carregamento</h5>
-                    <button
-                        className="font-bold mx-2"
-                        style={{
-                            borderRadius: '50px',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontSize: '16px',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
-                        }}
-                        onMouseEnter={() => setIsHoveredButtonX(true)}
-                        onMouseLeave={() => setIsHoveredButtonX(false)}
-                        onClick={closeModal}
-                    >
-                        X
-                    </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white rounded-lg relative flex flex-col w-[500px] h-[240px]">
+                {/* Cabeçalho */}
+                <div className="w-full h-14 bg-[#0A7F8E] flex justify-between items-center text-white p-2">
+                    <h5 className="font-bold mx-2">Gerar Relatório</h5>
+                    {visivel && (
+                        <button
+                            className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
+                            onClick={onClose}
+                            aria-label="Fechar modal"
+                            title="Fechar"
+                        >
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    )}
                 </div>
-                <div style={contentContainerStyle}>
-                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4">
+                <div class="w-[500px] h-[250px] flex flex-col items-center mt-5 pb-16">
+                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <p className="font-medium mb-4">
                             O tempo estimado para gerar o relatório é de {formatTime(tempoEstimado)}. Deseja realmente gerar?
                         </p>
-                        <div style={{
-                            width: '100%',
-                            height: '10px',
-                            backgroundColor: '#e0e0e0',
-                            borderRadius: '5px',
-                            overflow: 'hidden',
-                            marginTop: '10px',
-                        }}>
-                            <div
-                                style={{
-                                    width: `${progress}%`,
-                                    height: '100%',
-                                    backgroundColor: '#0A7F8E',
-                                    transition: 'width 0.5s ease',
-                                }}
-                            />
+                        {/* Barra de progresso */}
+                        <div class="relative w-full h-[20px] bg-gray-300 rounded overflow-hidden mt-2.5">
+                            {/* Porcentagem sobre a barra */}
+                            <span class={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[12px] font-bold ${progress > 50 ? 'text-white' : 'text-black'} z-10`}>
+                                {`${Math.floor(progress)}%`}
+                            </span>
+                            {/* Barra de progresso */}
+                            <div className={`h-full bg-[#0A7F8E] transition-width duration-500 ease-in-out`} style={{ width: `${progress}%` }}>
+                            </div>
+                        </div>
+                        {isCarregando && (
+                            <div class="flex justify-center mt-2.5">
+                                <button
+                                    onClick={handleCancel}
+                                    className="font-bold text-white rounded-lg w-20 h-10 text-sm cursor-pointer bg-custom-vermelho hover:bg-custom-vermelho-escuro transition-colors duration-300"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {visivel && (
+                    <div class="rounded-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-[0_-2px_5px_rgba(0,0,0,0.1)] justify-between">
+                        <div className="ml-auto flex items-center">
+                            <button
+                                className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
+                                onClick={closeModal}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
+                                onClick={handleClick}
+                            >
+                                Opções
+                                <FaCaretDown
+                                    style={{
+                                        transition: 'transform 0.3s ease',
+                                        transform: isClicked ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    }}
+                                />
+                            </button>
                         </div>
                     </div>
-                </div>
-
-                <div style={buttonContainerStyle}>
-                    <div style={leftButtonContainerStyle}>
-                        <button
-                            style={{
-                                fontWeight: 'bold',
-                                border: 'none',
-                                borderRadius: '5px',
-                                color: '#fff',
-                                width: '80px',
-                                height: '40px',
-                                fontSize: '13px',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.3s ease',
-                                backgroundColor: isHoveredButtonExcluir ? '#B11236' : '#ED1846',
-                            }}
-                            onMouseEnter={() => setIsHoveredButtonExcluir(true)}
-                            onMouseLeave={() => setIsHoveredButtonExcluir(false)}
-                            onClick={closeModal}
-                        >
-                            Excluir
-                        </button>
-                    </div>
-                    <div style={rightButtonContainerStyle}>
-                        <button
-                            style={{
-                                fontWeight: 'bold',
-                                border: 'none',
-                                borderRadius: '5px',
-                                color: '#fff',
-                                width: '80px',
-                                height: '40px',
-                                fontSize: '13px',
-                                cursor: 'pointer',
-                                marginRight: '10px',
-                                transition: 'background-color 0.3s ease',
-                                backgroundColor: isHoveredButtonCancelar ? '#5a6268' : '#6c757d',
-                            }}
-                            onMouseEnter={() => setIsHoveredButtonCancelar(true)}
-                            onMouseLeave={() => setIsHoveredButtonCancelar(false)}
-                            onClick={closeModal}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            style={{
-                                fontWeight: 'bold',
-                                border: 'none',
-                                borderRadius: '5px',
-                                color: '#fff',
-                                width: '120px',
-                                height: '40px',
-                                fontSize: '13px',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.3s ease',
-                                backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center', // Centraliza o texto e o ícone
-                                gap: '8px', // Espaçamento entre o texto e o ícone
-                            }}
-                            onMouseEnter={() => setIsHoveredButtonCarregar(true)}
-                            onMouseLeave={() => setIsHoveredButtonCarregar(false)}
-                            onClick={handleClick}
-                        >
-                            Opções
-                            <FaCaretDown
-                                style={{
-                                    transition: 'transform 0.3s ease',
-                                    transform: isClicked ? 'rotate(180deg)' : 'rotate(0deg)',
-                                }}
-                            />
-                        </button>
-                    </div>
-                </div>
-
+                )}
                 {showDropdown && (
                     <div
                         ref={dropdownRef}
