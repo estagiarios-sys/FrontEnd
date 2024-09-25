@@ -210,59 +210,39 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                         style={{
                             position: 'absolute',
                             bottom: '60px',
-                            right: '20px',
-                            backgroundColor: '#fff',
-                            border: '1px solid #ccc',
-                            borderRadius: '5px',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            right: '10px',
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
                             zIndex: 1000,
+                            overflow: 'hidden',
                         }}
                     >
-                        <button
-                            style={{
-                                display: 'block',
-                                width: '100%',
-                                padding: '10px',
-                                backgroundColor: '#f8f9fa',
-                                border: 'none',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                            }}
-                            onClick={() => handleOptionClick('Gerar')}
-                        >
-                            Gerar
-                        </button>
-                        <button
-                            style={{
-                                display: 'block',
-                                width: '100%',
-                                padding: '10px',
-                                backgroundColor: '#f8f9fa',
-                                border: 'none',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                            }}
-                            onClick={() => handleOptionClick('Gerar e Baixar PDF')}
-                        >
-                            Gerar e Baixar PDF
-                        </button>
-                        <button
-                            style={{
-                                display: 'block',
-                                width: '100%',
-                                padding: '10px',
-                                backgroundColor: '#f8f9fa',
-                                border: 'none',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                            }}
-                            onClick={() => handleOptionClick('Gerar e Baixar CSV')}
-                        >
-                            Gerar e Baixar CSV
-                        </button>
+                        {['Gerar', 'Gerar e Baixar PDF', 'Gerar e Baixar CSV'].map((option) => (
+                            <button
+                                key={option}
+                                style={{
+                                    display: 'block',
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    backgroundColor: '#f8f9fa',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    fontSize: '14px',
+                                    color: '#333',
+                                    transition: 'background-color 0.2s ease',
+                                }}
+                                onClick={() => handleOptionClick(option)}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 105, 115, 0.15)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                            >
+                                {option}
+                            </button>
+                        ))}
                     </div>
                 )}
-
             </div>
             <ModalAlert isOpen={modal.isOpen} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} onConfirm={handleConfirmar} modalType={modal.type} message={modal.message}/>
         </div>
