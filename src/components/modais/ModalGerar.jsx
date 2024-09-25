@@ -2,10 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { FaCaretDown } from "react-icons/fa";
 
 function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
-    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
-    const [isHoveredButtonExcluir, setIsHoveredButtonExcluir] = useState(false);
-    const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
-    const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -40,45 +36,6 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         mostrarOpcoes();
     };
 
-    const contentContainerStyle = {
-        width: '500px',
-        height: '250px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        marginTop: '20px',
-        paddingBottom: '60px',
-    };
-
-    const buttonContainerStyle = {
-        display: 'flex',
-        padding: '10px',
-        position: 'absolute',
-        bottom: '0',
-        width: '100%',
-        backgroundColor: '#fff',
-        borderTop: '1px solid #ccc',
-        boxShadow: '0 -2px 5px rgba(0, 0, 0, 0.1)',
-        justifyContent: 'space-between',
-    };
-
-    const leftButtonContainerStyle = {
-        display: 'flex',
-        alignItems: 'center',
-    };
-
-    const rightButtonContainerStyle = {
-        display: 'flex',
-        alignItems: 'center',
-    };
-
-    const resetHoverStates = () => {
-        setIsHoveredButtonX(false);
-        setIsHoveredButtonExcluir(false);
-        setIsHoveredButtonCancelar(false);
-        setIsHoveredButtonCarregar(false);
-    };
-
     const closeModal = () => {
         setShowDropdown(false);
         setProgress(0); // Reseta o progresso ao fechar o modal
@@ -104,15 +61,6 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         setVisivel(false);
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
 
-        // Realiza a operação com base na opção selecionada
-        if (option === 'Gerar') {
-            await onFetchData();
-        } else if (option === 'Gerar e Baixar PDF') {
-            await onFetchData('PDF');
-        } else if (option === 'Gerar e Baixar CSV') {
-            await onFetchData('CSV');
-        }
-
         const totalTime = tempoEstimado * 1000; // Converte o tempo estimado em milissegundos
         const intervalTime = 100; // Intervalo de tempo em milissegundos
         const steps = totalTime / intervalTime; // Número total de passos
@@ -129,6 +77,15 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         // Inicia a atualização do progresso após a operação
         updateProgress(0);
 
+        // Realiza a operação com base na opção selecionada
+        if (option === 'Gerar') {
+            await onFetchData();
+        } else if (option === 'Gerar e Baixar PDF') {
+            await onFetchData('PDF');
+        } else if (option === 'Gerar e Baixar CSV') {
+            await onFetchData('CSV');
+        }
+
         // Aguarda o tempo estimado antes de concluir o carregamento
         await new Promise((resolve) => setTimeout(resolve, totalTime));
 
@@ -136,6 +93,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
         setIsCarregando(false); // Reset o estado de carregamento
         setVisivel(true);
+        onClose();
     };
 
     const handleClickOutside = (event) => {
@@ -173,7 +131,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg relative flex flex-col w-[500px] h-[240px]">
+            <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
                 {/* Cabeçalho */}
                 <div className="w-full h-14 bg-[#0A7F8E] flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">Gerar Relatório</h5>
@@ -188,7 +146,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                         </button>
                     )}
                 </div>
-                <div class="w-[500px] h-[250px] flex flex-col items-center mt-5 pb-16">
+                <div class="w-[500px] h-[250px] flex flex-col items-center mt-3">
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <p className="font-medium mb-4">
                             O tempo estimado para gerar o relatório é de {formatTime(tempoEstimado)}. Deseja realmente gerar?
@@ -216,7 +174,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                     </div>
                 </div>
                 {visivel && (
-                    <div class="rounded-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-[0_-2px_5px_rgba(0,0,0,0.1)] justify-between">
+                    <div class="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
                         <div className="ml-auto flex items-center">
                             <button
                                 className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
