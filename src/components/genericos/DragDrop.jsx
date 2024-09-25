@@ -4,12 +4,22 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import ModalModal from '../modais/ModalAlert';
 import PropTypes from 'prop-types';
 
-function DragDropFile({ isOpen, onClose, onFileUpload }) {
+function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState(null);
   const inputRef = useRef(null);
   const [modalMessage, setModalMessage] = useState('');
   const [modalAlertImagem, setModalAlertImagem] = useState(false);
+
+  useEffect(() => {
+    if (image) {
+        const previewUrl = URL.createObjectURL(image);
+        setPreview(previewUrl);
+        return () => URL.revokeObjectURL(previewUrl); // Limpar URL ao desmontar
+    }else {
+      setPreview(null);
+    }
+}, [image]);
 
 
   const handleModalAlertImagem = () => {

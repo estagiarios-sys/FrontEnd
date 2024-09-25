@@ -21,8 +21,6 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
             handleImgPdf('');
             setModal({ isOpen: false, type: '', message: '' });
         } else if (modal.type === 'CONFIRMAR') {
-            setTitle('');
-            setImage(null);
             setModal({ isOpen: false, type: '', message: '' });
             onClose();
         } else if (modal.type === 'SUCESSO') {
@@ -122,7 +120,9 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
                     <div>
                         <h5 className="font-medium mb-1">Logotipo:</h5>
                         <div className="p-2 flex justify-center items-center overflow-auto border border-dashed border-gray-300 rounded">
-                            <DragDropFile onFileUpload={handleImageUpload} />
+                            <DragDropFile onFileUpload={handleImageUpload} 
+                            image={image}
+                            />
                         </div>
                     </div>
                 </div>
