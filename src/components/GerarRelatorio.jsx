@@ -10,6 +10,7 @@ import ModalEditar from "./modais/ModalEditar";
 import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 import ModalGerar from "./modais/ModalGerar";
+import Loading from "./genericos/Loading";
 
 // Hook personalizado para gerenciamento de modais
 function useModal() {
@@ -57,6 +58,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const itemsPerPage = 15;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
+    const [loading, setLoading] = useState(false);
 
     const confirmModalAlert = () => {
         openModal('alert');
@@ -346,6 +348,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
     const sendAnalysisData = async () => {
         try {
+            setLoading(true);
             const jsonRequest = buildJsonRequest();
 
             const url = 'http://localhost:8080/find/analysis';
@@ -365,6 +368,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             const estimatedTimeBack = await response.json();
 
             setEstimatedTime(estimatedTimeBack);
+            setLoading(false);
 
             openModal('gerar');
 
@@ -449,6 +453,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
     return (
         <div className="flex flex-col w-full">
+            {loading && <Loading />}
             <div className="w-full flex flex-row justify-between mt-4">
                 <div className="flex flex-col justify-start items-start ml-36">
                     <h1 className="font-bold text-3xl">Ações</h1>
