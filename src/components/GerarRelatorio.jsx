@@ -50,16 +50,18 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const [combinedDataExpo, setCombinedDataExpo] = useState(null);
     const [combinedDataPreviewExpo, setCombinedDataPreviewExpo] = useState(null);
     const [sql2, setSql2] = useState('');
-    const [titlePdf, setTitlePdf] = useState("");
+    const [titlePdf, setTitlePdf] = useState('');
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
-    const [fullTableHTML, setFullTableHTML] = useState('');
-    const [fullTableHTMLPreview, setFullTableHTMLPreview] = useState('');
     const tableRef = useRef(null);
     const itemsPerPage = 15;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
 
+    const confirmModalAlert = () => {
+        openModal('alert');
+    };
+    
     // Utilizando useMemo para otimizar cálculos
     const hasData = useMemo(() => tableData.length > 0 && tableData[0].values, [tableData]);
     const totalPages = useMemo(() => hasData ? Math.ceil(tableData[0].values.length / itemsPerPage) : 0, [hasData, tableData, itemsPerPage]);
@@ -172,19 +174,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                 };
             });
 
-            const fullTableHTML = generateFullTableHTML(updatedColumns, dataFormat, resultTotalizer);
-            const fullTableHTMLPreview = generateFullTableHTML(updatedColumns, dataFormat, resultTotalizer, 15);
-            setFullTableHTML(fullTableHTML);
-            setFullTableHTMLPreview(fullTableHTMLPreview);
-
-            const combinedData = {
-                fullTableHTML: fullTableHTML,
-                titlePDF: titlePdf,
-                imgPDF: base64Image,
-            };
-
-            setCombinedDataExpo(combinedData);
-
             const columnsMap = updatedColumns.map((column) => ({
                 value: column,
             }));
@@ -194,6 +183,11 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             }
 
             if (option === 'PDF') {
+                const combinedData = {
+                    fullTableHTML: generateFullTableHTML(updatedColumns, dataFormat, resultTotalizer),
+                    titlePDF: titlePdf,
+                    imgPDF: base64Image,
+                };
                 downloadPDF(combinedData);
             }
 
@@ -499,7 +493,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => openModal('filtro')} className="relative flex flex-col justify-center items-center">
+                            <button onClick={() => {
+                                if (selectedColumns.length === 0) {
+                                    openModal('alert');
+                                } else {
+                                    openModal('filtro');
+                                }
+                            }} className="relative flex flex-col justify-center items-center">
                                 {conditionsString && (
                                     <span className="absolute -top-2 -right-1 bg-custom-vermelho text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
                                         {conditionsString.split('AND').length}
@@ -526,16 +526,16 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={() => {
-                                if (tableData.length > 0) {
+                                if (tableData.length === 0) {
+                                    openModal('alert');
+                                } else {
                                     const combinedData = {
-                                        fullTableHTML: fullTableHTMLPreview,
+                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults),
                                         titlePDF: titlePdf,
                                         imgPDF: base64Image,
                                     };
-                                    setCombinedDataPreviewExpo(combinedData);
+                                    setCombinedDataExpo(combinedData);
                                     openModal('pdfView');
-                                } else {
-                                    openModal('alert');
                                 }
                             }} className="flex flex-col justify-center items-center">
                                 {/* Ícone e label */}
@@ -548,7 +548,19 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => openModal('expo')} className="flex flex-col justify-center items-center">
+                            <button onClick={() => {
+                                if (tableData.length === 0) {
+                                    openModal('alert');
+                                } else {
+                                    const combinedData = {
+                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults),
+                                        titlePDF: titlePdf,
+                                        imgPDF: base64Image,
+                                    };
+                                    setCombinedDataExpo(combinedData);
+                                    openModal('expo');
+                                }
+                            }} className="flex flex-col justify-center items-center">
                                 {/* Ícone e label */}
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25a.75.75 0 00.75.75h16.5a.75.75 0 00.75-.75V16.5M7.5 12l4.5 4.5m0 0l4.5-4.5M12 3v13.5" />
@@ -653,7 +665,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
-            <ModalAlert isOpen={modals.alert} onClose={() => closeModal('alert')} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
+            <ModalAlert isOpen={modals.alert} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message="Nenhuma tabela foi selecionada para Gerar o Relatório" modalType="ALERTA" confirmText="Fechar" />
         </div>
     );
 }
