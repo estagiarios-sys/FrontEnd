@@ -66,7 +66,7 @@ function CamposSelecionados({
     type: campo.type,
   }));
 
-  exportedSelectedCampos = selectedCampos;
+  exportedSelectedCampos = selectedCamposSemApelido;
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [openSelect, setOpenSelect] = useState(null); // Para rastrear qual select está aberto
