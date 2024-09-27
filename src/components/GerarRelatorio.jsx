@@ -69,7 +69,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const [base64Image, setBase64Image] = useState('');
     const [loading, setLoading] = useState(false);
     const tableRef = useRef(null);
-    const itemsPerPage = 15;
+    const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
 
