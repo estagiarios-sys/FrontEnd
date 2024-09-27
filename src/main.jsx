@@ -4,6 +4,7 @@ import CamposSelecionados from './components/CamposSelecionados';
 import GerarRelatorio from './components/GerarRelatorio';
 import logoSystextil from './imagens/logo-systextil-branca.png';
 import { resetTotalizers, removeSelectedTotalizers } from './components/CamposSelecionados';
+import ModalNotificacao from './components/modais/ModalNotificacao';
 
 function Main() {
   const [selectedCampos, setSelectedCampos] = useState([]);
@@ -101,6 +102,7 @@ function Main() {
 
   return (
     <div className="main-container">
+      <ModalNotificacao />
       <div className='content flex flex-col justify-center'>
         <div className="flex justify-around items-start">
           <div>
