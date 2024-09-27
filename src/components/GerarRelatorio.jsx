@@ -199,7 +199,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             if (option === 'PDF') {
                 const combinedData = {
-                    fullTableHTML: generateFullTableHTML(updatedColumns, dataFormat, resultTotalizer),
+                    fullTableHTML: generateFullTableHTML(updatedColumns, dataFormat, resultTotalizer, columnWidths),
                     titlePDF: titlePdf,
                     imgPDF: base64Image,
                 };
@@ -289,53 +289,56 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         }
     };
 
-    const generateFullTableHTML = (columns, dataFormat, resultTotalizer, maxRows = null) => {
+    const generateFullTableHTML = (columns, dataFormat, resultTotalizer, updatedColumnWidths, maxRows = null) => {
         if (!dataFormat || dataFormat.length === 0) return '<p>Nenhum dado encontrado.</p>';
+    
+        let size = 0;
+        const filteredColumns = [];
+        const filteredWidths = [];
 
-        const tableHeaders = columns.map((column, index) =>
-            `<th class="p-2 border-b text-center" style="width: ${columnWidths[index] || 'auto'}">${column}</th>`
+        updatedColumnWidths.forEach((width, index) => {
+            if (size + width <= 1000) {
+                size += width;
+                filteredColumns.push(columns[index]); 
+                filteredWidths.push(width);
+            }
+        });
+    
+        const tableHeaders = filteredColumns.map((column, index) =>
+            `<th class="p-2 border-b text-center" style="width: ${filteredWidths[index] || 'auto'}">${column}</th>`
         ).join('');
-
+    
         const rowCount = maxRows ? Math.min(dataFormat[0].values.length, maxRows) : dataFormat[0].values.length;
-
+    
         const tableRows = dataFormat[0].values.slice(0, rowCount).map((_, rowIndex) => {
-            const rowHTML = columns.map((column, colIndex) =>
+            const rowHTML = filteredColumns.map((_, colIndex) =>
                 `<td class="p-2 border-b text-center">${dataFormat[colIndex]?.values[rowIndex]}</td>`
             ).join('');
             const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
             return `<tr class="${rowClass}">${rowHTML}</tr>`;
         }).join('');
-
-        const totalizerHTML = renderTotalizerHTML(columns, resultTotalizer);
-
+    
+        const totalizerHTML = renderTotalizerHTML(filteredColumns, resultTotalizer);
+    
         return `
-      <table class="w-full text-sm">
-        <thead class="bg-custom-azul-escuro text-black">
-          <tr>${tableHeaders}</tr>
-        </thead>
-        <tbody>${tableRows}</tbody>
-        ${totalizerHTML ? totalizerHTML : ''}
-      </table>
-    `;
+        <table>
+            <thead class="text-black">
+                <tr>${tableHeaders}</tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+            ${totalizerHTML ? totalizerHTML : ''}
+        </table>
+        `;
+    }; 
+
+    const updateColumnWidths = () => {
+        if (tableRef.current) {
+            const thElements = tableRef.current.querySelectorAll('th');
+            const newColumnWidths = Array.from(thElements).map(th => th.offsetWidth);
+            setColumnWidths(newColumnWidths);
+            return newColumnWidths;
+        }
     };
-
-    useEffect(() => {
-        const updateColumnWidths = () => {
-            if (tableRef.current) {
-                const thElements = tableRef.current.querySelectorAll('th');
-                const newColumnWidths = Array.from(thElements).map(th => th.offsetWidth);
-                setColumnWidths(newColumnWidths);
-            }
-        };
-
-        window.addEventListener('resize', updateColumnWidths);
-
-        updateColumnWidths();
-
-        return () => {
-            window.removeEventListener('resize', updateColumnWidths);
-        };
-    }, [columns]);
 
     const handleTitlePdf = (title) => {
         setTitlePdf(title);
@@ -356,6 +359,8 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
         if (imgPdf) {
             convertToBase64(imgPdf);
+        } else {
+            setBase64Image('');
         }
     }, [imgPdf]);
 
@@ -406,7 +411,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         const totalizerKeys = Object.keys(resultTotalizer);
 
         return `
-            <tfoot class="border-t border-black">
+            <ftotalizer class="border-t border-black">
                 <tr class="bg-custom-azul-claro text-center">
                     <td class="p-2 border-t-2 border-black" colspan="${columns.length}">
                         <table class="w-full">
@@ -430,7 +435,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                         `;
                     }).join('')}
                 </tr>
-            </tfoot>
+            </ftotalizer>
         `;
     };
 
@@ -467,7 +472,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     };
 
     return (
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full justify-center items-center">
             {loading && <Loading />}
             <div className="w-full flex flex-row justify-between mt-4">
                 <div className="flex flex-col justify-start items-start ml-36">
@@ -545,12 +550,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => {
+                            <button onClick={ () => {
                                 if (tableData.length === 0) {
                                     openModal('alert', 'ALERTA', 'Gere o relatório para visualizar a prévia.');
                                 } else {
+                                    const updatedColumnWidths = updateColumnWidths();
                                     const combinedData = {
-                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, 15),
+                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, updatedColumnWidths, 15),
                                         titlePDF: titlePdf,
                                         imgPDF: base64Image,
                                     };
@@ -572,8 +578,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                                 if (tableData.length === 0) {
                                     openModal('alert', 'ALERTA', 'Gere o relatório antes de exportar.');
                                 } else {
+                                    const updatedColumnWidths = updateColumnWidths();
                                     const combinedData = {
-                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults),
+                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, updatedColumnWidths),
                                         titlePDF: titlePdf,
                                         imgPDF: base64Image,
                                     };
@@ -591,9 +598,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     </div>
                 </div>
             </div>
-            <div className="w-full text-center">
+            <div className="text-center w-[1200px]">
                 <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
-                    <table ref={tableRef} className="w-full text-sm">
+                    <table ref={tableRef} className="w-full text-tiny">
                         {hasData && (
                             <thead className="bg-custom-azul-escuro text-white">
                                 <tr>
@@ -602,7 +609,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                                             key={index}
                                             className="p-2 border-b text-center"
                                             style={{
-                                                resize: index === columns.length - 1 ? 'none' : 'horizontal',
+                                                resize: 'horizontal',
                                                 overflow: 'auto',
                                                 width: columnWidths[index] || 'auto'
                                             }}
