@@ -296,13 +296,18 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         const filteredColumns = [];
         const filteredWidths = [];
 
-        updatedColumnWidths.forEach((width, index) => {
-            if (size + width <= 1000) {
-                size += width;
-                filteredColumns.push(columns[index]); 
-                filteredWidths.push(width);
-            }
-        });
+        if (!updatedColumnWidths || updatedColumnWidths.length === 0) {
+            filteredColumns.push(...columns);
+            filteredWidths.push(...Array(columns.length).fill('auto'));
+        } else {
+            updatedColumnWidths.forEach((width, index) => {
+                if (size + width <= 1000) {
+                    size += width;
+                    filteredColumns.push(columns[index]); 
+                    filteredWidths.push(width);
+                }
+            });
+        }
     
         const tableHeaders = filteredColumns.map((column, index) =>
             `<th class="p-2 border-b text-center" style="width: ${filteredWidths[index] || 'auto'}">${column}</th>`

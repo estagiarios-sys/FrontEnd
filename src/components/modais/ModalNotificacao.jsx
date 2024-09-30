@@ -80,55 +80,60 @@ const ModalNotificacao = () => {
                 overlayClassName="fixed inset-0 bg-black bg-opacity-20 shadow-sm flex justify-center items-center z-50"
             >
                 <div className="flex justify-between items-center border-b p-3 pb-2 mb-4">
-                    <h2 className="font-bold mx-2">Notificações</h2>
+                    <h2 className="font-semibold mx-2">Notificações</h2>
                     <button
                         className="text-gray-500 hover:text-custom-azul transition duration-300 rounded-full w-8 h-8 flex justify-center items-center"
                         onClick={closeModal}
                         aria-label="Fechar modal"
                         title="Fechar"
                     >
-                        <span aria-hidden="true">×</span>
+                        <span aria-hidden="true" className="text-xl">×</span>
                     </button>
                 </div>
-                <div className="w-[450px] h-[350px] flex flex-col relative">
-                    <div className="text-gray-600 mb-5 mx-5 flex flex-col overflow-y-auto h-full">
+                <div className="w-[500px] h-[350px] flex flex-col relative">
+                    <div className="text-gray-600 mb-5 mx-5 flex flex-col h-full relative">
                         {loading ? (
                             <p>Carregando notificações...</p>
                         ) : (
-                            <table className="min-w-full border-collapse border border-gray-200 text-tiny">
-                                <thead className="bg-custom-azul text-white sticky top-0 z-10">
-                                    <tr>
-                                        <th className="border border-gray-200 p-1 hidden">ID</th>
-                                        <th className="border border-gray-200 p-1">Título</th>
-                                        <th className="border border-gray-200 p-1">Data Início</th>
-                                        <th className="border border-gray-200 p-1">Data Final</th>
-                                        <th className="border border-gray-200 p-1">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {notificacoes.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="5" className="text-center border border-gray-200 p-1">Nenhuma notificação por enquanto.</td>
-                                        </tr>
-                                    ) : (
-                                        notificacoes.map((notificacao, index) => (
-                                            <tr key={notificacao.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                                                <td className="border border-gray-200 p-2 hidden">{notificacao.id}</td>
-                                                <td className="border border-gray-200 p-2">{notificacao.pdfTitle || 'Sem Título'}</td>
-                                                <td className="border border-gray-200 p-2">{new Date(notificacao.requestTime).toLocaleString()}</td>
-                                                <td className="border border-gray-200 p-2">{new Date(notificacao.generatedPdfTime).toLocaleString()}</td>
-                                                <td className="border border-gray-200 p-2 flex flex-col items-center space-y-1">
-                                                    <button className="text-custom-azul hover:text-custom-azul-escuro transition duration-300">Visualizar</button>
-                                                    <button className="text-custom-azul hover:text-custom-azul-escuro transition duration-300"
-                                                        onClick={() => fetchPdfById(notificacao.id)}
-                                                    >PDF</button>
-                                                    <button className="text-custom-azul hover:text-custom-azul-escuro transition duration-300">CSV</button>
-                                                </td>
+                            <div className="relative h-[95%]">
+                                {/* Container da tabela com overflow */}
+                                <div className="overflow-y-auto h-full">
+                                    <table className="min-w-full text-tiny rounded-lg overflow-hidden">
+                                        <thead className="bg-custom-azul-escuro text-white">
+                                            <tr>
+                                                <th className="p-1 hidden">ID</th>
+                                                <th className="p-1">Título</th>
+                                                <th className="p-1">Data Início</th>
+                                                <th className="p-1">Data Final</th>
+                                                <th className="p-1">Ações</th>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                        </thead>
+                                        <tbody>
+                                            {notificacoes.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="5" className="text-center border border-custom-azul-escuro p-1">Nenhuma notificação por enquanto.</td>
+                                                </tr>
+                                            ) : (
+                                                notificacoes.map((notificacao, index) => (
+                                                    <tr key={notificacao.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                                                        <td className="border border-gray-300 p-2 hidden">{notificacao.id}</td>
+                                                        <td className="border border-gray-300 p-2">{notificacao.pdfTitle || 'Sem Título'}</td>
+                                                        <td className="border border-gray-300 p-2">{new Date(notificacao.requestTime).toLocaleString()}</td>
+                                                        <td className="border border-gray-300 p-2">{new Date(notificacao.generatedPdfTime).toLocaleString()}</td>
+                                                        <td className="border border-gray-300 p-2">
+                                                            <button className="text-custom-azul hover:text-custom-azul-escuro transition duration-300 p-3"
+                                                                onClick={() => fetchPdfById(notificacao.id)}
+                                                            >PDF</button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {/* Sombra na parte inferior */}
+                                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none"></div>
+                            </div>
                         )}
                     </div>
                 </div>
