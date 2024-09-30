@@ -24,11 +24,7 @@ export async function downloadPDF(combinedData, setLoading, handleModalAviso) {
         if (!response.ok) {
             throw new Error('Erro ao gerar o PDF.');
         }
-
-        const blob = await response.blob();
-        const fileName = `relatorio_${new Date().toISOString()}.pdf`;
         setLoading(false);
-        downloadFile(blob, fileName);
     } catch (error) {
         setLoading(false);
         handleModalAviso('Erro ao baixar o PDF. Por favor, tente novamente.');
