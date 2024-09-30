@@ -51,7 +51,7 @@ function useModal() {
     return { modals, openModal, closeModal };
 }
 
-function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, handleLoadFromLocalStorage }) {
+function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, handleLoadFromLocalStorage, setPdfOK }) {
     const { modals, openModal, closeModal } = useModal(); // Usando o hook personalizado para modais
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
@@ -72,6 +72,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
+
+    const handleModalAviso = (message) => {
+        openModal('alert', 'ALERTA', message);
+    };
 
     const confirmModalAlert = () => {
         closeModal('alert');
@@ -172,16 +176,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             const [sql, sql2, updatedColumns, data, resultTotalizer] = responseData;
 
-            setSql2(sql2);
-
-            const sqlFinal = "Primeira Consulta: " + sql + " Consulta do totalizador: " + sql2;
-
-            localStorage.setItem('SQLGeradoFinal', sqlFinal);
-
-            setTotalizerResults(resultTotalizer);
-            setSqlQuery(sql);
-            setColumns(updatedColumns);
-
             const dataFormat = updatedColumns.map((column, index) => {
                 return {
                     column,
@@ -194,7 +188,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             }));
 
             if (option === 'CSV') {
-                downloadCSV(columnsMap, dataFormat, setLoading);
+                downloadCSV(columnsMap, dataFormat, handleModalAviso);
+                setPdfOK(true);
+                return;
             }
 
             if (option === 'PDF') {
@@ -203,8 +199,31 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     titlePDF: titlePdf,
                     imgPDF: base64Image,
                 };
-                downloadPDF(combinedData, setLoading);
+                openModal('alert', 'ALERTA', 'O PDF está sendo gerado, quando finalizar você será notificado.');
+                await downloadPDF(combinedData, handleModalAviso);
+                //preciso que na mensagem do modal com PDF gerado com sucesso tenha o titulo do PDF
+                if (titlePdf) {
+                    const mensagem = 'PDF "' + titlePdf + '" gerado com sucesso.';
+                    openModal('alert', 'ALERTA', mensagem);
+                } else {
+                    openModal('alert', 'ALERTA', 'PDF "Sem Título" gerado com sucesso.');
+                }
+                setPdfOK(true);
+                return;
             }
+
+            let sqlFinal = "Primeira Consulta: " + sql;
+
+            if (sql2) {
+                sqlFinal = "Primeira Consulta: " + sql + " Consulta do totalizador: " + sql2;
+            }
+
+            localStorage.setItem('SQLGeradoFinal', sqlFinal);
+
+            setTotalizerResults(resultTotalizer);
+            setSqlQuery(sql);
+            setSql2(sql2);
+            setColumns(updatedColumns);
 
             setTableData(dataFormat);
             setCurrentPage(1);
@@ -483,13 +502,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     <h1 className="font-bold text-3xl">Ações</h1>
                     <div className="flex mt-3">
                         <button
-                            className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
+                            className="p-2 px-5 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-lg mr-2"
                             onClick={handleModalGenerate}
                         >
                             Gerar Relatório
                         </button>
                         <button
-                            className="p-2 px-5 border-2 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-sm mr-2"
+                            className="p-2 px-5 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-lg mr-2"
                             onClick={() => openModal('salvarCon')}
                         >
                             Salvar Consulta

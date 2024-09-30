@@ -13,6 +13,7 @@ function Main() {
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
   const [checkedCampos, setCheckedCampos] = useState([]);
   const [handleLoadFromLocalStorage, setHandleLoadFromLocalStorage] = useState(null);
+  const [pdfOK, setPdfOK] = useState(false);
 
   const passHandleLoadFromLocalStorage = (fn) => {
     setHandleLoadFromLocalStorage(() => fn); // Armazena a função no estado
@@ -30,24 +31,24 @@ function Main() {
 
   // Remove campos selecionados com checkbox marcado e adiciona de volta aos disponíveis
   const handleIndividualLeftClick = () => {
-    const camposParaRemover = selectedCampos.filter(campo => 
+    const camposParaRemover = selectedCampos.filter(campo =>
       typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, ''))
     );
-    const camposRestantes = selectedCampos.filter(campo => 
+    const camposRestantes = selectedCampos.filter(campo =>
       !(typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, '')))
     );
     const orderByString = localStorage.getItem('orderByString') || '';
-  
+
     removeSelectedTotalizers(camposParaRemover.map(campo => campo.value));
-  
+
     if (camposParaRemover.some(campo => orderByString.includes(campo.value))) {
       localStorage.setItem('orderByString', '');
     }
-  
+
     setAvailableCampos([...availableCampos, ...camposParaRemover]);
     setSelectedCampos(camposRestantes);
     setCheckedCampos([]);
-  };  
+  };
 
   // Move todos os campos disponíveis para a lista de campos selecionados e limpa a lista de disponíveis
   const handleAllRightClick = () => {
@@ -55,13 +56,13 @@ function Main() {
       const newCampos = availableCampos.filter(campo => {
         return !prevSelectedCampos.some(selected => selected.value === campo.value);
       });
-  
+
       // Retorna a nova lista de campos selecionados
       return [...prevSelectedCampos, ...newCampos];
     });
-  
+
     setAvailableCampos([]);
-  
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('clearSelectedCampos'));
     }
@@ -102,12 +103,19 @@ function Main() {
 
   return (
     <div className="main-container">
-      <ModalNotificacao />
+      {pdfOK && (
+        <span className="absolute -top-2 -right-1 bg-custom-vermelho text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
+          !
+        </span>
+      )}
+      <ModalNotificacao
+        setPdfOK={setPdfOK}
+      />
       <div className='content flex flex-col justify-center'>
         <div className="flex justify-around items-start">
           <div>
             <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} passHandleLoadFromLocalStorage={passHandleLoadFromLocalStorage}/>
+            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} passHandleLoadFromLocalStorage={passHandleLoadFromLocalStorage} />
           </div>
           <div>
             <div className='mt-36'>
@@ -160,6 +168,7 @@ function Main() {
           selectTable={selectedTabela}
           selectedRelatedTables={selectedRelacionada}
           handleLoadFromLocalStorage={handleLoadFromLocalStorage}
+          setPdfOK={setPdfOK}
         />
         <footer className="footer">
           <span className="copyright-text">©  Copyright 2024 - Systextil - Todos os direitos reservados</span>

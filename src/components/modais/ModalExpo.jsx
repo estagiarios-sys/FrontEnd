@@ -5,14 +5,13 @@ import ModalAlert from './ModalAlert';
 import { FiFile, FiDownload } from 'react-icons/fi';
 import Loading from '../genericos/Loading';
 
-export async function downloadPDF(combinedData, setLoading, handleModalAviso) {
+export async function downloadPDF(combinedData, handleModalAviso) {
     if (!combinedData || Object.keys(combinedData).length === 0) {
         handleModalAviso('Por favor, selecione pelo menos uma tabela e certifique-se de que há dados para exportar.');
         return;
     }
 
     try {
-        setLoading(true);
         const response = await fetch('http://localhost:8080/pdf/generate', {
             method: 'POST',
             headers: {
@@ -24,21 +23,18 @@ export async function downloadPDF(combinedData, setLoading, handleModalAviso) {
         if (!response.ok) {
             throw new Error('Erro ao gerar o PDF.');
         }
-        setLoading(false);
     } catch (error) {
-        setLoading(false);
-        handleModalAviso('Erro ao baixar o PDF. Por favor, tente novamente.');
+        handleModalAviso('Erro ao gerar o PDF. Por favor, tente novamente.');
         console.error('Erro ao baixar o PDF:', error);
     }
 };
 
-export function downloadCSV(columns, tableData, setLoading,  handleModalAviso) { 
+export function downloadCSV(columns, tableData,  handleModalAviso) { 
     if (!columns || columns.length === 0 || !tableData || tableData.length === 0) {
         handleModalAviso('Por favor, selecione pelo menos uma coluna e certifique-se de que há dados para exportar.');
         return;
     }
 
-    setLoading(true);
     const columnsName = columns.map((col) => col.value);
     const csvContent = convertToCSV(columnsName, tableData);
 
@@ -49,7 +45,6 @@ export function downloadCSV(columns, tableData, setLoading,  handleModalAviso) {
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const fileName = `relatorio_${new Date().toISOString()}.csv`;
-    setLoading(false);
     downloadFile(blob, fileName);
 };
 
@@ -90,6 +85,7 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
 
     const closeModalAviso = () => {
         setIsModalAvisoOpen(false);
+        onClose();
     };
 
     // Impedir scroll da página quando o modal está aberto
@@ -130,12 +126,12 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
                 </div>
                 <div className="flex flex-row justify-center items-center mt-5 gap-16">
                     <DownloadButton
-                        onClick={() => downloadPDF(combinedData, setLoading, handleModalAviso)}
+                        onClick={() => downloadPDF(combinedData, handleModalAviso)}
                         icon={<FiFile size={24} />}
                         label="Baixar PDF"
                     />
                     <DownloadButton
-                        onClick={() => downloadCSV(selectedColumns, table, setLoading, handleModalAviso)}
+                        onClick={() => downloadCSV(selectedColumns, table, handleModalAviso)}
                         icon={<FiDownload size={24} />}
                         label="Baixar CSV"
                     />
@@ -146,6 +142,7 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
             <ModalAlert
                 isOpen={isModalAvisoOpen}
                 onClose={closeModalAviso}
+                onConfirm={closeModalAviso}
                 message={modalMessage}
                 modalType="ALERTA"
                 confirmText="Fechar"
