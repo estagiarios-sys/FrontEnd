@@ -189,6 +189,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             if (option === 'CSV') {
                 downloadCSV(columnsMap, dataFormat, handleModalAviso);
+                openModal('alert', 'SUCESSO', 'CSV gerado com sucesso.');
                 setPdfOK(true);
                 return;
             }
@@ -199,16 +200,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     titlePDF: titlePdf,
                     imgPDF: base64Image,
                 };
-                openModal('alert', 'ALERTA', 'O PDF está sendo gerado, quando finalizar você será notificado.');
-                await downloadPDF(combinedData, handleModalAviso);
-                //preciso que na mensagem do modal com PDF gerado com sucesso tenha o titulo do PDF
-                if (titlePdf) {
-                    const mensagem = 'PDF "' + titlePdf + '" gerado com sucesso.';
-                    openModal('alert', 'ALERTA', mensagem);
-                } else {
-                    openModal('alert', 'ALERTA', 'PDF "Sem Título" gerado com sucesso.');
-                }
-                setPdfOK(true);
+                await downloadPDF(combinedData, handleModalAviso, setPdfOK);
                 return;
             }
 
@@ -505,7 +497,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                             className="p-2 px-5 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-lg mr-2"
                             onClick={handleModalGenerate}
                         >
-                            Gerar Relatório
+                            Consultar
                         </button>
                         <button
                             className="p-2 px-5 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-lg mr-2"
@@ -711,7 +703,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
-            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} />
+            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK}/>
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />

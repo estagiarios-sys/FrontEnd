@@ -104,7 +104,7 @@ function Main() {
   return (
     <div className="main-container">
       {pdfOK && (
-        <span className="absolute -top-2 -right-1 bg-custom-vermelho text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
+        <span className="fixed top-2 right-2 bg-custom-vermelho text-white rounded-full text-[8px] w-3 h-3 flex justify-center items-center z-10">
           !
         </span>
       )}

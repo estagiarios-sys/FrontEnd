@@ -63,6 +63,19 @@ const ModalNotificacao = ({ setPdfOK }) => {
         setPdfUrl(null); // Limpa o URL do PDF ao fechar
     };
 
+    const mapStatus = (status) => {
+        switch (status) {
+            case 'ERRO':
+                return { display: 'ERRO', color: 'bg-red-500', textColor: 'text-red-500' };
+            case 'EM_ANDAMENTO':
+                return { display: 'EM ANDAMENTO', color: 'bg-orange-500', textColor: 'text-orange-500' };
+            case 'CONCLUIDO':
+                return { display: 'CONCLUÍDO', color: 'bg-green-500', textColor: 'text-green-500' };
+            default:
+                return { display: 'DESCONHECIDO', color: 'bg-gray-400', textColor: 'text-gray-400' }; // padrão
+        }
+    };
+
     return (
         <div className="fixed top-3 right-3">
             <button
@@ -90,7 +103,7 @@ const ModalNotificacao = ({ setPdfOK }) => {
                         <span aria-hidden="true" className="text-xl">×</span>
                     </button>
                 </div>
-                <div className="w-[600px] h-[350px] flex flex-col relative">
+                <div className="w-[610px] h-[350px] flex flex-col relative">
                     <div className="text-gray-600 mb-5 mx-5 flex flex-col h-full relative">
                         {loading ? (
                             <p>Carregando notificações...</p>
@@ -98,14 +111,14 @@ const ModalNotificacao = ({ setPdfOK }) => {
                             <div className="relative h-[95%]">
                                 {/* Container da tabela com overflow */}
                                 <div className="overflow-y-auto h-full">
-                                    <table className="min-w-full text-tiny rounded-lg overflow-hidden rounded-tr-none">
+                                <table className="min-w-full text-tiny rounded-lg overflow-hidden rounded-tr-none">
                                         <thead className="bg-custom-azul-escuro text-white border border-custom-azul-escuro">
                                             <tr>
                                                 <th className="p-1 hidden">ID</th>
                                                 <th className="p-1">Título</th>
                                                 <th className="p-1">Data Início</th>
                                                 <th className="p-1">Data Final</th>
-                                                <th className="p-1">Status</th> {/* Nova coluna Status */}
+                                                <th className="p-1">Status</th>
                                                 <th className="p-1">Ações</th>
                                             </tr>
                                         </thead>
@@ -115,42 +128,39 @@ const ModalNotificacao = ({ setPdfOK }) => {
                                                     <td colSpan="6" className="text-center border border-custom-azul-escuro p-1">Nenhuma notificação por enquanto.</td>
                                                 </tr>
                                             ) : (
-                                                notificacoes.map((notificacao, index) => (
-                                                    <tr key={notificacao.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                                                        <td className="border border-gray-300 p-2 hidden">{notificacao.id}</td>
-                                                        <td className="border border-gray-300 p-2">{notificacao.pdfTitle || 'Sem Título'}</td>
-                                                        <td className="border border-gray-300 p-2">{new Date(notificacao.requestTime).toLocaleString()}</td>
-                                                        <td className="border border-gray-300 p-2">{new Date(notificacao.generatedPdfTime).toLocaleString()}</td>
-                                                        <td className="border border-gray-300 p-2">
-                                                            <div className="flex flex-col items-center">
-                                                                {/* Indicador de Status */}
-                                                                <div
-                                                                    className={`w-3 h-3 rounded-full ${notificacao.status === 'CANCELADO' ? 'bg-red-500' :
-                                                                            notificacao.status === 'EM PROCESSO' ? 'bg-orange-500' :
-                                                                                notificacao.status === 'FINALIZADO' ? 'bg-green-500' :
-                                                                                    'bg-gray-400' // padrão se o status não for reconhecido
-                                                                        }`}
-                                                                />
-                                                                <span className={`text-xs ${notificacao.status === 'CANCELADO' ? 'text-red-500' :
-                                                                        notificacao.status === 'EM PROCESSO' ? 'text-orange-500' :
-                                                                            notificacao.status === 'FINALIZADO' ? 'text-green-500' :
-                                                                                'text-gray-400' // padrão
-                                                                    }`}>
-                                                                    {notificacao.status}
-                                                                </span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="border border-gray-300 p-2">
-                                                            <button className="text-custom-azul hover:text-custom-azul-escuro transition duration-300 p-3"
-                                                                onClick={() => fetchPdfById(notificacao.id)}
-                                                            >PDF</button>
-                                                        </td>
-                                                    </tr>
-                                                ))
+                                                notificacoes.map((notificacao, index) => {
+                                                    const { display, color, textColor } = mapStatus(notificacao.status); // Mapeia o status
+                                                    const isDisabled = notificacao.status === 'ERRO' || notificacao.status === 'EM_ANDAMENTO'; // Verifica se deve desabilitar o botão
+                                                    return (
+                                                        <tr key={notificacao.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                                                            <td className="border border-gray-300 p-2 hidden">{notificacao.id}</td>
+                                                            <td className="border border-gray-300 p-2">{notificacao.pdfTitle || 'Sem Título'}</td>
+                                                            <td className="border border-gray-300 p-2 whitespace-nowrap">{new Date(notificacao.requestTime).toLocaleString()}</td>
+                                                            <td className="border border-gray-300 p-2 whitespace-nowrap">{new Date(notificacao.generatedPdfTime).toLocaleString()}</td>
+                                                            <td className="border border-gray-300 p-2 whitespace-nowrap">
+                                                                <div className="flex flex-col items-center">
+                                                                    {/* Indicador de Status */}
+                                                                    <div className={`w-3 h-3 rounded-full ${color}`} />
+                                                                    <span className={`text-xs ${textColor} whitespace-nowrap`}>
+                                                                        {display}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="border border-gray-300 p-2">
+                                                                <button
+                                                                    className={`text-custom-azul hover:text-custom-azul-escuro transition duration-300 p-3 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                                    onClick={() => !isDisabled && fetchPdfById(notificacao.id)}
+                                                                    disabled={isDisabled} // Desabilita o botão se necessário
+                                                                >
+                                                                    PDF
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })
                                             )}
                                         </tbody>
                                     </table>
-
                                 </div>
                                 {/* Sombra na parte inferior */}
                                 <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none" style={{ marginRight: '6px' }}></div>
