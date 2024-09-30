@@ -52,21 +52,20 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     };
 
     const handleOptionClick = async (option) => {
-        setLoading(true); // Ativa o estado de carregamento
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
 
         // Realiza a operação com base na opção selecionada
-        if (option === 'Gerar') {
+        if (option === 'Buscar dados') {
+            setLoading(true); // Ativa o estado de carregamento
             await onFetchData();
-        } else if (option === 'Gerar e Baixar PDF') {
+            setLoading(false); // Desativa o estado de carregamento
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'Relatório gerado com sucesso!' });
+        } else if (option === 'Baixar PDF') {
+            setModal({ isOpen: true, type: 'ALERTA', message: 'O PDF está sendo gerado, quando finalizar você será notificado.' });
             await onFetchData('PDF');
-        } else if (option === 'Gerar e Baixar CSV') {
+        } else if (option === 'Baixar CSV') {
             await onFetchData('CSV');
         }
-
-        setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
-        setLoading(false); // Desativa o estado de carregamento
-        setModal({ isOpen: true, type: 'SUCESSO', message: 'Relatório gerado com sucesso!' });
     };
 
     const handleClickOutside = (event) => {
@@ -108,7 +107,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                 {loading && <Loading />}
                 {/* Cabeçalho */}
                 <div className="w-full h-14 bg-[#0A7F8E] flex justify-between items-center text-white p-2">
-                    <h5 className="font-bold mx-2">Gerar Relatório</h5>
+                    <h5 className="font-bold mx-2">CONSULTAR DADOS</h5>
                         <button
                             className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
                             onClick={onClose}
@@ -121,7 +120,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                 <div class="w-[500px] h-[250px] flex flex-col items-center mt-3">
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <p className="font-medium mb-4">
-                            O tempo estimado para gerar o relatório é de {formatTime(tempoEstimado)}. Deseja realmente gerar?
+                            O tempo estimado para a consulta é de {formatTime(tempoEstimado)}, Escolha uma das opções.
                         </p>
                     </div>
                 </div>
@@ -131,7 +130,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                                 className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
                                 onClick={closeModal}
                             >
-                                CancelarF
+                                Cancelar
                             </button>
                             <button
                                 className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
@@ -162,7 +161,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                             overflow: 'hidden',
                         }}
                     >
-                        {['Gerar', 'Gerar e Baixar PDF', 'Gerar e Baixar CSV'].map((option) => (
+                        {['Buscar dados', 'Baixar PDF', 'Baixar CSV'].map((option) => (
                             <button
                                 key={option}
                                 style={{

@@ -3,9 +3,8 @@ import PropTypes from 'prop-types';
 import Papa from 'papaparse';
 import ModalAlert from './ModalAlert';
 import { FiFile, FiDownload } from 'react-icons/fi';
-import Loading from '../genericos/Loading';
 
-export async function downloadPDF(combinedData, handleModalAviso) {
+export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     if (!combinedData || Object.keys(combinedData).length === 0) {
         handleModalAviso('Por favor, selecione pelo menos uma tabela e certifique-se de que há dados para exportar.');
         return;
@@ -23,10 +22,14 @@ export async function downloadPDF(combinedData, handleModalAviso) {
         if (!response.ok) {
             throw new Error('Erro ao gerar o PDF.');
         }
+
     } catch (error) {
         handleModalAviso('Erro ao gerar o PDF. Por favor, tente novamente.');
         console.error('Erro ao baixar o PDF:', error);
+    } finally {
+        setPdfOK(true);
     }
+
 };
 
 export function downloadCSV(columns, tableData,  handleModalAviso) { 
@@ -72,11 +75,14 @@ const convertToCSV = (columns, tableData) => {
     return Papa.unparse(data);
 };
 
-function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
+function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData, setPdfOK }) {
     const [isModalAvisoOpen, setIsModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
-    const [loading, setLoading] = useState(false);
 
+    const handleDownloadPDF = async () => {
+        handleModalAviso('O PDF está sendo gerado, quando finalizar você será notificado.');
+        await downloadPDF(combinedData, handleModalAviso, setPdfOK);
+    };
 
     const handleModalAviso = (message) => {
         setModalMessage(message);
@@ -126,7 +132,7 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
                 </div>
                 <div className="flex flex-row justify-center items-center mt-5 gap-16">
                     <DownloadButton
-                        onClick={() => downloadPDF(combinedData, handleModalAviso)}
+                        onClick={handleDownloadPDF}
                         icon={<FiFile size={24} />}
                         label="Baixar PDF"
                     />
@@ -136,7 +142,6 @@ function ModalExpo({ isOpen, onClose, table, selectedColumns, combinedData }) {
                         label="Baixar CSV"
                     />
                 </div>
-                {loading && <Loading />} {/* Add loading indicator */}
             </div>
 
             <ModalAlert
