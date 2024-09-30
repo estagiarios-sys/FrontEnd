@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaCaretDown } from "react-icons/fa";
 import ModalAlert from "./ModalAlert";
+import Loading from "../genericos/Loading";
 
 function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [progress, setProgress] = useState(0);
     const dropdownRef = useRef(null);
     const [isClicked, setIsClicked] = useState(false);
-    const [isCarregando, setIsCarregando] = useState(false); // Estado para controlar se o carregamento está ativo
-    const [visivel, setVisivel] = useState(true);
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
+    const [loading, setLoading] = useState(false);
 
     const handleConfirmar = () => {
         setModal({ isOpen: false, type: '', message: '' });
@@ -20,7 +19,6 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
-        setProgress(0); // Reseta o progresso ao abrir o modal
 
         if (isOpen) {
             if (hasScroll) {
@@ -45,15 +43,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
 
     const closeModal = () => {
         setShowDropdown(false);
-        setProgress(0); // Reseta o progresso ao fechar o modal
-        setIsCarregando(false); // Garante que o carregamento não esteja ativo
         onClose();
-    };
-
-    const handleCancel = () => {
-        setIsCarregando(false); // Desativa o estado de carregamento
-        setProgress(0); // Reseta o progresso para 0
-        setVisivel(true);
     };
 
     const mostrarOpcoes = () => {
@@ -62,27 +52,8 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     };
 
     const handleOptionClick = async (option) => {
-        if (isCarregando) return; // Não faz nada se já estiver carregando
-        setIsCarregando(true); // Define que o carregamento está ativo
-        setProgress(0); // Reseta o progresso ao iniciar o carregamento
-        setVisivel(false);
+        setLoading(true); // Ativa o estado de carregamento
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
-
-        const totalTime = tempoEstimado * 1000; // Converte o tempo estimado em milissegundos
-        const intervalTime = 100; // Intervalo de tempo em milissegundos
-        const steps = totalTime / intervalTime; // Número total de passos
-        const progressIncrement = 100 / steps; // Quanto o progresso deve aumentar a cada intervalo
-
-        // Função para atualizar o progresso
-        const updateProgress = (currentProgress) => {
-            if (currentProgress >= 100) return; // Para se já atingiu 100%
-
-            setProgress((prev) => Math.min(prev + progressIncrement, 100)); // Aumenta o progresso
-            setTimeout(() => updateProgress(currentProgress + progressIncrement), intervalTime); // Chama novamente após o intervalo
-        };
-
-        // Inicia a atualização do progresso após a operação
-        updateProgress(0);
 
         // Realiza a operação com base na opção selecionada
         if (option === 'Gerar') {
@@ -93,13 +64,8 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
             await onFetchData('CSV');
         }
 
-        // Aguarda o tempo estimado antes de concluir o carregamento
-        await new Promise((resolve) => setTimeout(resolve, totalTime));
-
-        setProgress(100); // Define o progresso final como 100%
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
-        setIsCarregando(false); // Reset o estado de carregamento
-        setVisivel(true);
+        setLoading(false); // Desativa o estado de carregamento
         setModal({ isOpen: true, type: 'SUCESSO', message: 'Relatório gerado com sucesso!' });
     };
 
@@ -139,10 +105,10 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
+                {loading && <Loading />}
                 {/* Cabeçalho */}
                 <div className="w-full h-14 bg-[#0A7F8E] flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">Gerar Relatório</h5>
-                    {visivel && (
                         <button
                             className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
                             onClick={onClose}
@@ -151,43 +117,21 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                         >
                             <span aria-hidden="true">×</span>
                         </button>
-                    )}
                 </div>
                 <div class="w-[500px] h-[250px] flex flex-col items-center mt-3">
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <p className="font-medium mb-4">
                             O tempo estimado para gerar o relatório é de {formatTime(tempoEstimado)}. Deseja realmente gerar?
                         </p>
-                        {/* Barra de progresso */}
-                        <div class="relative w-full h-[20px] bg-gray-300 rounded overflow-hidden mt-2.5">
-                            {/* Porcentagem sobre a barra */}
-                            <span class={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[12px] font-bold ${progress > 50 ? 'text-white' : 'text-black'} z-10`}>
-                                {`${Math.floor(progress)}%`}
-                            </span>
-                            {/* Barra de progresso */}
-                            <div className={`h-full bg-[#0A7F8E] transition-width duration-500 ease-in-out`} style={{ width: `${progress}%` }}>
-                            </div>
-                        </div>
-                        {isCarregando && (
-                            <div class="flex justify-center mt-2.5">
-                                <button
-                                    onClick={handleCancel}
-                                    className="font-bold text-white rounded-lg w-20 h-10 text-sm cursor-pointer bg-custom-vermelho hover:bg-custom-vermelho-escuro transition-colors duration-300"
-                                >
-                                    Cancelar
-                                </button>
-                            </div>
-                        )}
                     </div>
                 </div>
-                {visivel && (
                     <div class="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
                         <div className="ml-auto flex items-center">
                             <button
                                 className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
                                 onClick={closeModal}
                             >
-                                Cancelar
+                                CancelarF
                             </button>
                             <button
                                 className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
@@ -203,7 +147,6 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                             </button>
                         </div>
                     </div>
-                )}
                 {showDropdown && (
                     <div
                         ref={dropdownRef}
@@ -244,7 +187,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                     </div>
                 )}
             </div>
-            <ModalAlert isOpen={modal.isOpen} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} onConfirm={handleConfirmar} modalType={modal.type} message={modal.message}/>
+            <ModalAlert isOpen={modal.isOpen} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} onConfirm={handleConfirmar} modalType={modal.type} message={modal.message} />
         </div>
     );
 }

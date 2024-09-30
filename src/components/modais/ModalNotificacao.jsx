@@ -4,7 +4,7 @@ import { FaBell } from 'react-icons/fa';
 
 Modal.setAppElement('#root');
 
-const ModalNotificacao = () => {
+const ModalNotificacao = ({ setPdfOK }) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [notificacoes, setNotificacoes] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -19,11 +19,11 @@ const ModalNotificacao = () => {
             }
             const data = await response.json();
             setNotificacoes(data);
-            console.log(data);
         } catch (error) {
             console.error(error);
             setNotificacoes([]);
         } finally {
+            setPdfOK(false);
             setModalIsOpen(true); // Abre o modal das notificações
         }
     };
@@ -90,7 +90,7 @@ const ModalNotificacao = () => {
                         <span aria-hidden="true" className="text-xl">×</span>
                     </button>
                 </div>
-                <div className="w-[500px] h-[350px] flex flex-col relative">
+                <div className="w-[600px] h-[350px] flex flex-col relative">
                     <div className="text-gray-600 mb-5 mx-5 flex flex-col h-full relative">
                         {loading ? (
                             <p>Carregando notificações...</p>
@@ -98,20 +98,21 @@ const ModalNotificacao = () => {
                             <div className="relative h-[95%]">
                                 {/* Container da tabela com overflow */}
                                 <div className="overflow-y-auto h-full">
-                                    <table className="min-w-full text-tiny rounded-lg overflow-hidden">
-                                        <thead className="bg-custom-azul-escuro text-white">
+                                    <table className="min-w-full text-tiny rounded-lg overflow-hidden rounded-tr-none">
+                                        <thead className="bg-custom-azul-escuro text-white border border-custom-azul-escuro">
                                             <tr>
                                                 <th className="p-1 hidden">ID</th>
                                                 <th className="p-1">Título</th>
                                                 <th className="p-1">Data Início</th>
                                                 <th className="p-1">Data Final</th>
+                                                <th className="p-1">Status</th> {/* Nova coluna Status */}
                                                 <th className="p-1">Ações</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {notificacoes.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan="5" className="text-center border border-custom-azul-escuro p-1">Nenhuma notificação por enquanto.</td>
+                                                    <td colSpan="6" className="text-center border border-custom-azul-escuro p-1">Nenhuma notificação por enquanto.</td>
                                                 </tr>
                                             ) : (
                                                 notificacoes.map((notificacao, index) => (
@@ -120,6 +121,25 @@ const ModalNotificacao = () => {
                                                         <td className="border border-gray-300 p-2">{notificacao.pdfTitle || 'Sem Título'}</td>
                                                         <td className="border border-gray-300 p-2">{new Date(notificacao.requestTime).toLocaleString()}</td>
                                                         <td className="border border-gray-300 p-2">{new Date(notificacao.generatedPdfTime).toLocaleString()}</td>
+                                                        <td className="border border-gray-300 p-2">
+                                                            <div className="flex flex-col items-center">
+                                                                {/* Indicador de Status */}
+                                                                <div
+                                                                    className={`w-3 h-3 rounded-full ${notificacao.status === 'CANCELADO' ? 'bg-red-500' :
+                                                                            notificacao.status === 'EM PROCESSO' ? 'bg-orange-500' :
+                                                                                notificacao.status === 'FINALIZADO' ? 'bg-green-500' :
+                                                                                    'bg-gray-400' // padrão se o status não for reconhecido
+                                                                        }`}
+                                                                />
+                                                                <span className={`text-xs ${notificacao.status === 'CANCELADO' ? 'text-red-500' :
+                                                                        notificacao.status === 'EM PROCESSO' ? 'text-orange-500' :
+                                                                            notificacao.status === 'FINALIZADO' ? 'text-green-500' :
+                                                                                'text-gray-400' // padrão
+                                                                    }`}>
+                                                                    {notificacao.status}
+                                                                </span>
+                                                            </div>
+                                                        </td>
                                                         <td className="border border-gray-300 p-2">
                                                             <button className="text-custom-azul hover:text-custom-azul-escuro transition duration-300 p-3"
                                                                 onClick={() => fetchPdfById(notificacao.id)}
@@ -130,9 +150,10 @@ const ModalNotificacao = () => {
                                             )}
                                         </tbody>
                                     </table>
+
                                 </div>
                                 {/* Sombra na parte inferior */}
-                                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none" style={{ marginRight: '6px' }}></div>
                             </div>
                         )}
                     </div>
