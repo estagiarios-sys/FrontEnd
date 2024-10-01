@@ -75,24 +75,32 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
     
         try {
             const totalizersObject = getTotalizers() || {};
-            const totalizersArray = Object.values(totalizersObject).map(totalizer => ({
-                totalizer
-            }));
-    
+            const totalizersArrayFormatted = Object.entries(totalizersObject).map(([key, totalizer]) => {
+                const [table, column] = key.split('.');
+                const formattedKey = `${table.toLowerCase()}.${column.toLowerCase()}`; // Coloca em minúsculas
+                return {
+                    totalizer: {
+                        [formattedKey]: totalizer
+                    }
+                };
+            });
+            
             // Criar o objeto JSON com os dados da consulta
             const dataToSave = {
                 queryName: inputValue,
                 finalQuery: sqlQuery,
                 totalizersQuery: sql2 || "",
                 titlePDF: titlePdf,
-                totalizers: totalizersArray
+                totalizers: totalizersArrayFormatted
             };
+
+            console.log(dataToSave)
     
             // Criar um FormData
             const formData = new FormData();
     
             // Adicionar o JSON como uma string
-            formData.append('queryData', JSON.stringify(dataToSave));  // Os dados JSON são enviados como string
+            formData.append('stringSavedQuerySaving', JSON.stringify(dataToSave));  // Os dados JSON são enviados como string
     
             // Adicionar a imagem
             formData.append('imgPDF', img);  // A imagem é enviada como um arquivo binário

@@ -99,7 +99,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-        onClick={onClose}
+        
         >
             <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
                 <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">

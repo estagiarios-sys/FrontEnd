@@ -72,6 +72,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
+    const [fullTableHTMLPreview, setFullTableHTMLPreview] = useState('');
+    const [renderTotalizerResult, setRenderTotalizerResult] = useState({});
+    const [combinedDataExpo, setcombinedDataExpo] = useState(null);
 
     const handleModalAviso = (message) => {
         openModal('alert', 'ALERTA', message);
@@ -80,7 +83,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const confirmModalAlert = () => {
         closeModal('alert');
     };
-    
+
     // Utilizando useMemo para otimizar cálculos
     const hasData = useMemo(() => tableData.length > 0 && tableData[0].values, [tableData]);
     const totalPages = useMemo(() => hasData ? Math.ceil(tableData[0].values.length / itemsPerPage) : 0, [hasData, tableData, itemsPerPage]);
@@ -106,6 +109,8 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                 break;
         }
     };
+
+
 
     // Função para construir o JSON Request
     const buildJsonRequest = () => {
@@ -226,7 +231,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         }
     };
 
-    const fetchLoadedQuery = async () => {
+    const fetchLoadQuery = async () => {
         try {
             const url = 'http://localhost:8080/find/loadedQuery';
             const loadedQuery = localStorage.getItem('loadedQuery');
@@ -237,61 +242,95 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             const parsedLoadedQuery = JSON.parse(loadedQuery);
 
+            const totalizersArray = Array.isArray(parsedLoadedQuery.queryWithTotalizers.totalizers)
+                ? parsedLoadedQuery.queryWithTotalizers.totalizers.map(totalizer => ({
+                    totalizer: totalizer
+                }))
+                : [];
+
+            const finalQueryData = {
+                finalQuery: parsedLoadedQuery.finalQuery,
+                totalizersQuery: parsedLoadedQuery.queryWithTotalizers.query,
+                totalizers: totalizersArray
+            };
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(parsedLoadedQuery),
+                body: JSON.stringify(finalQueryData),
             });
 
             handleLoadFromLocalStorage();
-            localStorage.removeItem('loadedQuery');
 
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
 
             const responseData = await response.json();
+            console.log('Resposta da API:', responseData);
 
-            const { columnsNickName, foundObjects, totalizersResults } = responseData;
+            const { columnsNameOrNickName, foundObjects, columnsAndTotalizersResult } = responseData;
 
-            if (!Array.isArray(foundObjects) || !Array.isArray(columnsNickName)) {
-                throw new Error('Estrutura de resposta inválida');
-            }
-
-            const transformedData = columnsNickName.map((column, index) => {
+            const transformedData = columnsNameOrNickName.map((column, index) => {
                 return {
                     column,
                     values: foundObjects.map(row => row[index]),
                 };
             });
 
-            setColumns(columnsNickName);
+            setColumns(columnsNameOrNickName);
 
-            if (Array.isArray(totalizersResults) && totalizersResults.length > 0) {
-                const resultTotalizer = {};
 
-                totalizersResults.forEach((totalizer, index) => {
-                    resultTotalizer[columnsNickName[index]] = totalizer;
+            const resultTotalizer = {};
+            if (columnsAndTotalizersResult) {
+                Object.keys(columnsAndTotalizersResult).forEach(column => {
+                    resultTotalizer[column] = columnsAndTotalizersResult[column];
                 });
-
-                setTotalizerResults(resultTotalizer);
-                localStorage.setItem('totalizers', JSON.stringify(resultTotalizer));
+                setRenderTotalizerResult(resultTotalizer);
             }
+
+
+            const imgPDf = localStorage.getItem('imgPDF');
+            const titlePDf = localStorage.getItem('titlePDF');
+
+
+            console.log(imgPDf);
+            console.log(titlePdf);
+
+
+
+            const fullTableHTML = generateFullTableHTML(columnsNameOrNickName, transformedData, resultTotalizer);
+            const fullTableHTMLPreview = generateFullTableHTML(columnsNameOrNickName, transformedData, resultTotalizer, 15);
+            setFullTableHTMLPreview(fullTableHTMLPreview);
+
+            const combinedData = {
+                fullTableHTML: fullTableHTML,
+                titlePDF: titlePDf,
+                imgPDF: imgPDf
+            };
+
+            setcombinedDataExpo(combinedData);
+            console.log(combinedData);
+
             setTableData(transformedData);
             setCurrentPage(1);
 
-        } catch (error) {
+            localStorage.removeItem('loadedQuery');
+
+        } catch (error) { // Certifique-se de que o bloco "catch" está dentro de uma função válida
             console.error('Erro ao buscar os dados:', error);
             return [];
         }
     };
 
+
+
     const handleGenerateReport = async () => {
         try {
             if (localStorage.getItem('loadedQuery')) {
-                await fetchLoadedQuery();
+                await fetchLoadQuery();
             } else {
                 await fetchData();
             }
@@ -302,29 +341,32 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
     const generateFullTableHTML = (columns, dataFormat, resultTotalizer, updatedColumnWidths, maxRows = null) => {
         if (!dataFormat || dataFormat.length === 0) return '<p>Nenhum dado encontrado.</p>';
-    
+
+        
         let size = 0;
         const filteredColumns = [];
         const filteredWidths = [];
 
-        if (!updatedColumnWidths || updatedColumnWidths.length === 0) {
+        console.log(resultTotalizer)
+
+        if (!Array.isArray(updatedColumnWidths)) {
             updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
         }
 
         updatedColumnWidths.forEach((width, index) => {
             if (size + width <= 1000) {
                 size += width;
-                filteredColumns.push(columns[index]); 
+                filteredColumns.push(columns[index]);
                 filteredWidths.push(width);
             }
         });
-    
+
         const tableHeaders = filteredColumns.map((column, index) =>
             `<th class="p-2 border-b text-center" style="width: ${filteredWidths[index] || 'auto'}">${column}</th>`
         ).join('');
-    
+
         const rowCount = maxRows ? Math.min(dataFormat[0].values.length, maxRows) : dataFormat[0].values.length;
-    
+
         const tableRows = dataFormat[0].values.slice(0, rowCount).map((_, rowIndex) => {
             const rowHTML = filteredColumns.map((_, colIndex) =>
                 `<td class="p-2 border-b text-center">${dataFormat[colIndex]?.values[rowIndex]}</td>`
@@ -332,9 +374,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
             return `<tr class="${rowClass}">${rowHTML}</tr>`;
         }).join('');
-    
+
         const totalizerHTML = renderTotalizerHTML(filteredColumns, resultTotalizer);
-    
+       
+
         return `
         <table>
             <thead class="text-black">
@@ -344,7 +387,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             ${totalizerHTML ? totalizerHTML : ''}
         </table>
         `;
-    }; 
+    };
 
     const updateColumnWidths = () => {
         if (tableRef.current) {
@@ -421,42 +464,35 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     };
 
     const renderTotalizerHTML = (columns, resultTotalizer) => {
-        if (!totalizerResults || Object.keys(totalizerResults).length === 0) return null;
-
-        const totalizerKeys = Object.keys(resultTotalizer);
-
+        if (!resultTotalizer || Object.keys(resultTotalizer).length === 0) return null;
+    
         return `
-            <ftotalizer class="border-t border-black">
+            <tfoot class="border-t border-black">
                 <tr class="bg-custom-azul-claro text-center">
                     <td class="p-2 border-t-2 border-black" colspan="${columns.length}">
-                        <table class="w-full">
+                        <table class="w-full ">
                             <tbody>
                                 <tr>
-                                    <td class="text-left font-semibold text-custom-azul-escuro">
-                                        TOTALIZADORES:
-                                    </td>
+                                    <td class="text-left font-semibold text-custom-azul-escuro ">TOTALIZADORES:</td>
                                 </tr>
                             </tbody>
                         </table>
                     </td>
                 </tr>
                 <tr class="bg-custom-azul-claro text-center">
-                    ${columns.map((col, index) => {
-                        const totalizerKey = totalizerKeys.find(key => key.includes(col));
-                        return `
-                            <td class="font-regular text-black pb-3">
-                                ${totalizerKey ? resultTotalizer[totalizerKey] : ""}
-                            </td>
-                        `;
+                    ${columns.map((column, index) => {
+                        const totalizerValue = resultTotalizer[column] || "";
+                        return `<td class="font-regular text-black pb-3">${totalizerValue}</td>`;
                     }).join('')}
                 </tr>
-            </ftotalizer>
+            </tfoot>
         `;
     };
+    
 
     const renderTotalizer = () => {
-        if (!totalizerResults || Object.keys(totalizerResults).length === 0) return null;
-
+        if (!renderTotalizerResult || Object.keys(renderTotalizerResult).length === 0) return null;
+    
         return (
             <tfoot className="border-t border-black">
                 <tr className="bg-custom-azul-claro text-center">
@@ -472,12 +508,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                 </tr>
                 <tr className="bg-custom-azul-claro text-center">
                     {columns.map((column, index) => {
-                        const totalizerKey = Object.keys(totalizerResults).find(key => key.includes(column));
+                        const totalizerKey = Object.keys(renderTotalizerResult).find(key => key.includes(column));
                         return (
-                            <td
-                                className="font-regular text-black pb-3"
-                                key={index}>
-                                {totalizerKey ? totalizerResults[totalizerKey] : ""}
+                            <td className="font-regular text-black pb-3" key={index}>
+                                {totalizerKey ? renderTotalizerResult[totalizerKey] : ""}
                             </td>
                         );
                     })}
@@ -485,6 +519,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             </tfoot>
         );
     };
+    
 
     return (
         <div className="flex flex-col w-full justify-center items-center">
@@ -511,7 +546,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={() => openModal('salvos')} className="flex flex-col justify-center items-center">
-				{/* Ícone e label */}
+                                {/* Ícone e label */}
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
                                 </svg>
@@ -565,7 +600,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={ () => {
+                            <button onClick={() => {
                                 if (tableData.length === 0) {
                                     openModal('alert', 'ALERTA', 'Gere o relatório para visualizar a prévia.');
                                 } else {
@@ -703,7 +738,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
-            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK}/>
+            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />

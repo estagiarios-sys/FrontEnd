@@ -115,40 +115,29 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
     const sqlQuery = localStorage.getItem('loadedQuery');
     if (sqlQuery) {
       const { tabelas, relacionadas, campos } = extractFieldsAndTablesFromSQL(sqlQuery, relationships);
-
+  
       if (tabelas.length > 0) {
         setSelectedTabela(tabelas[0]);
-
-        // Vamos garantir que o relacionamento seja filtrado de acordo com o que está no SQL
-        const relacionamentosValidos = relacionadas.filter(relacionada => {
-          // Pega ambas as tabelas do relacionamento, que estão no formato "tabela1 e tabela2"
-          const [tabela1, tabela2] = relacionada.split(' e ');
-
-          // Verifica se ambas as tabelas do relacionamento estão na lista de tabelas extraídas do SQL
-          return tabelas.includes(tabela1) && tabelas.includes(tabela2);
-        });
-
-        console.log("Relacionamentos válidos (apenas do SQL):", relacionamentosValidos);
-
-        // Atualiza relacionamentos no estado sem duplicatas
+  
+        // Relacionamentos
         setSelectedRelacionada(prevRelacionada => {
-          const updatedRelacionada = [...new Set([...relacionamentosValidos])];
-          console.log("Relacionamentos finais (sem duplicatas):", updatedRelacionada);
+          const updatedRelacionada = [...new Set([...relacionadas])];
           return updatedRelacionada;
         });
-
-        // Atualiza campos sem duplicação
+  
+        // Campos (importante verificar aqui)
         setSelectedCampos(prevCampos => {
           const updatedCampos = [...new Set([...prevCampos, ...campos.map(campo => {
             const [tabela, campoNome] = campo.split('.');
-            return `${tabela}.${campoNome}`;
+            return { value: `${tabela}.${campoNome}`, label: `${tabela} - ${campoNome}` };
           })])];
-          console.log("Campos finais (sem duplicatas):", updatedCampos);
+          console.log("Campos carregados do localStorage:", updatedCampos);
           return updatedCampos;
         });
       }
     }
   }, [relationships]);
+  
 
   useEffect(() => {
     passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
@@ -177,15 +166,15 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
       Object.keys(jsonData[selectedTabela]).forEach(campo => {
         const optionValue = `${selectedTabela}.${campo}`;
         if (!selectedValues.has(optionValue)) { // Verifica se o campo já está selecionado
-          options.set(optionValue, { 
-            value: optionValue, 
-            label: `${selectedTabela} - ${campo}`, 
-            type: jsonData[selectedTabela][campo] 
+          options.set(optionValue, {
+            value: optionValue,
+            label: `${selectedTabela} - ${campo}`,
+            type: jsonData[selectedTabela][campo]
           });
         }
       });
     }
-  
+
     // Adiciona campos das tabelas selecionadas como relacionadas
     if (selectedRelacionada.length > 0) {
       selectedRelacionada.forEach(relacionadaTabela => {
@@ -194,16 +183,16 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           .filter(rel => rel.tabelas.includes(relacionadaTabela))
           .forEach(rel => {
             const tabelas = rel.tabelas.split(' e ');
-  
+
             tabelas.forEach(table => {
               if (table !== selectedTabela && table === relacionadaTabela && jsonData[table]) {
                 Object.keys(jsonData[table]).forEach(campo => {
                   const optionValue = `${table}.${campo}`;
                   if (!selectedValues.has(optionValue)) { // Verifica se o campo já está selecionado
-                    options.set(optionValue, { 
-                      value: optionValue, 
-                      label: `${table} - ${campo}`, 
-                      type: jsonData[table][campo] 
+                    options.set(optionValue, {
+                      value: optionValue,
+                      label: `${table} - ${campo}`,
+                      type: jsonData[table][campo]
                     });
                   }
                 });
@@ -212,9 +201,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           });
       });
     }
-  
+
     return Array.from(options.values());
-  }, [selectedTabela, jsonData, selectedRelacionada, campos]); 
+  }, [selectedTabela, jsonData, selectedRelacionada, campos]);
 
   const relacionadaOptions = useMemo(() => {
     if (!selectedTabela) return [];
@@ -406,6 +395,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
             onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
             styles={customStyles} // Aplica os estilos customizados
           />
+
 
           <div id='info-click' className={mostrarInfo3 ? 'up show' : 'up'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo3(prev => !prev)} ref={buttonRef}>
