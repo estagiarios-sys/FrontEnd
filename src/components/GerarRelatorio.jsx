@@ -156,6 +156,25 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
     const fetchData = async (option) => {
         try {
+
+            let idNotificacao = null;
+
+            if (option === 'PDF') { 
+                const id = await fetch('http://localhost:8080/pdf/create-empty', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: titlePdf,
+                });
+
+                if (!id.ok) {
+                    throw new Error(`Erro ao criar ID da notificação: ${id.statusText}`);
+                }
+
+                idNotificacao = await id.json();
+            }
+
             const jsonRequest = buildJsonRequest();
 
             const url = 'http://localhost:8080/find';
@@ -196,6 +215,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             if (option === 'PDF') {
                 const combinedData = {
+                    pdfId: idNotificacao,
                     fullTableHTML: generateFullTableHTML(updatedColumns, dataFormat, resultTotalizer, columnWidths),
                     titlePDF: titlePdf,
                     imgPDF: base64Image,

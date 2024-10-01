@@ -11,8 +11,9 @@ export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     }
 
     try {
-        const response = await fetch('http://localhost:8080/pdf/generate', {
-            method: 'POST',
+        console.log('combinedData:', combinedData);
+        const response = await fetch('http://localhost:8080/pdf/set-data', {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },

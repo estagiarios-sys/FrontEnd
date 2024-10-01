@@ -120,7 +120,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                 <div class="w-[500px] h-[250px] flex flex-col items-center mt-3">
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <p className="font-medium mb-4">
-                            O tempo estimado para a consulta é de {formatTime(tempoEstimado)}, Escolha uma das opções.
+                            O tempo estimado para a consulta é de {formatTime(tempoEstimado)}. Escolha uma das opções:
                         </p>
                     </div>
                 </div>
