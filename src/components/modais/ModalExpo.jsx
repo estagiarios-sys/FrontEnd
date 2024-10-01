@@ -11,7 +11,6 @@ export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     }
 
     try {
-        console.log('combinedData:', combinedData);
         const response = await fetch('http://localhost:8080/pdf/set-data', {
             method: 'PUT',
             headers: {
@@ -25,8 +24,8 @@ export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
         }
 
     } catch (error) {
-        handleModalAviso('Erro ao gerar o PDF. Por favor, tente novamente.');
-        console.error('Erro ao baixar o PDF:', error);
+        handleModalAviso('Erro ao gerar o PDF. Por favor, tente novamente. Se o erro persistir, entre em contato com o suporte.');
+        console.error('Erro ao gerar o PDF:', error);
     } finally {
         setPdfOK(true);
     }

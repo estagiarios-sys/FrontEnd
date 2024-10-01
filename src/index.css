@@ -19,7 +19,7 @@ body {
     user-select: none;
 }
 
-.custon-disabled-andamento {
+.custon-disabled-processing {
     cursor: progress;
     opacity: 0.4;
 }
