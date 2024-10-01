@@ -7,7 +7,6 @@ Modal.setAppElement('#root');
 const ModalNotificacao = ({ setPdfOK }) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [notificacoes, setNotificacoes] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [pdfUrl, setPdfUrl] = useState(null); // Estado para armazenar o URL do PDF
     const [pdfModalIsOpen, setPdfModalIsOpen] = useState(false); // Modal para PDF em tela cheia
 
@@ -18,6 +17,7 @@ const ModalNotificacao = ({ setPdfOK }) => {
                 throw new Error('Erro ao buscar notificações');
             }
             const data = await response.json();
+            console.log(data);
             setNotificacoes(data);
         } catch (error) {
             console.error(error);
@@ -105,71 +105,75 @@ const ModalNotificacao = ({ setPdfOK }) => {
                 </div>
                 <div className="w-[610px] h-[350px] flex flex-col relative">
                     <div className="text-gray-600 mb-5 mx-5 flex flex-col h-full relative">
-                        {loading ? (
-                            <p>Carregando notificações...</p>
-                        ) : (
-                            <div className="relative h-[95%]">
-                                {/* Container da tabela com overflow */}
-                                <div className="overflow-y-auto h-full">
+                        <div className="relative h-[95%]">
+                            {/* Container da tabela com overflow */}
+                            <div className="overflow-y-auto h-full">
                                 <table className="min-w-full text-tiny rounded-lg overflow-hidden rounded-tr-none">
-                                        <thead className="bg-custom-azul-escuro text-white border border-custom-azul-escuro">
+                                    <thead className="bg-custom-azul-escuro text-white border border-custom-azul-escuro">
+                                        <tr>
+                                            <th className="p-1 hidden">ID</th>
+                                            <th className="p-1">Título</th>
+                                            <th className="p-1">Data Início</th>
+                                            <th className="p-1">Data Final</th>
+                                            <th className="p-1">Status</th>
+                                            <th className="p-1">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {notificacoes.length === 0 ? (
                                             <tr>
-                                                <th className="p-1 hidden">ID</th>
-                                                <th className="p-1">Título</th>
-                                                <th className="p-1">Data Início</th>
-                                                <th className="p-1">Data Final</th>
-                                                <th className="p-1">Status</th>
-                                                <th className="p-1">Ações</th>
+                                                <td colSpan="6" className="text-center border border-custom-azul-escuro p-1">Nenhuma notificação por enquanto.</td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {notificacoes.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="6" className="text-center border border-custom-azul-escuro p-1">Nenhuma notificação por enquanto.</td>
-                                                </tr>
-                                            ) : (
-                                                notificacoes.map((notificacao, index) => {
-                                                    const { display, color, textColor } = mapStatus(notificacao.status); // Mapeia o status
-                                                    const isDisabled = notificacao.status === 'ERRO' || notificacao.status === 'EM_ANDAMENTO'; // Verifica se deve desabilitar o botão
-                                                    return (
-                                                        <tr key={notificacao.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                                                            <td className="border border-gray-300 p-2 hidden">{notificacao.id}</td>
-                                                            <td className="border border-gray-300 p-2">{notificacao.pdfTitle || 'Sem Título'}</td>
-                                                            <td className="border border-gray-300 p-2 whitespace-nowrap">{new Date(notificacao.requestTime).toLocaleString()}</td>
-                                                            <td className="border border-gray-300 p-2 whitespace-nowrap">{new Date(notificacao.generatedPdfTime).toLocaleString()}</td>
-                                                            <td className="border border-gray-300 p-2 whitespace-nowrap">
-                                                                <div className="flex flex-col items-center">
-                                                                    {/* Indicador de Status */}
-                                                                    <div className={`w-3 h-3 rounded-full ${color}`} />
-                                                                    <span className={`text-xs ${textColor} whitespace-nowrap`}>
-                                                                        {display}
-                                                                    </span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="border border-gray-300 p-2">
-                                                                <button
-                                                                    className={`text-custom-azul hover:text-custom-azul-escuro transition duration-300 p-3 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                                    onClick={() => !isDisabled && fetchPdfById(notificacao.id)}
-                                                                    disabled={isDisabled} // Desabilita o botão se necessário
-                                                                >
-                                                                    PDF
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {/* Sombra na parte inferior */}
-                                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none" style={{ marginRight: '6px' }}></div>
+                                        ) : (
+                                            notificacoes.map((notificacao, index) => {
+                                                const { display, color, textColor } = mapStatus(notificacao.status); // Mapeia o status
+                                                const isErro = notificacao.status === 'ERRO';
+                                                const isEmAndamento = notificacao.status === 'EM_ANDAMENTO';
+                                                const isDisabled = isErro || isEmAndamento; // Verifica se deve desabilitar o botão
+                                                const buttonClass = isErro
+                                                    ? 'custom-disabled-erro'
+                                                    : isEmAndamento
+                                                        ? 'custom-disabled-andamento'
+                                                        : ''; // Define a classe de acordo com o status
+                                                return (
+                                                    <tr key={notificacao.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                                                        <td className="text-center border border-gray-300 p-2 hidden">{notificacao.id}</td>
+                                                        <td className="text-center border border-gray-300 p-2">{notificacao.pdfTitle || 'Sem Título'}</td>
+                                                        <td className="text-center border border-gray-300 p-2 whitespace-nowrap">{new Date(notificacao.requestTime).toLocaleString()}</td>
+                                                        <td className="text-center border border-gray-300 p-2 whitespace-nowrap">
+                                                            {notificacao.generatedPdfTime ? new Date(notificacao.generatedPdfTime).toLocaleString() : '-'}
+                                                        </td>
+                                                        <td className="text-center border border-gray-300 p-2 whitespace-nowrap">
+                                                            <div className="flex flex-col items-center">
+                                                                {/* Indicador de Status */}
+                                                                <div className={`w-3 h-3 rounded-full ${color}`} />
+                                                                <span className={`text-xs ${textColor} whitespace-nowrap`}>
+                                                                    {display}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="text-center border border-gray-300 p-2">
+                                                            <button
+                                                                className={`text-custom-azul transition duration-300 p-3 ${buttonClass} ${!isDisabled ? 'hover:text-custom-azul-escuro' : ''}`}
+                                                                onClick={() => !isDisabled && fetchPdfById(notificacao.id)}
+                                                                disabled={isDisabled} // Desabilita o botão se necessário
+                                                            >
+                                                                PDF
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
-                        )}
+                            {/* Sombra na parte inferior */}
+                            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none" style={{ marginRight: '6px' }}></div>
+                        </div>
                     </div>
                 </div>
             </Modal>
-
             {/* Modal para exibir o PDF em tela cheia */}
             <Modal
                 isOpen={pdfModalIsOpen}
@@ -190,8 +194,8 @@ const ModalNotificacao = ({ setPdfOK }) => {
                     <div className="bg-white p-0 rounded-md relative w-[850px] h-[90%] overflow-hidden flex justify-center items-center">
                         <iframe
                             src={pdfUrl}
-                            className="w-full h-full"
                             title="PDF Preview"
+                            className="w-full h-full"
                         />
                     </div>
                 ) : (

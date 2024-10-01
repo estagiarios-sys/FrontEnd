@@ -159,7 +159,7 @@ function CamposSelecionados({
             <table
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="w-auto min-w-full border-2 border-custom-azul-escuro"
+              className="w-auto min-w-full border-2 border-custom-azul-escuro border-t-0"
             >
               <thead className="bg-custom-azul-escuro text-white sticky top-0 z-10">
                 <tr className="bg-custom-azul-escuro text-white ">

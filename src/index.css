@@ -18,3 +18,12 @@ body {
 body {
     user-select: none;
 }
+
+.custon-disabled-andamento {
+    cursor: progress;
+    opacity: 0.4;
+}
+
+.custon-disabled-erro {
+    opacity: 0.4;
+}
