@@ -1,31 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { FaBell } from 'react-icons/fa';
 
 Modal.setAppElement('#root');
 
-const ModalNotificacao = ({ setPdfOK }) => {
+const ModalNotificacao = ({ setPdfOK, pdfOK, setStatus, status }) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [notificacoes, setNotificacoes] = useState([]);
     const [pdfUrl, setPdfUrl] = useState(null); // Estado para armazenar o URL do PDF
     const [pdfModalIsOpen, setPdfModalIsOpen] = useState(false); // Modal para PDF em tela cheia
 
-    const openModal = async () => {
+    const loadData = async () => {
         try {
             const response = await fetch('http://localhost:8080/pdf/list');
             if (!response.ok) {
                 throw new Error('Erro ao buscar notificações');
             }
             const data = await response.json();
-            console.log(data);
             setNotificacoes(data);
+            console.log('Notificações:', data);
+            if (modalIsOpen) {
+                setPdfOK(false); // Atualiza o estado de pdfOK
+            }
         } catch (error) {
             console.error(error);
             setNotificacoes([]);
-        } finally {
-            setPdfOK(false);
-            setModalIsOpen(true); // Abre o modal das notificações
+            alert('Falha ao buscar notificações: ' + error.message);
         }
+    };
+
+    const openModal = async () => {
+        await loadData();
+        setModalIsOpen(true); // Abre o modal das notificações
+        setPdfOK(false); // Reseta o estado de pdfOK
     };
 
     const fetchPdfById = async (id) => {
@@ -42,8 +49,6 @@ const ModalNotificacao = ({ setPdfOK }) => {
             }
 
             const blob = await response.blob();
-
-            // Gera o URL para exibir o PDF
             const url = URL.createObjectURL(blob);
             setPdfUrl(url); // Atualiza o estado com o URL do PDF
             setPdfModalIsOpen(true); // Abre o modal em tela cheia para o PDF
@@ -66,15 +71,29 @@ const ModalNotificacao = ({ setPdfOK }) => {
     const mapStatus = (status) => {
         switch (status) {
             case 'ERRO':
-                return { display: 'ERRO', color: 'bg-red-500', textColor: 'text-red-500' };
-            case 'EM_ANDAMENTO':
-                return { display: 'EM ANDAMENTO', color: 'bg-orange-500', textColor: 'text-orange-500' };
+                return { display: 'ERRO', color: 'bg-red-500', textColor: 'text-red-500', isDisabled: 'custon-disabled-erro' };
+            case 'BUSCANDO_DADOS':
+                return { display: 'BUSCANDO DADOS', color: 'bg-orange-500', textColor: 'text-orange-500', isDisabled: 'custon-disabled-processing' };
+            case 'GERANDO_PDF':
+                return { display: 'GERANDO PDF', color: 'bg-yellow-500', textColor: 'text-yellow-500', isDisabled: 'custon-disabled-processing' };
             case 'CONCLUIDO':
-                return { display: 'CONCLUÍDO', color: 'bg-green-500', textColor: 'text-green-500' };
+                return { display: 'CONCLUÍDO', color: 'bg-green-500', textColor: 'text-green-500', isDisabled: '' };
             default:
-                return { display: 'DESCONHECIDO', color: 'bg-gray-400', textColor: 'text-gray-400' }; // padrão
+                return { display: 'DESCONHECIDO', color: 'bg-gray-400', textColor: 'text-gray-400', isDisabled: '' }; // padrão
         }
     };
+
+    // useEffect para atualizar as notificações quando pdfOK for true
+    useEffect(() => {
+        const fetchNotificacoes = async () => {
+            if (pdfOK || status) {
+                await loadData();
+                setStatus(false);
+            }
+        };
+
+        fetchNotificacoes();
+    }, [pdfOK, status]); // Dependência do useEffect
 
     return (
         <div className="fixed top-3 right-3">
@@ -108,7 +127,7 @@ const ModalNotificacao = ({ setPdfOK }) => {
                         <div className="relative h-[95%]">
                             {/* Container da tabela com overflow */}
                             <div className="overflow-y-auto h-full">
-                                <table className="min-w-full text-tiny rounded-lg overflow-hidden rounded-tr-none">
+                                <table className="min-w-full text-tiny overflow-hidden">
                                     <thead className="bg-custom-azul-escuro text-white border border-custom-azul-escuro">
                                         <tr>
                                             <th className="p-1 hidden">ID</th>
@@ -126,24 +145,17 @@ const ModalNotificacao = ({ setPdfOK }) => {
                                             </tr>
                                         ) : (
                                             notificacoes.map((notificacao, index) => {
-                                                const { display, color, textColor } = mapStatus(notificacao.status); // Mapeia o status
-                                                const isErro = notificacao.status === 'ERRO';
-                                                const isEmAndamento = notificacao.status === 'EM_ANDAMENTO';
-                                                const isDisabled = isErro || isEmAndamento; // Verifica se deve desabilitar o botão
-                                                const buttonClass = isErro
-                                                    ? 'custom-disabled-erro'
-                                                    : isEmAndamento
-                                                        ? 'custom-disabled-andamento'
-                                                        : ''; // Define a classe de acordo com o status
+                                                const { display, color, textColor, isDisabled } = mapStatus(notificacao.status);
+
                                                 return (
                                                     <tr key={notificacao.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                                                        <td className="text-center border border-gray-300 p-2 hidden">{notificacao.id}</td>
-                                                        <td className="text-center border border-gray-300 p-2">{notificacao.pdfTitle || 'Sem Título'}</td>
-                                                        <td className="text-center border border-gray-300 p-2 whitespace-nowrap">{new Date(notificacao.requestTime).toLocaleString()}</td>
-                                                        <td className="text-center border border-gray-300 p-2 whitespace-nowrap">
+                                                        <td className="text-center border border-gray-300 p-0 hidden">{notificacao.id}</td>
+                                                        <td className="text-center border border-gray-300 p-0">{notificacao.pdfTitle || 'Sem Título'}</td>
+                                                        <td className="text-center border border-gray-300 p-0 whitespace-nowrap">{new Date(notificacao.requestTime).toLocaleString()}</td>
+                                                        <td className="text-center border border-gray-300 p-0 whitespace-nowrap">
                                                             {notificacao.generatedPdfTime ? new Date(notificacao.generatedPdfTime).toLocaleString() : '-'}
                                                         </td>
-                                                        <td className="text-center border border-gray-300 p-2 whitespace-nowrap">
+                                                        <td className="text-center border border-gray-300 p-0 whitespace-nowrap">
                                                             <div className="flex flex-col items-center">
                                                                 {/* Indicador de Status */}
                                                                 <div className={`w-3 h-3 rounded-full ${color}`} />
@@ -154,9 +166,9 @@ const ModalNotificacao = ({ setPdfOK }) => {
                                                         </td>
                                                         <td className="text-center border border-gray-300 p-2">
                                                             <button
-                                                                className={`text-custom-azul transition duration-300 p-3 ${buttonClass} ${!isDisabled ? 'hover:text-custom-azul-escuro' : ''}`}
-                                                                onClick={() => !isDisabled && fetchPdfById(notificacao.id)}
-                                                                disabled={isDisabled} // Desabilita o botão se necessário
+                                                                className={`text-custom-azul transition duration-300 p-3 ${isDisabled}`} // Adicione a classe correspondente ao estado
+                                                                onClick={() => fetchPdfById(notificacao.id)}
+                                                                disabled={!!isDisabled} // Desabilita o botão se necessário
                                                             >
                                                                 PDF
                                                             </button>
@@ -169,7 +181,11 @@ const ModalNotificacao = ({ setPdfOK }) => {
                                 </table>
                             </div>
                             {/* Sombra na parte inferior */}
-                            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none" style={{ marginRight: '6px' }}></div>
+                            {notificacoes.length <= 4 ? (
+                                <div className="absolute bottom-0 left-0 right-0 h-0 bg-white pointer-events-none" style={{ marginRight: '6px' }}></div>
+                            ) : (
+                                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none" style={{ marginRight: '6px' }}></div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -183,11 +199,10 @@ const ModalNotificacao = ({ setPdfOK }) => {
                 overlayClassName="fixed inset-0 bg-black bg-opacity-70 z-[1000]"
             >
                 <button
-                    className="absolute top-4 right-4 text-white text-2xl"
+                    className="absolute top-4 right-4 text-white text-2xl w-full h-full"
                     onClick={closePdfModal}
                     aria-label="Fechar PDF"
                 >
-                    ×
                 </button>
 
                 {pdfUrl ? (

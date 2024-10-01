@@ -110,6 +110,7 @@ function Main() {
       )}
       <ModalNotificacao
         setPdfOK={setPdfOK}
+        pdfOK={pdfOK}
       />
       <div className='content flex flex-col justify-center'>
         <div className="flex justify-around items-start">
