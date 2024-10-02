@@ -117,14 +117,14 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                             <span aria-hidden="true">×</span>
                         </button>
                 </div>
-                <div class="w-[500px] h-[250px] flex flex-col items-center mt-3">
+                <div className="w-[500px] h-[250px] flex flex-col items-center mt-3">
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <p className="font-medium mb-4">
                             O tempo estimado para a consulta é de {formatTime(tempoEstimado)}. Escolha uma das opções:
                         </p>
                     </div>
                 </div>
-                    <div class="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
+                    <div className="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
                         <div className="ml-auto flex items-center">
                             <button
                                 className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
