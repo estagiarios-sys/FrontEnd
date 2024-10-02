@@ -246,7 +246,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         }
     };
 
-    const fetchLoadedQuery = async () => {
+    const fetchLoadQuery = async () => {
         try {
             const url = 'http://localhost:8080/find/loadedQuery';
             const loadedQuery = localStorage.getItem('loadedQuery');
@@ -257,16 +257,27 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             const parsedLoadedQuery = JSON.parse(loadedQuery);
 
+            const totalizersArray = Array.isArray(parsedLoadedQuery.queryWithTotalizers.totalizers)
+                ? parsedLoadedQuery.queryWithTotalizers.totalizers.map(totalizer => ({
+                    totalizer: totalizer
+                }))
+                : [];
+
+            const finalQueryData = {
+                finalQuery: parsedLoadedQuery.finalQuery,
+                totalizersQuery: parsedLoadedQuery.queryWithTotalizers.query,
+                totalizers: totalizersArray
+            };
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(parsedLoadedQuery),
+                body: JSON.stringify(finalQueryData),
             });
 
             handleLoadFromLocalStorage();
-            localStorage.removeItem('loadedQuery');
 
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
@@ -274,35 +285,33 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             const responseData = await response.json();
 
-            const { columnsNickName, foundObjects, totalizersResults } = responseData;
+            console.log('responseData: ', responseData);
 
-            if (!Array.isArray(foundObjects) || !Array.isArray(columnsNickName)) {
-                throw new Error('Estrutura de resposta inválida');
-            }
+            const { columnsNameOrNickName, foundObjects, columnsAndTotalizersResult } = responseData;
 
-            const transformedData = columnsNickName.map((column, index) => {
+            const transformedData = columnsNameOrNickName.map((column, index) => {
                 return {
                     column,
                     values: foundObjects.map(row => row[index]),
                 };
             });
 
-            setColumns(columnsNickName);
+            setColumns(columnsNameOrNickName);
 
-            if (Array.isArray(totalizersResults) && totalizersResults.length > 0) {
-                const resultTotalizer = {};
-
-                totalizersResults.forEach((totalizer, index) => {
-                    resultTotalizer[columnsNickName[index]] = totalizer;
+            const resultTotalizer = {};
+            if (columnsAndTotalizersResult) {
+                Object.keys(columnsAndTotalizersResult).forEach(column => {
+                    resultTotalizer[column] = columnsAndTotalizersResult[column];
                 });
-
                 setTotalizerResults(resultTotalizer);
-                localStorage.setItem('totalizers', JSON.stringify(resultTotalizer));
             }
+
             setTableData(transformedData);
             setCurrentPage(1);
 
-        } catch (error) {
+            localStorage.removeItem('loadedQuery');
+
+        } catch (error) { // Certifique-se de que o bloco "catch" está dentro de uma função válida
             console.error('Erro ao buscar os dados:', error);
             return [];
         }
@@ -311,7 +320,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const handleGenerateReport = async () => {
         try {
             if (localStorage.getItem('loadedQuery')) {
-                await fetchLoadedQuery();
+                await fetchLoadQuery();
             } else {
                 await fetchData();
             }
@@ -327,9 +336,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         const filteredColumns = [];
         const filteredWidths = [];
 
-        if (!updatedColumnWidths || updatedColumnWidths.length === 0) {
+        if (!Array.isArray(updatedColumnWidths)) {
             updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
         }
+
+        //if (!updatedColumnWidths || updatedColumnWidths.length === 0) {
+        //    updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
+        //}
 
         updatedColumnWidths.forEach((width, index) => {
             if (size + width <= 1000) {
@@ -724,7 +737,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
             <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK}/>
-            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} />
+            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf}/>
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
