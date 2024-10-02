@@ -94,7 +94,7 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg relative flex flex-col w-[500px] h-[550px]">
+            <div className="bg-white rounded-lg relative flex flex-col w-[500px] h-[580px]">
                 {/* Cabeçalho */}
                 <div className="w-full bg-[#0A7F8E] flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">EDITAR</h5>
@@ -110,31 +110,33 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
 
                 {/* Conteúdo */}
                 <div className="flex-1 w-full p-4 overflow-auto">
-                    {/* Campo de título */}
-                    <div className="mb-4">
-                        <h5 className="font-medium mb-1">Título:</h5>
-                        <input
-                            type="text"
-                            maxLength={20} // Limite de caracteres para o título
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)} // Atualiza o estado `title`
-                            placeholder="Digite..."
-                            className="border border-[#0A7F8E] focus:ring-1 focus:ring-[#0A7F8E] rounded p-2 focus:outline-none w-full"
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    e.target.blur(); // Remove o foco ao pressionar Enter
-                                }
-                            }}
-                        />
+                    <div className="w-12/12 bg-gray-200 bg-opacity-30 rounded-md p-2 relative">
+                        {/* Campo de título */}
+                        <div className="mb-4">
+                            <h5 className="font-medium mb-1">Título:</h5>
+                            <input
+                                type="text"
+                                maxLength={20} // Limite de caracteres para o título
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)} // Atualiza o estado `title`
+                                placeholder="Digite..."
+                                className="border border-[#0A7F8E] focus:ring-1 focus:ring-[#0A7F8E] rounded p-2 focus:outline-none w-full"
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.target.blur(); // Remove o foco ao pressionar Enter
+                                    }
+                                }}
+                            />
+                        </div>
                     </div>
 
                     {/* Campo para logotipo */}
                     <div>
-                        <h5 className="font-medium mb-1">Logotipo:</h5>
-                        <div className="p-2 flex justify-center items-center overflow-auto border border-dashed border-gray-300 rounded">
-                            <DragDropFile onFileUpload={handleImageUpload} // Componente para arrastar e soltar arquivos
-                                image={image} // Exibe a imagem carregada
-                            />
+                            <h5 className="font-medium mb-1">Logotipo:</h5>
+                            <div className="p-2 flex justify-center items-center overflow-auto border border-dashed border-gray-300 rounded">
+                                <DragDropFile onFileUpload={handleImageUpload} // Componente para arrastar e soltar arquivos
+                                    image={image} // Exibe a imagem carregada
+                                />
                         </div>
                     </div>
                 </div>

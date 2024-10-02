@@ -201,30 +201,32 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                 <div className="flex flex-1 m-8" ref={containerRef}>
                     {/* Seção de Campos */}
                     <div className="w-96 mr-5 overflow-y-auto px-2">
-                        <h6 className="font-bold p-1">Campos</h6>
-                        <Select
-                            isMulti
-                            options={campoOptions}
-                            components={{ SingleValue: CustomSingleValue }}
-                            className="w-full"
-                            classNamePrefix="Select"
-                            placeholder="Selecione..."
-                            onChange={handleCampoChange}
-                            value={campoOptions.filter(option => selectedCampos.includes(option.value))}
-                            closeMenuOnSelect={false}
-                            styles={{
-                                valueContainer: (provided) => ({
-                                    ...provided,
-                                    maxHeight: '120px', // Altura máxima do container de opções selecionadas
-                                    overflowY: 'auto', // Habilita o scroll quando a altura for excedida
-                                }),
-                                multiValue: (provided) => ({
-                                    ...provided,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                }),
-                            }}
-                        />
+                        <div className="w-12/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
+                            <h6 className="font-bold p-1">Campos</h6>
+                            <Select
+                                isMulti
+                                options={campoOptions}
+                                components={{ SingleValue: CustomSingleValue }}
+                                className="w-full"
+                                classNamePrefix="Select"
+                                placeholder="Selecione..."
+                                onChange={handleCampoChange}
+                                value={campoOptions.filter(option => selectedCampos.includes(option.value))}
+                                closeMenuOnSelect={false}
+                                styles={{
+                                    valueContainer: (provided) => ({
+                                        ...provided,
+                                        maxHeight: '120px', // Altura máxima do container de opções selecionadas
+                                        overflowY: 'auto', // Habilita o scroll quando a altura for excedida
+                                    }),
+                                    multiValue: (provided) => ({
+                                        ...provided,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }),
+                                }}
+                            />
+                        </div>
                     </div>
 
                     {/* Botões de Ação com Tooltips Customizados */}
@@ -283,58 +285,60 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
 
                     {/* Tabela de Campos Selecionados */}
                     <div className="flex-1 overflow-y-auto ml-8">
-                        <h6 className="font-bold p-1">Campos Selecionados e Condições</h6>
-                        <div className="max-h-[322px] overflow-y-auto" onScroll={handleScroll}>
-                            <table className="min-w-full table-fixed bg-white border-2 border-custom-azul-escuro w-full border-t-0">
-                                <thead className="sticky top-0 z-10">
-                                    <tr>
-                                        <th className="py-2 px-4 bg-custom-azul-escuro text-left text-sm font-semibold text-white w-14"></th>
-                                        <th className="py-2 px-4 bg-custom-azul-escuro text-left text-sm font-semibold text-white">Campos</th>
-                                        <th className="py-2 px-4 bg-custom-azul-escuro text-left text-sm font-semibold text-white">Ordenação</th>
-                                        <th className="py-2 px-4 bg-custom-azul-escuro text-left text-sm font-semibold text-white">Valor</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {addedCampos.map((campo, index) => (
-                                        <tr key={campo.id}>
-                                            <td className="py-2 px-4 border-b border-custom-azul text-sm">
-                                                <input
-                                                    type="checkbox"
-                                                    className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
-                                                    checked={campo.checked}
-                                                    onChange={() => handleCheckboxChange(campo.id)}
-                                                />
-                                            </td>
-                                            <td className="py-2 px-4 border-b border-custom-azul text-sm">{campo.value}</td>
-                                            <td className="py-2 px-4 border-b border-custom-azul text-sm">
-                                                <Select
-                                                    ref={ref => selectRefs.current[index] = ref}
-                                                    options={ordenacaoOptions}
-                                                    className="basic-single"
-                                                    classNamePrefix="Select"
-                                                    placeholder="Selecione..."
-                                                    menuPortalTarget={containerRef.current} // Referencia a div que será o limite
-                                                    menuShouldScrollIntoView={false} // Evita que ele saia da área visível
-                                                    menuPosition="fixed" // Posiciona o menu fixo
-                                                    styles={{ menuPortal: base => ({ ...base, zIndex: 20000 }) }}
-                                                    onChange={(option) => handleOrdenacaoChange(campo.id, option)}
-                                                    value={ordenacaoOptions.find(option => option.value === campo.ordenacao)}
-                                                />
-                                            </td>
-                                            <td className="py-2 px-4 border-b border-custom-azul text-sm">
-                                                <input
-                                                    type={getInputType(campo.type)}
-                                                    value={campo.valor}
-                                                    onChange={(e) => handleValorChange(campo.id, e.target.value)}
-                                                    onKeyDown={(e) => handleValorKeyDown(campo.id, e)}
-                                                    className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none w-full"
-                                                    placeholder="Digite o valor"
-                                                />
-                                            </td>
+                        <div className="w-12/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
+                            <h6 className="font-bold p-1">Campos Selecionados e Condições</h6>
+                            <div className="max-h-[322px] overflow-y-auto" onScroll={handleScroll}>
+                                <table className="min-w-full table-fixed bg-white border-2 border-custom-azul-escuro w-full border-t-0">
+                                    <thead className="sticky top-0 z-10">
+                                        <tr>
+                                            <th className="py-2 px-4 bg-custom-azul-escuro text-left text-sm font-semibold text-white w-14"></th>
+                                            <th className="py-2 px-4 bg-custom-azul-escuro text-left text-sm font-semibold text-white">Campos</th>
+                                            <th className="py-2 px-4 bg-custom-azul-escuro text-left text-sm font-semibold text-white">Ordenação</th>
+                                            <th className="py-2 px-4 bg-custom-azul-escuro text-left text-sm font-semibold text-white">Valor</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {addedCampos.map((campo, index) => (
+                                            <tr key={campo.id}>
+                                                <td className="py-2 px-4 border-b border-custom-azul text-sm">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
+                                                        checked={campo.checked}
+                                                        onChange={() => handleCheckboxChange(campo.id)}
+                                                    />
+                                                </td>
+                                                <td className="py-2 px-4 border-b border-custom-azul text-sm">{campo.value}</td>
+                                                <td className="py-2 px-4 border-b border-custom-azul text-sm">
+                                                    <Select
+                                                        ref={ref => selectRefs.current[index] = ref}
+                                                        options={ordenacaoOptions}
+                                                        className="basic-single"
+                                                        classNamePrefix="Select"
+                                                        placeholder="Selecione..."
+                                                        menuPortalTarget={containerRef.current} // Referencia a div que será o limite
+                                                        menuShouldScrollIntoView={false} // Evita que ele saia da área visível
+                                                        menuPosition="fixed" // Posiciona o menu fixo
+                                                        styles={{ menuPortal: base => ({ ...base, zIndex: 20000 }) }}
+                                                        onChange={(option) => handleOrdenacaoChange(campo.id, option)}
+                                                        value={ordenacaoOptions.find(option => option.value === campo.ordenacao)}
+                                                    />
+                                                </td>
+                                                <td className="py-2 px-4 border-b border-custom-azul text-sm">
+                                                    <input
+                                                        type={getInputType(campo.type)}
+                                                        value={campo.valor}
+                                                        onChange={(e) => handleValorChange(campo.id, e.target.value)}
+                                                        onKeyDown={(e) => handleValorKeyDown(campo.id, e)}
+                                                        className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none w-full"
+                                                        placeholder="Digite o valor"
+                                                    />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -63,7 +63,7 @@ function ModalSql({ isOpen, onClose }) {
                         onClick={handleCopy}
                         className={`font-bold py-1 px-2 rounded flex items-center transition-colors duration-300 ${isCopied
                             ? "bg-white text-custom-azul-escuro border border-custom-azul-escuro"
-                            : "bg-custom-azul-escuro text-white hover:bg-custom-azul"
+                            : "bg-custom-azul text-white hover:bg-custom-azul-escuro"
                             }`}
                     >
                         <svg

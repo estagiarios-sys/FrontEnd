@@ -4,7 +4,7 @@ import { FaBell } from 'react-icons/fa';
 
 Modal.setAppElement('#root');
 
-const ModalNotificacao = ({ setPdfOK, pdfOK, setStatus, status }) => {
+const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [notificacoes, setNotificacoes] = useState([]);
     const [pdfUrl, setPdfUrl] = useState(null); // Estado para armazenar o URL do PDF
@@ -86,14 +86,13 @@ const ModalNotificacao = ({ setPdfOK, pdfOK, setStatus, status }) => {
     // useEffect para atualizar as notificações quando pdfOK for true
     useEffect(() => {
         const fetchNotificacoes = async () => {
-            if (pdfOK || status) {
+            if (pdfOK) {
                 await loadData();
-                setStatus(false);
             }
         };
 
         fetchNotificacoes();
-    }, [pdfOK, status]); // Dependência do useEffect
+    }, [pdfOK]); // Dependência do useEffect
 
     return (
         <div className="fixed top-3 right-3">
