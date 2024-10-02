@@ -3,7 +3,7 @@ import ModalAlert from './ModalAlert';
 import { getTotalizers } from "../CamposSelecionados";
 
 
-function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
+function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
     const [inputValue, setInputValue] = useState('');
 
     const [isConfirmModalSaveOpen, setIsModalAlertSaveOpen] = useState(false);
@@ -72,7 +72,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
             handleModalAlert();
             return;
         }
-    
+
         try {
             const totalizersObject = getTotalizers() || {};
             const totalizersArrayFormatted = Object.entries(totalizersObject).map(([key, totalizer]) => {
@@ -84,7 +84,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
                     }
                 };
             });
-            
+
             // Criar o objeto JSON com os dados da consulta
             const dataToSave = {
                 queryName: inputValue,
@@ -96,23 +96,23 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
 
             // Criar um FormData
             const formData = new FormData();
-    
+
             // Adicionar o JSON como uma string
             formData.append('stringSavedQuerySaving', JSON.stringify(dataToSave));  // Os dados JSON são enviados como string
-    
+
             // Adicionar a imagem
             formData.append('imgPDF', img);  // A imagem é enviada como um arquivo binário
-    
+
             // Enviar a requisição com fetch
             const response = await fetch('http://localhost:8080/save', {
                 method: 'POST',
                 body: formData,  // Enviando tudo com FormData
             });
-    
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-    
+
             const result = await response.json();
             console.log('Success:', result);
             handleModalAlertSave();
@@ -121,7 +121,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
             handleModalAlertUpdate();
         }
     };
-    
+
 
 
     const updateQuery = async () => {
@@ -233,7 +233,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
 
                     <button className="align-left"
                         style={{
-                            backgroundColor: '#6c757d',
                             border: 'none',
                             borderRadius: '5px',
                             color: '#fff',

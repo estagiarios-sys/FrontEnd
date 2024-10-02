@@ -1,9 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Loading from "../genericos/Loading";
 
 function ModalPdfView({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Função para gerar o PDF
+  const handlePreviewPDF = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8080/pdf/preview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(combinedData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar o PDF.');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setPdfUrl(url);
+    } catch (error) {
+      console.error('Erro ao gerar o PDF:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [combinedData]); // Inclua combinedData como dependência
 
   // Impedir scroll da página quando o modal está aberto
   useEffect(() => {
@@ -25,7 +50,7 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
       document.body.style.overflow = ""; // Limpeza no fechamento
       document.body.style.paddingRight = ""; // Limpeza no fechamento
     };
-  }, [isOpen]);
+  }, [isOpen, handlePreviewPDF]); // Adicione handlePreviewPDF aqui
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -38,30 +63,6 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
-
-  const handlePreviewPDF = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/pdf/preview', { // Backend Java
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(combinedData), // Envia o HTML da tabela completa
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao gerar o PDF.');
-      }
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      setPdfUrl(url); // Atualiza para usar o URL do PDF
-    } catch (error) {
-      console.error('Erro ao gerar o PDF:', error);
-    } finally {
-      setIsLoading(false); // Finaliza o carregamento após o PDF ser gerado
-    }
-  };
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000]"

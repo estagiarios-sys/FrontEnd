@@ -152,8 +152,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
   useEffect(() => {
     passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
-  }, [passHandleLoadFromLocalStorage, handleLoadFromLocalStorage]); // Inclua handleLoadFromLocalStorage como dependência
-
+  }, [handleLoadFromLocalStorage]); // Inclua handleLoadFromLocalStorage como dependência
 
   const tabelas = Object.keys(jsonData);
 
@@ -163,7 +162,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
       relacionada: [...new Set(selectedRelacionada)], // Remove duplicatas aqui também, se necessário
       campos: [...new Set(selectedCampos)] // Remove duplicatas nos campos também
     });
-  }, [selectedTabela, selectedRelacionada, selectedCampos, onDataChange]);
+  }, [selectedTabela, selectedRelacionada, selectedCampos]);
 
   const tabelaOptions = tabelas.map(tabela => ({
     value: tabela,
