@@ -80,7 +80,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const confirmModalAlert = () => {
         closeModal('alert');
     };
-    
+
     // Utilizando useMemo para otimizar cálculos
     const hasData = useMemo(() => tableData.length > 0 && tableData[0].values, [tableData]);
     const totalPages = useMemo(() => hasData ? Math.ceil(tableData[0].values.length / itemsPerPage) : 0, [hasData, tableData, itemsPerPage]);
@@ -159,7 +159,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             let idNotificacao = null;
 
-            if (option === 'PDF') { 
+            if (option === 'PDF') {
                 const id = await fetch('http://localhost:8080/pdf/create-empty', {
                     method: 'POST',
                     headers: {
@@ -331,7 +331,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
     const generateFullTableHTML = (columns, dataFormat, resultTotalizer, updatedColumnWidths, maxRows = null) => {
         if (!dataFormat || dataFormat.length === 0) return '<p>Nenhum dado encontrado.</p>';
-    
+
         let size = 0;
         const filteredColumns = [];
         const filteredWidths = [];
@@ -347,17 +347,17 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         updatedColumnWidths.forEach((width, index) => {
             if (size + width <= 1000) {
                 size += width;
-                filteredColumns.push(columns[index]); 
+                filteredColumns.push(columns[index]);
                 filteredWidths.push(width);
             }
         });
-    
+
         const tableHeaders = filteredColumns.map((column, index) =>
             `<th class="p-2 border-b text-center" style="width: ${filteredWidths[index] || 'auto'}">${column}</th>`
         ).join('');
-    
+
         const rowCount = maxRows ? Math.min(dataFormat[0].values.length, maxRows) : dataFormat[0].values.length;
-    
+
         const tableRows = dataFormat[0].values.slice(0, rowCount).map((_, rowIndex) => {
             const rowHTML = filteredColumns.map((_, colIndex) =>
                 `<td class="p-2 border-b text-center">${dataFormat[colIndex]?.values[rowIndex]}</td>`
@@ -365,9 +365,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
             return `<tr class="${rowClass}">${rowHTML}</tr>`;
         }).join('');
-    
+
         const totalizerHTML = renderTotalizerHTML(filteredColumns, resultTotalizer);
-    
+
         return `
         <table>
             <thead class="text-black">
@@ -377,7 +377,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             ${totalizerHTML ? totalizerHTML : ''}
         </table>
         `;
-    }; 
+    };
 
     const updateColumnWidths = () => {
         if (tableRef.current) {
@@ -475,13 +475,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                 </tr>
                 <tr class="bg-custom-azul-claro text-center">
                     ${columns.map((col, index) => {
-                        const totalizerKey = totalizerKeys.find(key => key.includes(col));
-                        return `
+            const totalizerKey = totalizerKeys.find(key => key.includes(col));
+            return `
                             <td class="font-regular text-black pb-3">
                                 ${totalizerKey ? resultTotalizer[totalizerKey] : ""}
                             </td>
                         `;
-                    }).join('')}
+        }).join('')}
                 </tr>
             </ftotalizer>
         `;
@@ -598,7 +598,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={ () => {
+                            <button onClick={() => {
                                 if (tableData.length === 0) {
                                     openModal('alert', 'ALERTA', 'Gere o relatório para visualizar a prévia.');
                                 } else {
@@ -736,8 +736,8 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
-            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK}/>
-            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf}/>
+            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns.map(col => typeof col === 'object' ? col.columnName : col)} combinedData={combinedData} setPdfOK={setPdfOK} />
+            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />

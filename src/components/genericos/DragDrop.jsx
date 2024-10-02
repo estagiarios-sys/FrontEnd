@@ -134,7 +134,8 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
       </label>
 
       {/* Modal de alerta para arquivos inválidos */}
-      <ModalModal modalType="ATENÇÃO"
+      <ModalModal
+        modalType="ALERTA" // Altere "ATENÇÃO" para um valor válido
         isOpen={modalAlertImagem} // Controla se o modal está aberto
         onClose={() => setModalAlertImagem(false)} // Fecha o modal ao clicar em "Fechar"
         onConfirm={onClose} // Executa ação de confirmação (fechar)

@@ -59,6 +59,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
             await onFetchData('PDF');
         } else if (option === 'Baixar CSV') {
             await onFetchData('CSV');
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'CSV gerado com sucesso!' }); // Adicione isso se necessário
         }
     };
 
@@ -179,7 +180,13 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                     </div>
                 )}
             </div>
-            <ModalAlert isOpen={modal.isOpen} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} onConfirm={handleConfirmar} modalType={modal.type} message={modal.message} />
+            <ModalAlert 
+                isOpen={modal.isOpen} 
+                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} 
+                onConfirm={handleConfirmar} 
+                modalType={modal.type || 'ALERTA'} // Use um valor padrão se modal.type estiver vazio
+                message={modal.message} 
+            />
         </div>
     );
 }
