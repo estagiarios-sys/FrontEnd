@@ -519,25 +519,25 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                         >
                             Consultar
                         </button>
-                        <button
+                        {/* <button
                             className="p-2 px-5 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-lg mr-2"
                             onClick={() => openModal('salvarCon')}
                         >
                             Salvar Consulta
-                        </button>
+                        </button> */}
                     </div>
                 </div>
                 <div className="flex mr-36 justify-center items-center">
                     <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
+                        {/* <div className="flex flex-col justify-center items-center">
                             <button onClick={() => openModal('salvos')} className="flex flex-col justify-center items-center">
-				{/* Ícone e label */}
+				            {/* Ícone e label }
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
                                 </svg>
                                 <label htmlFor="mais">Salvos</label>
                             </button>
-                        </div>
+                        </div> */}
                     </div>
                     {/* Outros botões de modais */}
                     <div className="mx-2">
