@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalAlert from './ModalAlert';
 
-function ModalSalvos({ isOpen, onClose, generateReport }) {
+function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitlePdf }) {
     const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
@@ -39,7 +39,9 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
                     queryWithTotalizers: {
                         "query": item.totalizersQuery,
                         "totalizers": item.totalizers.map(totalizerObj => totalizerObj.totalizer)
-                    }
+                    },
+                    imgSaved: item.imgPDF,
+                    titleSaved: item.titlePDF
                 }));
                 setCampoOptions(options);
             } catch (error) {
@@ -48,7 +50,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
         }
 
         fetchSavedQueries();
-    }, []);
+    }, [selectedCampo, isOpen]);
 
     async function deleteSavedQuery() {
         try {
@@ -82,7 +84,12 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
 
     async function handleCarregar(generateReport) {
         if (selectedCampo && selectedCampo.finalQuery) {
-            localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo));
+            localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo)); 
+
+            const base64ImageWithMetadata = "data:image/png;base64," + selectedCampo.imgSaved;
+
+            setBase64Image(base64ImageWithMetadata);
+            setTitlePdf(selectedCampo.titleSaved);
             setModalMessage('Consulta carregada!');
             setModalType('warning'); // Definir modal de aviso
 
@@ -98,9 +105,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-        onClick={onClose}
-        >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
                 <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">CONSULTAS SALVAS</h5>
@@ -179,6 +184,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
             {/* Modal de Aviso */}
             {modalType === 'warning' && (
                 <ModalAlert
+                    modalType={"ALERTA"}
                     isOpen={true}
                     onClose={() => setModalType(null)}
                     onConfirm={() => setModalType(null)}
