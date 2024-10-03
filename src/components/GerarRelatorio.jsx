@@ -13,7 +13,9 @@ import ModalGerar from "./modais/ModalGerar";
 import Loading from "./genericos/Loading";
 
 const url2 = window.location.hostname
-const completUrl = process.env.COMPLET_URL;
+const completUrl = process.env.REACT_APP_COMPLET_URL;
+
+console.log(completUrl)
 
 // Hook personalizado para gerenciamento de modais
 function useModal() {
