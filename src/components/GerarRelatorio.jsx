@@ -72,6 +72,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
+    let idNotificacao = null;
 
     const handleModalAviso = (message) => {
         openModal('alert', 'ALERTA', message);
@@ -154,25 +155,35 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         });
     }, [currentPage]);
 
+    const createEmpty = async (titlePdf) => {
+        try {
+            // Faz a requisição para criar um ID da notificação
+            const response = await fetch('http://localhost:8080/pdf/create-empty', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(titlePdf), // Serializa o título como JSON
+            });
+    
+            // Verifica se a resposta foi bem-sucedida
+            if (!response.ok) {
+                throw new Error(`Erro ao criar ID da notificação: ${response.statusText}`);
+            }
+    
+            // Pega o ID retornado
+            idNotificacao = await response.json();
+        } catch (error) {
+            console.error('Erro ao criar a notificação:', error);
+            throw error; // Propaga o erro para ser tratado em outro local se necessário
+        }
+    };
+
     const fetchData = async (option) => {
         try {
 
-            let idNotificacao = null;
-
-            if (option === 'PDF') {
-                const id = await fetch('http://localhost:8080/pdf/create-empty', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: titlePdf,
-                });
-
-                if (!id.ok) {
-                    throw new Error(`Erro ao criar ID da notificação: ${id.statusText}`);
-                }
-
-                idNotificacao = await id.json();
+            if (option === 'PDF') { 
+                createEmpty();
             }
 
             const jsonRequest = buildJsonRequest();
@@ -336,13 +347,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         const filteredColumns = [];
         const filteredWidths = [];
 
-        if (!Array.isArray(updatedColumnWidths)) {
-            updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
+        if (!updatedColumnWidths || updatedColumnWidths.length === 0) {
+           updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
         }
-
-        //if (!updatedColumnWidths || updatedColumnWidths.length === 0) {
-        //    updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
-        //}
 
         updatedColumnWidths.forEach((width, index) => {
             if (size + width <= 1000) {
@@ -622,12 +629,14 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     </div>
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => {
+                            <button onClick={async () => {
                                 if (tableData.length === 0) {
                                     openModal('alert', 'ALERTA', 'Gere o relatório antes de exportar.');
                                 } else {
                                     const updatedColumnWidths = updateColumnWidths();
+                                    await createEmpty();
                                     const combinedData = {
+                                        pdfId: idNotificacao,
                                         fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, updatedColumnWidths),
                                         titlePDF: titlePdf,
                                         imgPDF: base64Image,
