@@ -46,8 +46,17 @@ export function downloadCSV(columns, tableData, handleModalAviso) {
         );
         return;
     }
+    console.log('columns', columns);
 
-    const columnsName = columns.map((col) => col.value);
+    const columnsName = columns.map((col) => {
+        if (col.value.includes(' as ')) {
+            const aliasMatch = col.value.match(/as\s+"(.+?)"/i);
+            return aliasMatch ? aliasMatch[1] : col.value;
+        }
+        console.log('col', col);
+        return col.value;
+    });
+    console.log('columnsName', columnsName);
     const csvContent = convertToCSV(columnsName, tableData);
 
     if (!csvContent || csvContent.trim() === "") {
@@ -165,9 +174,9 @@ function ModalExpo({
                         label="Baixar PDF"
                     />
                     <DownloadButton
-                        onClick={() =>
-                            downloadCSV(selectedColumns, table, handleModalAviso)
-                        }
+                        onClick={() => {
+                            downloadCSV(selectedColumns, table, handleModalAviso);
+                        }}
                         icon={<FiDownload size={24} />}
                         label="Baixar CSV"
                     />
@@ -213,7 +222,7 @@ ModalExpo.propTypes = {
             values: PropTypes.array.isRequired,
         })
     ),
-    selectedColumns: PropTypes.arrayOf(PropTypes.string),
+    selectedColumns: PropTypes.arrayOf(PropTypes.object),
     combinedData: PropTypes.object,
     setPdfOK: PropTypes.func.isRequired, // Adicionado setPdfOK aos propTypes
 };

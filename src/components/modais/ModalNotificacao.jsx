@@ -19,7 +19,6 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
             }
             const data = await response.json();
             setNotificacoes(data);
-            console.log('Notificações:', data);
             if (modalIsOpen) {
                 setPdfOK(false); // Atualiza o estado de pdfOK
             }
