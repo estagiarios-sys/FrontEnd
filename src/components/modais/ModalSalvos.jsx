@@ -21,7 +21,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
     }, [isOpen]);
 
     const url = window.location.hostname
-    const completUrl = process.env.REACT_APP_COMPLET_URL;
+    const completUrl = process.env.COMPLET_URL;
 
     useEffect(() => {
         async function fetchSavedQueries() {

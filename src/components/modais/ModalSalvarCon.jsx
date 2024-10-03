@@ -25,7 +25,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
     };
 
     const url = window.location.hostname
-    const completUrl = process.env.REACT_APP_COMPLET_URL;
+    const completUrl = process.env.COMPLET_URL;
 
     const handleModalAlertSave = () => {
         setModalMessage('Consulta salva!');

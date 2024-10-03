@@ -21,7 +21,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   const selectedValues = new Set(campos.map(campo => campo.value)); // Cria um conjunto dos valores selecionados
 
   const url = window.location.hostname
-  const completUrl = process.env.REACT_APP_COMPLET_URL;
+  const completUrl = process.env.COMPLET_URL;
 
   useEffect(() => {
     async function fetchJsonData() {
