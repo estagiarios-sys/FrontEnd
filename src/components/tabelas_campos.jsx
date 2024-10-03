@@ -21,11 +21,12 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   const selectedValues = new Set(campos.map(campo => campo.value)); // Cria um conjunto dos valores selecionados
 
   const url = window.location.hostname
+  const completUrl = "8082/reportsback"
 
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch(`http://${url}:8080/find/table` , {
+        const response = await fetch(`http://${url}:${completUrl}/find/table` , {
           credentials: 'include'
         });
         
@@ -42,7 +43,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
     async function fetchRelationships() {
       try {
-        const response = await fetch(`http://${url}:8080/find/relationship`, {
+        const response = await fetch(`http://${url}:${completUrl}/find/relationship`, {
           credentials: 'include'
         });
 

@@ -21,11 +21,12 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
     }, [isOpen]);
 
     const url = window.location.hostname
+    const completUrl = "8082/reportsback"
 
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
-                const response = await fetch(`http://${url}:8080/find/saved-query`, {
+                const response = await fetch(`http://${url}:${completUrl}/find/saved-query`, {
                     credentials: 'include'
                 });
 
@@ -54,7 +55,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
 
     async function deleteSavedQuery() {
         try {
-            const response = await fetch(`http://${url}:8080/delete/${excludeCampo}`, {
+            const response = await fetch(`http://${url}:${completUrl}/delete/${excludeCampo}`, {
                 method: 'DELETE',
             });
 
