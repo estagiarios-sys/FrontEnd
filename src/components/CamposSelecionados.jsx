@@ -184,6 +184,8 @@ function CamposSelecionados({
                             <td className="py-2 px-4 border-b border-custom-azul text-sm">
                               <input
                                 type="checkbox"
+                                id={`checkbox-${value}`} // Adding a unique ID
+                                name={`checkbox-${value}`} // Adding a name attribute
                                 checked={checkedCampos.includes(value)}
                                 onChange={() => handleCheckboxChange(value)}
                                 className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
@@ -193,6 +195,8 @@ function CamposSelecionados({
                           <td className="py-2 px-4 border-b border-custom-azul text-sm">
                             <input
                               type="text"
+                              id={`input-${value}`} // Adding a unique ID
+                              name={`input-${value}`} // Adding a name attribute
                               onBlur={(e) => handleCustomNameChange(e, { value })}
                               className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none"
                               placeholder={value}

@@ -165,12 +165,12 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                 },
                 body: JSON.stringify(titlePdf), // Serializa o título como JSON
             });
-    
+
             // Verifica se a resposta foi bem-sucedida
             if (!response.ok) {
                 throw new Error(`Erro ao criar ID da notificação: ${response.statusText}`);
             }
-    
+
             // Pega o ID retornado
             idNotificacao = await response.json();
         } catch (error) {
@@ -182,7 +182,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const fetchData = async (option) => {
         try {
 
-            if (option === 'PDF') { 
+            if (option === 'PDF') {
                 createEmpty();
             }
 
@@ -348,7 +348,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         const filteredWidths = [];
 
         if (!updatedColumnWidths || updatedColumnWidths.length === 0) {
-           updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
+            updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
         }
 
         updatedColumnWidths.forEach((width, index) => {
@@ -745,7 +745,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
-            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns.map(col => typeof col === 'object' ? col.columnName : col)} combinedData={combinedData} setPdfOK={setPdfOK} />
+            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
