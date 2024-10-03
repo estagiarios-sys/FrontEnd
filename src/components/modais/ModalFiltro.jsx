@@ -43,13 +43,9 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     const [condicoesStringComparacao, setCondicoesStringComparacao] = useState('');
     const selectRefs = useRef([]);
     const containerRef = useRef(null);
-    let comparacao = 0;
 
-    if (condicoesStringComparacao !== '') {
-        comparacao = condicoesStringComparacao.split(' AND ').length;
-    } else {
-        comparacao = 0;
-    }
+    // Contar comparações
+    const comparacao = condicoesStringComparacao.split(' AND ').length - (condicoesStringComparacao ? 1 : 0);
 
     const handleClose = useCallback(() => {
         const hasEmptyFields = addedCampos.some(campo => !campo.valor.trim() || !campo.ordenacao);
@@ -58,20 +54,20 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
             return;
         }
         onClose();
-    }, [onClose]);
+    }, [onClose, addedCampos, comparacao]);
 
     const handleScroll = () => {
-        // Fecha todos os selects abertos ao scrollar
         selectRefs.current.forEach(ref => {
             if (ref) ref.blur();
         });
     };
 
-    const campoOptions = useMemo(() => columns.map(col => ({
-        value: col.value,
-        label: col.value,
-        type: col.type,
-    })), [columns]);
+    const campoOptions = useMemo(() => 
+        columns.map(col => ({
+            value: col.value,
+            label: col.value,
+            type: col.type,
+        })), [columns]);
 
     const handleCampoChange = useCallback((selectedOptions) => {
         setSelectedCampos(selectedOptions?.map(option => option.value) || []);
@@ -81,7 +77,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         const camposToAdd = selectedCampos.map(value => {
             const option = campoOptions.find(option => option.value === value);
             return {
-                id: `${value}-${Date.now()}-${Math.random()}`, // Geração de ID único
+                id: `${value}-${Date.now()}-${Math.random()}`,
                 value: option.value,
                 type: option.type,
                 checked: false,
@@ -100,9 +96,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     }, [onSave]);
 
     const handleCheckboxChange = useCallback((id) => {
-        setAddedCampos(prev => prev.map(campo =>
-            campo.id === id ? { ...campo, checked: !campo.checked } : campo
-        ));
+        setAddedCampos(prev => prev.map(campo => campo.id === id ? { ...campo, checked: !campo.checked } : campo));
     }, []);
 
     const handleRemoveCheckedCampos = useCallback(() => {
@@ -116,9 +110,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     }, [addedCampos, onSave]);
 
     const handleValorChange = useCallback((id, value) => {
-        setAddedCampos(prev => prev.map(campo =>
-            campo.id === id ? { ...campo, valor: value } : campo
-        ));
+        setAddedCampos(prev => prev.map(campo => campo.id === id ? { ...campo, valor: value } : campo));
     }, []);
 
     const handleValorKeyDown = useCallback((id, e) => {
@@ -130,9 +122,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     }, [handleValorChange]);
 
     const handleOrdenacaoChange = useCallback((id, selectedOption) => {
-        setAddedCampos(prev => prev.map(campo =>
-            campo.id === id ? { ...campo, ordenacao: selectedOption?.value || '' } : campo
-        ));
+        setAddedCampos(prev => prev.map(campo => campo.id === id ? { ...campo, ordenacao: selectedOption?.value || '' } : campo));
     }, []);
 
     const handleSave = useCallback(() => {
@@ -151,31 +141,28 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     }, [addedCampos, onSave]);
 
     const handleConfirm = useCallback(() => {
-        if (modal.type === "SUCESSO") {
-            onClose();
-        } else if (modal.type === "CONFIRMAR") {
+        if (modal.type === "SUCESSO" || modal.type === "CONFIRMAR") {
             onClose();
         }
         setModal(prev => ({ ...prev, isOpen: false }));
     }, [modal.type, onClose]);
 
-    // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
 
         if (isOpen) {
             if (hasScroll) {
-                document.body.style.paddingRight = "6px"; // Adiciona padding
+                document.body.style.paddingRight = "6px";
             }
-            document.body.style.overflow = "hidden"; // Desativa o scroll
+            document.body.style.overflow = "hidden";
         } else {
-            document.body.style.overflow = ""; // Restaura o scroll
-            document.body.style.paddingRight = ""; // Remove o padding
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
         }
 
         return () => {
-            document.body.style.overflow = ""; // Limpeza no fechamento
-            document.body.style.paddingRight = ""; // Limpeza no fechamento
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
         };
     }, [isOpen]);
 

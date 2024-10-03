@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
 import { FaBell } from 'react-icons/fa';
 
@@ -10,7 +10,8 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
     const [pdfUrl, setPdfUrl] = useState(null); // Estado para armazenar o URL do PDF
     const [pdfModalIsOpen, setPdfModalIsOpen] = useState(false); // Modal para PDF em tela cheia
 
-    const loadData = async () => {
+    // Usar useCallback para memorizar a função loadData
+    const loadData = useCallback(async () => {
         try {
             const response = await fetch('http://localhost:8080/pdf/list');
             if (!response.ok) {
@@ -27,7 +28,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
             setNotificacoes([]);
             alert('Falha ao buscar notificações: ' + error.message);
         }
-    };
+    }, [modalIsOpen, setPdfOK]); // Adicione as dependências necessárias
 
     const openModal = async () => {
         await loadData();
@@ -92,7 +93,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
         };
 
         fetchNotificacoes();
-    }, [pdfOK]); // Dependência do useEffect
+    }, [pdfOK, loadData]); // Adiciona loadData às dependências do useEffect
 
     return (
         <div className="fixed top-3 right-3">

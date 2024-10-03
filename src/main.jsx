@@ -31,6 +31,10 @@ function Main() {
 
   // Remove campos selecionados com checkbox marcado e adiciona de volta aos disponíveis
   const handleIndividualLeftClick = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('clearSelectedCampos'));
+    }
+
     const camposParaRemover = selectedCampos.filter(campo =>
       typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, ''))
     );
@@ -70,6 +74,10 @@ function Main() {
 
   // Move todos os campos selecionados para a lista de disponíveis e limpa a lista de selecionados
   const handleAllLeftClick = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('clearSelectedCampos'));
+    }
+
     localStorage.setItem('orderByString', '');
     resetTotalizers();
     setAvailableCampos(prevAvailableCampos => [
