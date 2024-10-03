@@ -20,10 +20,12 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
         };
     }, [isOpen]);
 
+    const url = window.location.hostname
+
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
-                const response = await fetch('http://localhost:8080/find/saved-query', {
+                const response = await fetch(`http://${url}:8080/find/saved-query`, {
                     credentials: 'include'
                 });
 
@@ -52,7 +54,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
 
     async function deleteSavedQuery() {
         try {
-            const response = await fetch(`http://localhost:8080/delete/${excludeCampo}`, {
+            const response = await fetch(`http://${url}:8080/delete/${excludeCampo}`, {
                 method: 'DELETE',
             });
 
@@ -99,7 +101,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-        
+
         >
             <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
                 <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">

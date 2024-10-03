@@ -20,13 +20,15 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   const campos = getSelectedCampos();
   const selectedValues = new Set(campos.map(campo => campo.value)); // Cria um conjunto dos valores selecionados
 
+  const url = window.location.hostname
+
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch('http://localhost:8080/find/table', {
+        const response = await fetch(`http://${url}:8080/find/table` , {
           credentials: 'include'
         });
-
+        
         if (!response.ok) {
           throw new Error(`Erro na requisição: ${response.statusText}`);
         }
@@ -40,7 +42,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
     async function fetchRelationships() {
       try {
-        const response = await fetch('http://localhost:8080/find/relationship', {
+        const response = await fetch(`http://${url}:8080/find/relationship`, {
           credentials: 'include'
         });
 

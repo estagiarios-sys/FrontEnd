@@ -24,6 +24,8 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
 
     };
 
+    const url = window.location.hostname
+
     const handleModalAlertSave = () => {
         setModalMessage('Consulta salva!');
         setIsModalAlertSaveOpen(true);
@@ -106,7 +108,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
             formData.append('imgPDF', img);  // A imagem é enviada como um arquivo binário
     
             // Enviar a requisição com fetch
-            const response = await fetch('http://localhost:8080/save', {
+            const response = await fetch(`http://${url}:8080/save`, {
                 method: 'POST',
                 body: formData,  // Enviando tudo com FormData
             });
@@ -135,7 +137,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf}) {
 
             const query = JSON.stringify(dataToSave);
 
-            const response = await fetch('http://localhost:8080/update/saved-query', {
+            const response = await fetch(`http://${url}:8080/update/saved-query`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

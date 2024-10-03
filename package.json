@@ -12,6 +12,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0",
+    "react-modal": "^3.16.1",
     "react-router-dom": "^6.26.1",
     "react-scripts": "5.0.1",
     "react-select": "^5.8.0",
@@ -42,9 +43,17 @@
     ]
   },
   "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
     "autoprefixer": "^10.4.20",
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "file-loader": "^6.2.0",
     "postcss": "^8.4.41",
-    "tailwindcss": "^3.4.10"
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^3.4.10",
+    "webpack-cli": "^5.1.4"
   },
   "proxy": "http://localhost:8080"
 }

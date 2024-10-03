@@ -12,6 +12,8 @@ import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from
 import ModalGerar from "./modais/ModalGerar";
 import Loading from "./genericos/Loading";
 
+const url2 = window.location.hostname
+
 // Hook personalizado para gerenciamento de modais
 function useModal() {
     const [modals, setModals] = useState({
@@ -76,6 +78,8 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const [renderTotalizerResult, setRenderTotalizerResult] = useState({});
     const [combinedDataExpo, setcombinedDataExpo] = useState(null);
 
+    
+
     const handleModalAviso = (message) => {
         openModal('alert', 'ALERTA', message);
     };
@@ -133,11 +137,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         }
         return jsonRequest;
     };
-
     useEffect(() => {
         const fetchRelationshipData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/find/relationship');
+                const response = await fetch(`http://${url2}:8080/find/relationship`);
                 const data = await response.json();
                 setRelationshipData(data);
             } catch (error) {
@@ -163,7 +166,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         try {
             const jsonRequest = buildJsonRequest();
 
-            const url = 'http://localhost:8080/find';
+            const url = `http://${url2}:8080/find`;
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -233,7 +236,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
     const fetchLoadQuery = async () => {
         try {
-            const url = 'http://localhost:8080/find/loadedQuery';
+            const url = `http://${url2}:8080/find/loadedQuery`;
             const loadedQuery = localStorage.getItem('loadedQuery');
 
             if (!loadedQuery) {
@@ -427,7 +430,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             setLoading(true);
             const jsonRequest = buildJsonRequest();
 
-            const url = 'http://localhost:8080/find/analysis';
+            const url = `http://${url2}:8080/find/analysis`;
 
             const response = await fetch(url, {
                 method: 'POST',
