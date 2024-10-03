@@ -166,12 +166,12 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
             <ModalAlert
                 isOpen={modal.isOpen}
                 onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
-                onConfirm={handleConfirmar}
-                modalType={modal.type}
+                modalType={modal.type || 'ALERTA'} // Garante que um valor válido seja passado
                 message={modal.message}
+                onConfirm={handleConfirmar} // Callback ao confirmar ação no modal
             />
         </div>
     );
 }
 
-export default ModalEditar; // Exporta o componente ModalEditar para ser usado em outras partes da aplicação
+export default ModalEditar;

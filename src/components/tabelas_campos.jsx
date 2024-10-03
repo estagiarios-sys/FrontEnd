@@ -18,7 +18,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   const buttonRef = useRef(null);
 
   const campos = getSelectedCampos();
-  const selectedValues = new Set(campos.map(campo => campo.value)); // Cria um conjunto dos valores selecionados
 
   useEffect(() => {
     async function fetchJsonData() {
@@ -151,19 +150,23 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   }, [relationships]);
 
   useEffect(() => {
-    passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
-  }, [passHandleLoadFromLocalStorage, handleLoadFromLocalStorage]); // Inclua handleLoadFromLocalStorage como dependência
-
+    if (passHandleLoadFromLocalStorage) {
+      passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
+    }
+  }, [handleLoadFromLocalStorage, passHandleLoadFromLocalStorage]); // Inclua handleLoadFromLocalStorage como dependência
 
   const tabelas = Object.keys(jsonData);
 
   useEffect(() => {
-    onDataChange({
-      tabela: selectedTabela,
-      relacionada: [...new Set(selectedRelacionada)], // Remove duplicatas aqui também, se necessário
-      campos: [...new Set(selectedCampos)] // Remove duplicatas nos campos também
-    });
-  }, [selectedTabela, selectedRelacionada, selectedCampos, onDataChange]);
+    if (onDataChange) {
+      onDataChange({
+        tabela: selectedTabela,
+        relacionada: [...new Set(selectedRelacionada)],
+        campos: [...new Set(selectedCampos)]
+      });
+    }
+  }, [selectedTabela, selectedRelacionada, selectedCampos]);
+
 
   const tabelaOptions = tabelas.map(tabela => ({
     value: tabela,
@@ -171,21 +174,23 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   }));
 
   const campoOptions = useMemo(() => {
+    const selectedValues = new Set(campos.map(campo => campo.value)); // Move para dentro do useMemo
+
     const options = new Map();
 
     if (selectedTabela && jsonData[selectedTabela]) {
       Object.keys(jsonData[selectedTabela]).forEach(campo => {
         const optionValue = `${selectedTabela}.${campo}`;
         if (!selectedValues.has(optionValue)) { // Verifica se o campo já está selecionado
-          options.set(optionValue, { 
-            value: optionValue, 
-            label: `${selectedTabela} - ${campo}`, 
-            type: jsonData[selectedTabela][campo] 
+          options.set(optionValue, {
+            value: optionValue,
+            label: `${selectedTabela} - ${campo}`,
+            type: jsonData[selectedTabela][campo]
           });
         }
       });
     }
-  
+
     // Adiciona campos das tabelas selecionadas como relacionadas
     if (selectedRelacionada.length > 0) {
       selectedRelacionada.forEach(relacionadaTabela => {
@@ -194,16 +199,16 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           .filter(rel => rel.tabelas.includes(relacionadaTabela))
           .forEach(rel => {
             const tabelas = rel.tabelas.split(' e ');
-  
+
             tabelas.forEach(table => {
               if (table !== selectedTabela && table === relacionadaTabela && jsonData[table]) {
                 Object.keys(jsonData[table]).forEach(campo => {
                   const optionValue = `${table}.${campo}`;
                   if (!selectedValues.has(optionValue)) { // Verifica se o campo já está selecionado
-                    options.set(optionValue, { 
-                      value: optionValue, 
-                      label: `${table} - ${campo}`, 
-                      type: jsonData[table][campo] 
+                    options.set(optionValue, {
+                      value: optionValue,
+                      label: `${table} - ${campo}`,
+                      type: jsonData[table][campo]
                     });
                   }
                 });
@@ -212,9 +217,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           });
       });
     }
-  
+
     return Array.from(options.values());
-  }, [selectedTabela, jsonData, selectedRelacionada, campos]); 
+  }, [selectedTabela, jsonData, selectedRelacionada, relationships, campos]); // 'selectedValues' não precisa estar aqui
 
   const relacionadaOptions = useMemo(() => {
     if (!selectedTabela) return [];
@@ -335,6 +340,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
         <div className="containerClick">
           <Select
             name="tabelas"
+            inputId="tabelas"
             options={tabelaOptions}
             className="basic-single w-96"
             classNamePrefix="Select"
@@ -363,6 +369,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           <Select
             isMulti
             name="relacionadas"
+            inputId="relacionadas"
             options={relacionadaOptions} // Opções geradas pelo useMemo
             className="basic-single w-96"
             classNamePrefix="Select"
@@ -393,6 +400,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           <Select
             isMulti
             name="campos"
+            inputId="campos"
             options={campoOptions} // Campos gerados a partir das tabelas selecionadas
             className="basic-multi-select w-96"
             classNamePrefix="Select"

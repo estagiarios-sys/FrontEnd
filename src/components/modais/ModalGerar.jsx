@@ -5,7 +5,6 @@ import Loading from "../genericos/Loading";
 
 function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [showDropdown, setShowDropdown] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
     const [isClicked, setIsClicked] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
@@ -36,11 +35,6 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
         };
     }, [isOpen]);
 
-    const handleClick = () => {
-        setIsClicked(!isClicked);
-        mostrarOpcoes();
-    };
-
     const closeModal = () => {
         setShowDropdown(false);
         onClose();
@@ -48,7 +42,7 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
 
     const mostrarOpcoes = () => {
         setShowDropdown(prev => !prev); // Alterna o estado de visibilidade do dropdown
-        setIsDropdownOpen(prev => !prev); // Alterna o ícone de seta para cima/baixo
+        setIsClicked(prev => !prev); // Alterna o estado de clique
     };
 
     const handleOptionClick = async (option) => {
@@ -65,13 +59,13 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
             await onFetchData('PDF');
         } else if (option === 'Baixar CSV') {
             await onFetchData('CSV');
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'CSV gerado com sucesso!' }); // Adicione isso se necessário
         }
     };
 
     const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             setShowDropdown(false);
-            setIsDropdownOpen(false);
             setIsClicked(false);
         }
     };
@@ -108,14 +102,14 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                 {/* Cabeçalho */}
                 <div className="w-full h-14 bg-[#0A7F8E] flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">CONSULTAR DADOS</h5>
-                        <button
-                            className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
-                            onClick={onClose}
-                            aria-label="Fechar modal"
-                            title="Fechar"
-                        >
-                            <span aria-hidden="true">×</span>
-                        </button>
+                    <button
+                        className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
+                        onClick={onClose}
+                        aria-label="Fechar modal"
+                        title="Fechar"
+                    >
+                        <span aria-hidden="true">×</span>
+                    </button>
                 </div>
                 <div className="w-[500px] h-[250px] flex flex-col items-center mt-3">
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
@@ -124,28 +118,28 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                         </p>
                     </div>
                 </div>
-                    <div className="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
-                        <div className="ml-auto flex items-center">
-                            <button
-                                className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
-                                onClick={closeModal}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
-                                onClick={handleClick}
-                            >
-                                Opções
-                                <FaCaretDown
-                                    style={{
-                                        transition: 'transform 0.3s ease',
-                                        transform: isClicked ? 'rotate(180deg)' : 'rotate(0deg)',
-                                    }}
-                                />
-                            </button>
-                        </div>
+                <div className="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
+                    <div className="ml-auto flex items-center">
+                        <button
+                            className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
+                            onClick={closeModal}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
+                            onClick={mostrarOpcoes}
+                        >
+                            Opções
+                            <FaCaretDown
+                                style={{
+                                    transition: 'transform 0.3s ease',
+                                    transform: isClicked ? 'rotate(180deg)' : 'rotate(0deg)',
+                                }}
+                            />
+                        </button>
                     </div>
+                </div>
                 {showDropdown && (
                     <div
                         ref={dropdownRef}
@@ -186,7 +180,13 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                     </div>
                 )}
             </div>
-            <ModalAlert isOpen={modal.isOpen} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} onConfirm={handleConfirmar} modalType={modal.type} message={modal.message} />
+            <ModalAlert 
+                isOpen={modal.isOpen} 
+                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} 
+                onConfirm={handleConfirmar} 
+                modalType={modal.type || 'ALERTA'} // Use um valor padrão se modal.type estiver vazio
+                message={modal.message} 
+            />
         </div>
     );
 }
