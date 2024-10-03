@@ -340,6 +340,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
         <div className="containerClick">
           <Select
             name="tabelas"
+            inputId="tabelas"
             options={tabelaOptions}
             className="basic-single w-96"
             classNamePrefix="Select"
@@ -368,6 +369,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           <Select
             isMulti
             name="relacionadas"
+            inputId="relacionadas"
             options={relacionadaOptions} // Opções geradas pelo useMemo
             className="basic-single w-96"
             classNamePrefix="Select"
@@ -398,6 +400,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           <Select
             isMulti
             name="campos"
+            inputId="campos"
             options={campoOptions} // Campos gerados a partir das tabelas selecionadas
             className="basic-multi-select w-96"
             classNamePrefix="Select"

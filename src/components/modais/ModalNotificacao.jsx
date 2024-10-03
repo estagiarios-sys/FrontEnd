@@ -184,28 +184,38 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
                             {notificacoes.length <= 4 ? (
                                 <div className="absolute bottom-0 left-0 right-0 h-0 bg-white pointer-events-none" style={{ marginRight: '6px' }}></div>
                             ) : (
-                                <div className="absolute bottom-0 left-0 right-0 h-5 bg-white pointer-events-none" style={{ marginRight: '6px' }}></div>
+                                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-gray-300 to-transparent pointer-events-none" style={{ marginRight: '6px' }}></div>
                             )}
                         </div>
                     </div>
                 </div>
             </Modal>
-
-            {/* Modal para exibir PDF em tela cheia */}
+            {/* Modal para exibir o PDF em tela cheia */}
             <Modal
                 isOpen={pdfModalIsOpen}
                 onRequestClose={closePdfModal}
-                contentLabel="PDF"
-                className="fixed top-0 left-0 right-0 bottom-0 z-50"
-                overlayClassName="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center"
+                contentLabel="Visualizar PDF"
+                className="absolute inset-0 flex justify-center items-center"
+                overlayClassName="fixed inset-0 bg-black bg-opacity-70 z-[1000]"
             >
-                {pdfUrl && <iframe src={pdfUrl} className="w-full h-full" title="PDF Viewer" />}
                 <button
+                    className="absolute top-4 right-4 text-white text-2xl w-full h-full"
                     onClick={closePdfModal}
-                    className="absolute top-5 right-5 text-white"
+                    aria-label="Fechar PDF"
                 >
-                    Fechar
                 </button>
+
+                {pdfUrl ? (
+                    <div className="bg-white p-0 rounded-md relative w-[850px] h-[90%] overflow-hidden flex justify-center items-center">
+                        <iframe
+                            src={pdfUrl}
+                            title="PDF Preview"
+                            className="w-full h-full"
+                        />
+                    </div>
+                ) : (
+                    <p className="text-white">Carregando PDF...</p>
+                )}
             </Modal>
         </div>
     );
