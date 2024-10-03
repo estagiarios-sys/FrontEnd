@@ -155,7 +155,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         });
     }, [currentPage]);
 
-    const createEmpty = async (titlePdf) => {
+    const createEmpty = async () => {
         try {
             // Faz a requisição para criar um ID da notificação
             const response = await fetch('http://localhost:8080/pdf/create-empty', {
@@ -163,7 +163,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(titlePdf), // Serializa o título como JSON
+                body: titlePdf, // Serializa o título como JSON
             });
 
             // Verifica se a resposta foi bem-sucedida
@@ -173,6 +173,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             // Pega o ID retornado
             idNotificacao = await response.json();
+            return idNotificacao;
         } catch (error) {
             console.error('Erro ao criar a notificação:', error);
             throw error; // Propaga o erro para ser tratado em outro local se necessário
@@ -634,9 +635,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                                     openModal('alert', 'ALERTA', 'Gere o relatório antes de exportar.');
                                 } else {
                                     const updatedColumnWidths = updateColumnWidths();
-                                    await createEmpty();
                                     const combinedData = {
-                                        pdfId: idNotificacao,
                                         fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, updatedColumnWidths),
                                         titlePDF: titlePdf,
                                         imgPDF: base64Image,

@@ -104,6 +104,7 @@ function ModalExpo({
     selectedColumns = [],
     combinedData,
     setPdfOK,
+    createEmpty
 }) {
     const [isModalAvisoOpen, setIsModalAvisoOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
@@ -112,7 +113,12 @@ function ModalExpo({
         handleModalAviso(
             "O PDF está sendo gerado, quando finalizar você será notificado."
         );
-        await downloadPDF(combinedData, handleModalAviso, setPdfOK);
+        const idNotificacao = await createEmpty();
+        const updatedCombinedData = {
+            ...combinedData,
+            pdfId: idNotificacao
+        };
+        await downloadPDF(updatedCombinedData, handleModalAviso, setPdfOK);
     };
 
     const handleModalAviso = (message) => {
