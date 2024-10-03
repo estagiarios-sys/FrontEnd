@@ -155,7 +155,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         });
     }, [currentPage]);
 
-    const createEmpty = async (titlePdf) => {
+    const createEmpty = async () => {
         try {
             // Faz a requisição para criar um ID da notificação
             const response = await fetch('http://localhost:8080/pdf/create-empty', {
@@ -163,7 +163,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(titlePdf), // Serializa o título como JSON
+                body: titlePdf, // Serializa o título como JSON
             });
     
             // Verifica se a resposta foi bem-sucedida
@@ -173,6 +173,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     
             // Pega o ID retornado
             idNotificacao = await response.json();
+            return idNotificacao;
         } catch (error) {
             console.error('Erro ao criar a notificação:', error);
             throw error; // Propaga o erro para ser tratado em outro local se necessário
@@ -634,9 +635,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                                     openModal('alert', 'ALERTA', 'Gere o relatório antes de exportar.');
                                 } else {
                                     const updatedColumnWidths = updateColumnWidths();
-                                    await createEmpty();
                                     const combinedData = {
-                                        pdfId: idNotificacao,
                                         fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, updatedColumnWidths),
                                         titlePDF: titlePdf,
                                         imgPDF: base64Image,
@@ -745,7 +744,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
-            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns.map(col => typeof col === 'object' ? col.columnName : col)} combinedData={combinedData} setPdfOK={setPdfOK} />
+            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns.map(col => typeof col === 'object' ? col.columnName : col)} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty}/>
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
