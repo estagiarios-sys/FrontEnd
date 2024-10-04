@@ -67,7 +67,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
             if (col.value.includes(' as ')) {
                 const aliasMatch = col.value.match(/as\s+"(.+?)"/i);
                 return {
-                    value: aliasMatch ? aliasMatch[1] : col.value,
+                    value: col.value,
                     label: aliasMatch ? aliasMatch[1] : col.value,
                     type: col.type,
                 };
@@ -89,6 +89,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
             return {
                 id: `${value}-${Date.now()}-${Math.random()}`,
                 value: option.value,
+                label: option.label,
                 type: option.type,
                 checked: false,
                 valor: '',
@@ -305,7 +306,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                                                         onChange={() => handleCheckboxChange(campo.id)}
                                                     />
                                                 </td>
-                                                <td className="py-2 px-4 border-b border-custom-azul text-sm">{campo.value}</td>
+                                                <td className="py-2 px-4 border-b border-custom-azul text-sm">{campo.label}</td>
                                                 <td className="py-2 px-4 border-b border-custom-azul text-sm">
                                                     <Select
                                                         ref={ref => selectRefs.current[index] = ref}
