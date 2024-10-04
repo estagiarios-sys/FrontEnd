@@ -47,19 +47,25 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
 
     const handleOptionClick = async (option) => {
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
-
-        // Realiza a operação com base na opção selecionada
-        if (option === 'Buscar dados') {
-            setLoading(true); // Ativa o estado de carregamento
-            await onFetchData();
-            setLoading(false); // Desativa o estado de carregamento
-            setModal({ isOpen: true, type: 'SUCESSO', message: 'Relatório gerado com sucesso!' });
-        } else if (option === 'Baixar PDF') {
-            setModal({ isOpen: true, type: 'ALERTA', message: 'O PDF está sendo gerado, quando finalizar você será notificado.' });
-            await onFetchData('PDF');
-        } else if (option === 'Baixar CSV') {
-            await onFetchData('CSV');
-            setModal({ isOpen: true, type: 'SUCESSO', message: 'CSV gerado com sucesso!' }); // Adicione isso se necessário
+    
+        try {
+            if (option === 'Buscar dados') {
+                setLoading(true); // Ativa o estado de carregamento
+                await onFetchData();
+                setLoading(false); // Desativa o estado de carregamento
+                setModal({ isOpen: true, type: 'SUCESSO', message: 'Relatório gerado com sucesso!' });
+            } else if (option === 'Baixar PDF') {
+                setModal({ isOpen: true, type: 'SUCESSO', message: 'O PDF está sendo gerado, quando finalizar você será notificado.' });
+                await onFetchData('PDF');
+            } else if (option === 'Baixar CSV') {
+                await onFetchData('CSV');
+                setModal({ isOpen: true, type: 'SUCESSO', message: 'CSV gerado com sucesso!' });
+            }
+        } catch (error) {
+            console.error('Erro ao processar a opção:', error);
+            setModal({ isOpen: true, type: 'ALERTA', message: 'Erro ao processar a consulta. Por favor, tente novamente.' });
+        } finally {
+            setLoading(false); // Garante que o estado de carregamento seja desativado em caso de erro
         }
     };
 

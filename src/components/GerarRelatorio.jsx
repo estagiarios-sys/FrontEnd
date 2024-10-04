@@ -253,7 +253,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
-            return [];
+            throw error;
         }
     };
 
@@ -334,6 +334,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                 await fetchData();
             }
         } catch (error) {
+            openModal('alert', 'ALERTA', 'Erro ao buscar os dados. Por favor, tente novamente.');
             console.error('Erro ao buscar os dados:', error);
         }
     };
