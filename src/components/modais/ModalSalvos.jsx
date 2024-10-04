@@ -6,8 +6,7 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
     const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
-    const [modalType, setModalType] = useState(null);
-    const [modalMessage, setModalMessage] = useState('');
+    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Usando o estado modal
 
     // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
@@ -65,42 +64,57 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
             setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo));
             setSelectedCampo(null);
 
+            // Exibir modal de sucesso ao excluir
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta excluída com sucesso!' });
+
         } catch (error) {
             console.error('Erro ao excluir a consulta salva:', error);
-        } finally {
-            setModalType(null); // Fechar o modal após a exclusão
         }
+    }
+
+    // Função para verificar se a consulta foi selecionada
+    function verifyCampoSelected(message) {
+        if (!selectedCampo) {
+            setModal({ isOpen: true, type: 'ALERTA', message });
+            return false;
+        }
+        return true;
     }
 
     const handleApagar = () => {
-        if (selectedCampo) {
-            setModalMessage('Você tem certeza de que deseja apagar essa consulta?');
-            setModalType('confirmDelete'); // Definir modal de confirmação
-        } else {
-            setModalMessage('Selecione uma consulta para apagar.');
-            setModalType('warning'); // Definir modal de aviso
-        }
+        if (!verifyCampoSelected('Selecione uma consulta para apagar.')) return;
+        setModal({
+            isOpen: true,
+            type: 'CONFIRMAR',
+            message: 'Você tem certeza de que deseja apagar essa consulta?',
+        });
     };
 
     async function handleCarregar(generateReport) {
-        if (selectedCampo && selectedCampo.finalQuery) {
-            localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo)); 
+        if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
+        
+        localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo)); 
 
-            const base64ImageWithMetadata = "data:image/png;base64," + selectedCampo.imgSaved;
+        const base64ImageWithMetadata = "data:image/png;base64," + selectedCampo.imgSaved;
 
-            setBase64Image(base64ImageWithMetadata);
-            setTitlePdf(selectedCampo.titleSaved);
-            setModalMessage('Consulta carregada!');
-            setModalType('warning'); // Definir modal de aviso
+        setBase64Image(base64ImageWithMetadata);
+        setTitlePdf(selectedCampo.titleSaved);
 
-            if (generateReport) {
-                await generateReport();
-            }
-        } else {
-            setModalMessage('Selecione uma consulta para carregar.');
-            setModalType('warning'); // Definir modal de aviso
+        setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta carregada com sucesso!' });
+
+        if (generateReport) {
+            await generateReport();
         }
     }
+
+    const handleConfirmar = () => {
+        if (modal.type === 'CONFIRMAR') {
+            deleteSavedQuery();
+        } else if (modal.message === 'Consulta carregada com sucesso!') {
+            onClose();
+        }
+        setModal(prev => ({ ...prev, isOpen: false }));
+    };
 
     if (!isOpen) return null;
 
@@ -165,34 +179,14 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                     </div>
                 </div>
             </div>
-            {/* Modais */}
-            {modalType === 'confirmDelete' && (
-                <ModalAlert
-                    modalType="APAGAR"
-                    isOpen={true}
-                    onClose={() => setModalType(null)}
-                    onConfirm={deleteSavedQuery}
-                    confirmText="Excluir"
-                    message={modalMessage}
-                    title="Confirmação"
-                    buttonColors={{
-                        confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
-                        cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
-                    }}
-                />
-            )}
-            {/* Modal de Aviso */}
-            {modalType === 'warning' && (
-                <ModalAlert
-                    modalType={"ALERTA"}
-                    isOpen={true}
-                    onClose={() => setModalType(null)}
-                    onConfirm={() => setModalType(null)}
-                    confirmText="Confirmar"
-                    message={modalMessage}
-                    title="Aviso"
-                />
-            )}
+            {/* Renderização do modal de alerta */}
+            <ModalAlert
+                isOpen={modal.isOpen}
+                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={handleConfirmar}
+                modalType={modal.type || 'ALERTA'} // Usar 'ALERTA' como valor padrão
+                message={modal.message}
+            />
         </div>
     );
 }

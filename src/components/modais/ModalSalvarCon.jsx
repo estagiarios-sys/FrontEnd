@@ -2,18 +2,12 @@ import React, { useState } from "react";
 import ModalAlert from './ModalAlert';
 import { getTotalizers } from "../CamposSelecionados";
 
-
 function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
     const [inputValue, setInputValue] = useState('');
-
-    const [isConfirmModalSaveOpen, setIsModalAlertSaveOpen] = useState(false);
-    const [isConfirmModalUpdateOpen, setIsModalAlertUpdateOpen] = useState(false);
-    const [isConfirmModalAvisoOpen, setIsModalAlertOpen] = useState(false);
-    const [modalMessage, setModalMessage] = useState('');
+    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
     const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
     const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
     const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
-
     const [error, setError] = useState(null);
 
     const handleInputChange1 = (event) => {
@@ -21,55 +15,25 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
         if (error) {
             setError(null); // Limpa a mensagem de erro ao digitar
         }
-
     };
 
-    const handleModalAlertSave = () => {
-        setModalMessage('Consulta salva!');
-        setIsModalAlertSaveOpen(true);
+    const openModal = (type, message) => {
+        setModal({ isOpen: true, type, message });
     };
 
-    const handleModalAlertUpdate = () => {
-        setModalMessage('Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
-        setIsModalAlertUpdateOpen(true);
-    };
-
-    const handleModalAlert = () => {
-        setIsModalAlertOpen(true);
-    }
-
-    const contentContainerStyle = {
-        width: '500px',
-        height: '200px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        marginTop: '20px',
-        paddingBottom: '60px',
-    };
-
-    const resetHoverStates = () => {
-        setIsHoveredButtonX(false);
-    };
-
-    const handleClose = () => {
-        resetHoverStates();
-        setInputValue('');
-        onClose();
+    const closeModal = () => {
+        setModal((prev) => ({ ...prev, isOpen: false }));
     };
 
     const saveQuery = async () => {
         if (inputValue.length === 0 && sqlQuery.length === 0) {
-            setModalMessage('Faça uma consulta para salvar.');
-            handleModalAlert();
+            openModal('ALERTA', 'Faça uma consulta para salvar.');
             return;
         } else if (inputValue.length > 0 && sqlQuery.length === 0) {
-            setModalMessage('Faça uma consulta para salvar.');
-            handleModalAlert();
+            openModal('ALERTA', 'Faça uma consulta para salvar.');
             return;
         } else if (inputValue.length === 0 && sqlQuery.length > 0) {
-            setModalMessage('Digite um nome para salvar a consulta.');
-            handleModalAlert();
+            openModal('ALERTA', 'Digite um nome para salvar a consulta.');
             return;
         }
 
@@ -77,7 +41,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
             const totalizersObject = getTotalizers() || {};
             const totalizersArrayFormatted = Object.entries(totalizersObject).map(([key, totalizer]) => {
                 const [table, column] = key.split('.');
-                const formattedKey = `${table.toLowerCase()}.${column.toLowerCase()}`; // Coloca em minúsculas
+                const formattedKey = `${table.toLowerCase()}.${column.toLowerCase()}`;
                 return {
                     totalizer: {
                         [formattedKey]: totalizer
@@ -85,7 +49,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                 };
             });
 
-            // Criar o objeto JSON com os dados da consulta
             const dataToSave = {
                 queryName: inputValue,
                 finalQuery: sqlQuery,
@@ -94,19 +57,13 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                 totalizers: totalizersArrayFormatted
             };
 
-            // Criar um FormData
             const formData = new FormData();
+            formData.append('stringSavedQuerySaving', JSON.stringify(dataToSave));
+            formData.append('imgPDF', img);
 
-            // Adicionar o JSON como uma string
-            formData.append('stringSavedQuerySaving', JSON.stringify(dataToSave));  // Os dados JSON são enviados como string
-
-            // Adicionar a imagem
-            formData.append('imgPDF', img);  // A imagem é enviada como um arquivo binário
-
-            // Enviar a requisição com fetch
             const response = await fetch('http://localhost:8080/save', {
                 method: 'POST',
-                body: formData,  // Enviando tudo com FormData
+                body: formData,
             });
 
             if (!response.ok) {
@@ -114,14 +71,12 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
             }
 
             const result = await response.json();
-            handleModalAlertSave();
+            openModal('SUCESSO', 'Consulta salva!');
         } catch (error) {
             console.error('Error:', error);
-            handleModalAlertUpdate();
+            openModal('CONFIRMAR', 'Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
         }
     };
-
-
 
     const updateQuery = async () => {
         try {
@@ -145,7 +100,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
             }
 
             const result = await response.json();
-
             onClose(); // Fecha o modal após a atualização
         } catch (error) {
             console.error('Error:', error);
@@ -183,11 +137,10 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                     <h5 className="font-bold mx-2">SALVAR CONSULTA</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={handleClose}
+                        onClick={onClose}
                         style={{
                             borderRadius: '50px',
                             hover: 'pointer',
-                            hoverBackgroundColor: '#0A7F8E',
                             width: '30px',
                             height: '30px',
                             display: 'flex',
@@ -204,8 +157,8 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                         X
                     </button>
                 </div>
-                <div style={contentContainerStyle}>
-                    <div className="w-11/12 bg-gray-200 bg-opacity-30  rounded-md p-4">
+                <div style={{ width: '500px', height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px', paddingBottom: '60px' }}>
+                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4">
                         <h5 className="font-medium mb-4">Nome da Consulta</h5>
                         <input
                             type="text"
@@ -214,58 +167,40 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                         />
                     </div>
                 </div>
-                {/* Botões de Cancelar e Salvar */}
-
-                <div
-                    style={{
-                        backgroundColor: '#fff',
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        padding: '10px',
-                        position: 'absolute',
-                        bottom: '0',
-                        right: '0',
-                        boxSizing: 'border-box',
-                    }}
-                >
-
-                    <button className="align-left"
+                <div style={{ backgroundColor: '#fff', display: 'flex', justifyContent: 'flex-end', padding: '10px', position: 'absolute', bottom: '0', right: '0', boxSizing: 'border-box' }}>
+                    <button
                         style={{
                             border: 'none',
                             borderRadius: '5px',
                             color: '#fff',
                             width: '80px',
                             height: '40px',
-                            padding: '0', // Remover padding para garantir que o tamanho definido seja exato
                             fontSize: '13px',
                             cursor: 'pointer',
                             marginRight: '10px',
-                            display: 'flex', // Usar flexbox para alinhamento
-                            alignItems: 'center', // Alinhamento vertical
-                            justifyContent: 'center', // Alinhamento horizontal
-                            transition: 'background-color 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             backgroundColor: isHoveredButtonCancelar ? '#5a6268' : '#6c757d'
                         }}
                         onMouseEnter={() => setIsHoveredButtonCancelar(true)}
                         onMouseLeave={() => setIsHoveredButtonCancelar(false)}
-                        onClick={() => { onClose(); setInputValue('') }}
+                        onClick={onClose}
                     >
                         Cancelar
                     </button>
-                    <button className="align-left"
+                    <button
                         style={{
                             border: 'none',
-                            color: '#fff',
                             borderRadius: '5px',
+                            color: '#fff',
                             width: '80px',
                             height: '40px',
-                            padding: '0',
                             fontSize: '13px',
                             cursor: 'pointer',
-                            display: 'flex', // Usar flexbox para alinhamento
-                            alignItems: 'center', // Alinhamento vertical
-                            justifyContent: 'center', // Alinhamento horizontal
-                            transition: 'background-color 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
                         }}
                         onMouseEnter={() => setIsHoveredButtonCarregar(true)}
@@ -276,37 +211,16 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                     </button>
                 </div>
             </div>
-            <ModalAlert modalType="SUCESSO"
-                isOpen={isConfirmModalSaveOpen}
-                onClose={() => setIsModalAlertSaveOpen(false)}
-                onConfirm={onClose}
-                confirmText="Ok"
-                message={modalMessage}
+            <ModalAlert
+                isOpen={modal.isOpen}
+                onClose={closeModal}
+                onConfirm={modal.type === 'SUCESSO' ? onClose : updateQuery}
+                modalType={modal.type || 'ALERTA'}
+                message={modal.message}
+                confirmText={modal.type === 'SUCESSO' ? 'Ok' : 'Substituir'}
                 title="Confirmação"
                 buttonColors={{
-                    ok: "bg-gray-600 hover:bg-red-700 focus:ring-gray-600",
-                }}
-            />
-            <ModalAlert modalType="ALERTA"
-                isOpen={isConfirmModalUpdateOpen}
-                onClose={() => setIsModalAlertUpdateOpen(false)}
-                onConfirm={updateQuery}
-                confirmText="Substituir"
-                message={modalMessage}
-                title="Confirmação"
-                buttonColors={{
-                    ok: "bg-red-600 hover:bg-red-700 focus:ring-gray-600",
-                }}
-            />
-            <ModalAlert modalType="ALERTA"
-                isOpen={isConfirmModalAvisoOpen}
-                onClose={() => setIsModalAlertOpen(false)}
-                onConfirm={() => setIsModalAlertOpen(false)}
-                confirmText="Ok"
-                message={modalMessage}
-                title="Aviso"
-                buttonColors={{
-                    ok: "bg-yellow-600 hover:bg-yellow-700 focus:ring-gray-600",
+                    ok: modal.type === 'SUCESSO' ? "bg-gray-600 hover:bg-red-700" : "bg-red-600 hover:bg-red-700"
                 }}
             />
         </div>
