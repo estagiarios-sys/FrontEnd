@@ -132,11 +132,11 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
 
                     {/* Campo para logotipo */}
                     <div>
-                            <h5 className="font-medium mb-1">Logotipo:</h5>
-                            <div className="p-2 flex justify-center items-center overflow-auto border border-dashed border-gray-300 rounded">
-                                <DragDropFile onFileUpload={handleImageUpload} // Componente para arrastar e soltar arquivos
-                                    image={image} // Exibe a imagem carregada
-                                />
+                        <h5 className="font-medium mb-1">Logotipo:</h5>
+                        <div className="p-2 flex justify-center items-center overflow-auto border border-dashed border-gray-300 rounded">
+                            <DragDropFile onFileUpload={handleImageUpload} // Componente para arrastar e soltar arquivos
+                                image={image} // Exibe a imagem carregada
+                            />
                         </div>
                     </div>
                 </div>

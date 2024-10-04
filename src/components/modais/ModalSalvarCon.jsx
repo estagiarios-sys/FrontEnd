@@ -1,15 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ModalAlert from './ModalAlert';
 import { getTotalizers } from "../CamposSelecionados";
 
 function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
     const [inputValue, setInputValue] = useState('');
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
-    const [isHoveredButtonX, setIsHoveredButtonX] = useState(false);
-    const [isHoveredButtonCancelar, setIsHoveredButtonCancelar] = useState(false);
-    const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
     const [error, setError] = useState(null);
 
+    // useEffect para impedir o scroll da página quando o modal estiver aberto
+    useEffect(() => {
+        const hasScroll = document.body.scrollHeight > window.innerHeight;
+
+        if (isOpen) {
+            if (hasScroll) {
+                document.body.style.paddingRight = "6px"; // Adiciona padding para ajustar o layout
+            }
+            document.body.style.overflow = "hidden"; // Desativa o scroll da página
+        } else {
+            document.body.style.overflow = ""; // Restaura o scroll ao fechar o modal
+            document.body.style.paddingRight = ""; // Remove o padding ao fechar o modal
+        }
+
+        return () => {
+            // Limpeza ao desmontar o componente ou fechar o modal
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+        };
+    }, [isOpen]); // Executa o efeito sempre que o estado `isOpen` mudar
+  
     const handleConfirm = () => {
         if (modal.type === 'CONFIRMAR') {
             updateQuery();  // Chama a função para atualizar a consulta
@@ -145,56 +163,21 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
     if (!isOpen) return null;
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 50,
-            }}
-        >
-            <div
-                style={{
-                    backgroundColor: '#fff',
-                    padding: '0px',
-                    borderRadius: '5px',
-                    position: 'relative',
-                    width: '500px',
-                    height: '250px',
-                }}
-            >
-                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
+                <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">SALVAR CONSULTA</h5>
                     <button
-                        className="font-bold mx-2"
-                        onClick={handleOnClose}
-                        style={{
-                            borderRadius: '50px',
-                            hover: 'pointer',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontSize: '16px',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.3s ease',
-                            backgroundColor: isHoveredButtonX ? '#00AAB5' : '#0A7F8E',
-                        }}
-                        onMouseEnter={() => setIsHoveredButtonX(true)}
-                        onMouseLeave={() => setIsHoveredButtonX(false)}
+                        className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
+                        onClick={onClose}
+                        aria-label="Fechar modal"
+                        title="Fechar"
                     >
-                        X
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div style={{ width: '500px', height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px', paddingBottom: '60px' }}>
-                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4">
+                <div className="flex flex-col items-center mt-3">
+                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <h5 className="font-medium mb-4">Nome da Consulta</h5>
                         <input
                             type="text"
@@ -203,48 +186,21 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                         />
                     </div>
                 </div>
-                <div style={{ backgroundColor: '#fff', display: 'flex', justifyContent: 'flex-end', padding: '10px', position: 'absolute', bottom: '0', right: '0', boxSizing: 'border-box' }}>
-                    <button
-                        style={{
-                            border: 'none',
-                            borderRadius: '5px',
-                            color: '#fff',
-                            width: '80px',
-                            height: '40px',
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                            marginRight: '10px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: isHoveredButtonCancelar ? '#5a6268' : '#6c757d'
-                        }}
-                        onMouseEnter={() => setIsHoveredButtonCancelar(true)}
-                        onMouseLeave={() => setIsHoveredButtonCancelar(false)}
-                        onClick={handleOnClose}
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        style={{
-                            border: 'none',
-                            borderRadius: '5px',
-                            color: '#fff',
-                            width: '80px',
-                            height: '40px',
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: isHoveredButtonCarregar ? '#00AAB5' : '#0A7F8E',
-                        }}
-                        onMouseEnter={() => setIsHoveredButtonCarregar(true)}
-                        onMouseLeave={() => setIsHoveredButtonCarregar(false)}
-                        onClick={saveQuery}
-                    >
-                        Salvar
-                    </button>
+                <div className="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
+                    <div className="ml-auto flex items-center">
+                        <button
+                            className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
+                            onClick={handleOnClose}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
+                            onClick={saveQuery}
+                        >
+                            Salvar
+                        </button>
+                    </div>
                 </div>
             </div>
             <ModalAlert
@@ -255,7 +211,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                 confirmText={modal.type === 'CONFIRMAR' ? 'Substituir' : 'Ok'}
                 onConfirm={handleConfirm}
             />
-        </div>
+        </div >
     );
 }
 

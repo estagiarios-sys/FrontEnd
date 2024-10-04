@@ -62,7 +62,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         });
     };
 
-    const campoOptions = useMemo(() => 
+    const campoOptions = useMemo(() =>
         columns.map(col => {
             if (col.value.includes(' as ')) {
                 const aliasMatch = col.value.match(/as\s+"(.+?)"/i);

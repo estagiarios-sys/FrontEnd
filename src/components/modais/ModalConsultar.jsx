@@ -47,7 +47,7 @@ function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
 
     const handleOptionClick = async (option) => {
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
-    
+
         try {
             if (option === 'Buscar dados') {
                 setLoading(true); // Ativa o estado de carregamento
@@ -106,10 +106,10 @@ function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
             <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
                 {loading && <Loading />}
                 {/* Cabeçalho */}
-                <div className="w-full h-14 bg-[#0A7F8E] flex justify-between items-center text-white p-2">
+                <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">CONSULTAR DADOS</h5>
                     <button
-                        className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
+                        className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
                         onClick={onClose}
                         aria-label="Fechar modal"
                         title="Fechar"
@@ -117,7 +117,7 @@ function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div className="w-[500px] h-[250px] flex flex-col items-center mt-3">
+                <div className="flex flex-col items-center mt-3">
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <p className="font-medium mb-4">
                             O tempo estimado para a consulta é de {formatTime(tempoEstimado)}. Escolha uma das opções:
@@ -149,33 +149,12 @@ function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                 {showDropdown && (
                     <div
                         ref={dropdownRef}
-                        style={{
-                            position: 'absolute',
-                            bottom: '60px',
-                            right: '10px',
-                            backgroundColor: '#ffffff',
-                            border: '1px solid #ddd',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-                            zIndex: 1000,
-                            overflow: 'hidden',
-                        }}
+                        className="absolute bottom-[60px] right-[10px] bg-white border border-gray-300 rounded-lg shadow-lg z-[1000] overflow-hidden"
                     >
                         {['Buscar dados', 'Baixar PDF', 'Baixar CSV'].map((option) => (
                             <button
                                 key={option}
-                                style={{
-                                    display: 'block',
-                                    width: '100%',
-                                    padding: '8px 12px',
-                                    backgroundColor: '#f8f9fa',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    textAlign: 'left',
-                                    fontSize: '14px',
-                                    color: '#333',
-                                    transition: 'background-color 0.2s ease',
-                                }}
+                                className="block w-full px-3 py-2 bg-gray-100 text-left text-sm text-gray-800 cursor-pointer transition-colors duration-200"
                                 onClick={() => handleOptionClick(option)}
                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 105, 115, 0.15)'}
                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
@@ -186,12 +165,12 @@ function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
                     </div>
                 )}
             </div>
-            <ModalAlert 
-                isOpen={modal.isOpen} 
-                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} 
-                onConfirm={handleConfirmar} 
+            <ModalAlert
+                isOpen={modal.isOpen}
+                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={handleConfirmar}
                 modalType={modal.type || 'ALERTA'} // Use um valor padrão se modal.type estiver vazio
-                message={modal.message} 
+                message={modal.message}
             />
         </div>
     );

@@ -553,7 +553,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                     <div className="mx-2">
                         <div className="flex flex-col justify-center items-center">
                             <button onClick={() => openModal('salvos')} className="flex flex-col justify-center items-center">
-				            {/* Ícone e label */}
+                                {/* Ícone e label */}
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
                                 </svg>
@@ -745,7 +745,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
-            <ModalExportar isOpen={modals.expo} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty}/>
+            <ModalExportar isOpen={modals.expo} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
             <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
