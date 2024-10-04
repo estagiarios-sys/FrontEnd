@@ -143,7 +143,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     useEffect(() => {
         const fetchRelationshipData = async () => {
             try {
-                const response = await fetch(`http://${url2}:${completUrl}/find/relationship`);
+                const response = await fetch(`http://${url2}${completUrl}/find/relationship`);
                 const data = await response.json();
                 setRelationshipData(data);
             } catch (error) {
@@ -169,7 +169,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         try {
             const jsonRequest = buildJsonRequest();
 
-            const url = `http://${url2}:${completUrl}/find`;
+            const url = `http://${url2}${completUrl}/find`;
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -239,7 +239,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
     const fetchLoadQuery = async () => {
         try {
-            const url = `http://${url2}:${completUrl}/find/loadedQuery`;
+            const url = `http://${url2}${completUrl}/find/loadedQuery`;
             const loadedQuery = localStorage.getItem('loadedQuery');
 
             if (!loadedQuery) {
@@ -433,7 +433,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             setLoading(true);
             const jsonRequest = buildJsonRequest();
 
-            const url = `http://${url2}:${completUrl}/find/analysis`;
+            const url = `http://${url2}${completUrl}/find/analysis`;
 
             const response = await fetch(url, {
                 method: 'POST',

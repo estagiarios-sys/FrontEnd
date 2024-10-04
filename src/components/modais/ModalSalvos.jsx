@@ -26,7 +26,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
-                const response = await fetch(`http://${url}:${completUrl}/find/saved-query`, {
+                const response = await fetch(`http://${url}${completUrl}/find/saved-query`, {
                     credentials: 'include'
                 });
 
@@ -55,7 +55,7 @@ function ModalSalvos({ isOpen, onClose, generateReport }) {
 
     async function deleteSavedQuery() {
         try {
-            const response = await fetch(`http://${url}:${completUrl}/delete/${excludeCampo}`, {
+            const response = await fetch(`http://${url}${completUrl}/delete/${excludeCampo}`, {
                 method: 'DELETE',
             });
 

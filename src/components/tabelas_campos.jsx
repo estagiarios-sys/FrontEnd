@@ -26,10 +26,10 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch(`http://${url}:${completUrl}/find/table` , {
+        const response = await fetch(`http://${url}${completUrl}/find/table`, {
           credentials: 'include'
         });
-        
+
         if (!response.ok) {
           throw new Error(`Erro na requisição: ${response.statusText}`);
         }
@@ -43,7 +43,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
     async function fetchRelationships() {
       try {
-        const response = await fetch(`http://${url}:${completUrl}/find/relationship`, {
+        const response = await fetch(`http://${url}${completUrl}/find/relationship`, {
           credentials: 'include'
         });
 
@@ -118,16 +118,16 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
     const sqlQuery = localStorage.getItem('loadedQuery');
     if (sqlQuery) {
       const { tabelas, relacionadas, campos } = extractFieldsAndTablesFromSQL(sqlQuery, relationships);
-  
+
       if (tabelas.length > 0) {
         setSelectedTabela(tabelas[0]);
-  
+
         // Relacionamentos
         setSelectedRelacionada(prevRelacionada => {
           const updatedRelacionada = [...new Set([...relacionadas])];
           return updatedRelacionada;
         });
-  
+
         // Campos (importante verificar aqui)
         setSelectedCampos(prevCampos => {
           const updatedCampos = [...new Set([...prevCampos, ...campos.map(campo => {
@@ -140,7 +140,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
       }
     }
   }, [relationships]);
-  
+
 
   useEffect(() => {
     passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
