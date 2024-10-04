@@ -12,12 +12,8 @@ function Main() {
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
   const [checkedCampos, setCheckedCampos] = useState([]);
-  const [handleLoadFromLocalStorage, setHandleLoadFromLocalStorage] = useState(null);
   const [pdfOK, setPdfOK] = useState(false);
 
-  const passHandleLoadFromLocalStorage = (fn) => {
-    setHandleLoadFromLocalStorage(() => fn); // Armazena a função no estado
-  };
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
   };
@@ -124,7 +120,7 @@ function Main() {
         <div className="flex justify-around items-start">
           <div>
             <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} passHandleLoadFromLocalStorage={passHandleLoadFromLocalStorage} />
+            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} />
           </div>
           <div>
             <div className='mt-36'>
@@ -176,7 +172,6 @@ function Main() {
           selectedColumns={selectedCampos}
           selectTable={selectedTabela}
           selectedRelatedTables={selectedRelacionada}
-          handleLoadFromLocalStorage={handleLoadFromLocalStorage}
           setPdfOK={setPdfOK}
         />
         <footer className="footer">

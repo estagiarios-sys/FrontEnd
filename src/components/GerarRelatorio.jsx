@@ -51,19 +51,17 @@ function useModal() {
     return { modals, openModal, closeModal };
 }
 
-function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, handleLoadFromLocalStorage, setPdfOK }) {
+function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, setPdfOK }) {
     const { modals, openModal, closeModal } = useModal(); // Usando o hook personalizado para modais
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [conditionsString, setConditionsString] = useState('');
-    const [sqlQuery, setSqlQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalizerResults, setTotalizerResults] = useState(null);
     const [columnWidths, setColumnWidths] = useState([]);
     const [estimatedTime, setEstimatedTime] = useState(null);
     const [combinedData, setCombinedData] = useState(null);
-    const [sql2, setSql2] = useState('');
     const [titlePdf, setTitlePdf] = useState('');
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
@@ -72,6 +70,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
+    const formData = new FormData();
     let idNotificacao = null;
 
     const handleModalAviso = (message) => {
@@ -244,8 +243,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             localStorage.setItem('SQLGeradoFinal', sqlFinal);
 
             setTotalizerResults(resultTotalizer);
-            setSqlQuery(sql);
-            setSql2(sql2);
             setColumns(updatedColumns);
 
             setTableData(dataFormat);
@@ -254,91 +251,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             throw error;
-        }
-    };
-
-    const fetchLoadQuery = async () => {
-        try {
-            const url = 'http://localhost:8080/find/loadedQuery';
-            const loadedQuery = localStorage.getItem('loadedQuery');
-
-            if (!loadedQuery) {
-                throw new Error('No query found in localStorage');
-            }
-
-            const parsedLoadedQuery = JSON.parse(loadedQuery);
-
-            console.log('loadedQuery', loadedQuery);
-            console.log('parsedLoadedQuery', parsedLoadedQuery);
-
-            const totalizersArray = Array.isArray(parsedLoadedQuery.queryWithTotalizers.totalizers)
-                ? parsedLoadedQuery.queryWithTotalizers.totalizers.map(totalizer => ({
-                    totalizer: totalizer
-                }))
-                : [];
-
-            const finalQueryData = {
-                finalQuery: parsedLoadedQuery.finalQuery,
-                totalizersQuery: parsedLoadedQuery.queryWithTotalizers.query,
-                totalizers: totalizersArray
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(finalQueryData),
-            });
-
-            handleLoadFromLocalStorage();
-
-            if (!response.ok) {
-                throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
-            }
-
-            const responseData = await response.json();
-
-            const { columnsNameOrNickName, foundObjects, columnsAndTotalizersResult } = responseData;
-
-            const transformedData = columnsNameOrNickName.map((column, index) => {
-                return {
-                    column,
-                    values: foundObjects.map(row => row[index]),
-                };
-            });
-
-            setColumns(columnsNameOrNickName);
-
-            const resultTotalizer = {};
-            if (columnsAndTotalizersResult) {
-                Object.keys(columnsAndTotalizersResult).forEach(column => {
-                    resultTotalizer[column] = columnsAndTotalizersResult[column];
-                });
-                setTotalizerResults(resultTotalizer);
-            }
-
-            setTableData(transformedData);
-            setCurrentPage(1);
-
-            localStorage.removeItem('loadedQuery');
-
-        } catch (error) { // Certifique-se de que o bloco "catch" está dentro de uma função válida
-            console.error('Erro ao buscar os dados:', error);
-            return [];
-        }
-    };
-
-    const handleGenerateReport = async () => {
-        try {
-            if (localStorage.getItem('loadedQuery')) {
-                await fetchLoadQuery();
-            } else {
-                await fetchData();
-            }
-        } catch (error) {
-            openModal('alert', 'ALERTA', 'Erro ao buscar os dados. Por favor, tente novamente.');
-            console.error('Erro ao buscar os dados:', error);
         }
     };
 
@@ -543,7 +455,17 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                         </button>
                         <button
                             className="p-2 px-5 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-lg mr-2"
-                            onClick={() => openModal('salvarCon')}
+                            onClick={() => {
+                                if (selectedColumns.length === 0) {
+                                    openModal('alert', 'ALERTA', 'Por favor, monte uma consulta antes de salvar.');
+                                } else
+                                    ['request', 'imgPDF'].forEach(field => formData.delete(field));
+                                const request = buildJsonRequest();
+                                request.titlePDF = titlePdf;
+                                formData.append('request', JSON.stringify(request));
+                                formData.append('imgPDF', imgPdf);
+                                openModal('salvarCon');
+                            }}
                         >
                             Salvar Consulta
                         </button>
@@ -746,9 +668,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
             <ModalExportar isOpen={modals.expo} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
-            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
+            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
             <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
-            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
+            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} formData={formData} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
     );

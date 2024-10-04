@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalAlert from './ModalAlert';
 
-function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitlePdf }) {
+function ModalSalvos({ isOpen, onClose, setBase64Image, setTitlePdf }) {
     const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
@@ -59,6 +59,7 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
         }
 
         fetchSavedQueries();
+        //ver para possivelmente trocar selectedCampo para a função deleteSavedQuery
     }, [selectedCampo, isOpen]);
 
     async function deleteSavedQuery() {
@@ -71,10 +72,7 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                 throw new Error(`Erro na requisição: ${response.statusText}`);
             }
 
-            setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo));
             setSelectedCampo(null);
-
-            // Exibir modal de sucesso ao excluir
             setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta excluída com sucesso!' });
 
         } catch (error) {
@@ -100,7 +98,7 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
         });
     };
 
-    async function handleCarregar(generateReport) {
+    async function handleCarregar() {
         if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
 
         localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo));
@@ -111,10 +109,6 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
         setTitlePdf(selectedCampo.titleSaved);
 
         setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta carregada com sucesso!' });
-
-        if (generateReport) {
-            await generateReport();
-        }
     }
 
     const handleConfirmar = () => {
@@ -183,7 +177,7 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                         </button>
                         <button
                             className="align-left font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
-                            onClick={() => handleCarregar(generateReport)}
+                            onClick={() => handleCarregar()}
                         >
                             Carregar
                         </button>
