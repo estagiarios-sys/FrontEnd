@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import TabelaCampos from './components/tabelas_campos';
+import TabelaCampos from './components/TabelasCampos';
 import CamposSelecionados from './components/CamposSelecionados';
 import GerarRelatorio from './components/GerarRelatorio';
 import logoSystextil from './imagens/logo-systextil-branca.png';

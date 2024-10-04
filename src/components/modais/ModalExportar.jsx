@@ -94,7 +94,7 @@ const convertToCSV = (columns, tableData) => {
     return Papa.unparse(data);
 };
 
-function ModalExpo({
+function ModalExportar({
     isOpen,
     onClose,
     table = [],
@@ -211,7 +211,7 @@ DownloadButton.propTypes = {
     label: PropTypes.string.isRequired,
 };
 
-ModalExpo.propTypes = {
+ModalExportar.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     table: PropTypes.arrayOf(
@@ -224,4 +224,4 @@ ModalExpo.propTypes = {
     setPdfOK: PropTypes.func.isRequired, // Adicionado setPdfOK aos propTypes
 };
 
-export default ModalExpo;
+export default ModalExportar;

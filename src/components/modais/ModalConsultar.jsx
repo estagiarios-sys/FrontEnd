@@ -3,7 +3,7 @@ import { FaCaretDown } from "react-icons/fa";
 import ModalAlert from "./ModalAlert";
 import Loading from "../genericos/Loading";
 
-function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
+function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null);
     const [isClicked, setIsClicked] = useState(false);
@@ -197,4 +197,4 @@ function ModalGerar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     );
 }
 
-export default ModalGerar;
+export default ModalConsultar;

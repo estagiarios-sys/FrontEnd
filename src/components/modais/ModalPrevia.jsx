@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Loading from "../genericos/Loading";
 
-function ModalPdfView({ isOpen, onClose, combinedData }) {
+function ModalPrevia({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -83,4 +83,4 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
   );
 }
 
-export default ModalPdfView;
+export default ModalPrevia;
