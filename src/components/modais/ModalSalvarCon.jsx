@@ -10,6 +10,22 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
     const [isHoveredButtonCarregar, setIsHoveredButtonCarregar] = useState(false);
     const [error, setError] = useState(null);
 
+    const handleConfirm = () => {
+        if (modal.type === 'CONFIRMAR') {
+            updateQuery();  // Chama a função para atualizar a consulta
+        } else if (modal.type === 'ALERTA') {
+            closeModal();
+        } else {
+            handleOnClose();
+        }
+    };
+
+    const handleOnClose = () => {
+        //AINDA é preciso fazer teste quando o update estiver pronto, para saber se o inputValue está sendo limpo
+        setInputValue('');
+        onClose();
+    };
+
     const handleInputChange1 = (event) => {
         setInputValue(event.target.value);
         if (error) {
@@ -22,7 +38,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
     };
 
     const closeModal = () => {
-        setModal((prev) => ({ ...prev, isOpen: false }));
+        setModal({ isOpen: false, type: '', message: '' });
     };
 
     const saveQuery = async () => {
@@ -67,32 +83,51 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
             });
 
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                if (response.status === 409) {  // Verifica se o erro é de conflito (consulta já existente)
+                    openModal('CONFIRMAR', 'Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
+                } else {
+                    throw new Error('Falha na solicitação');
+                }
+            } else {
+                await response.json();
+                openModal('SUCESSO', 'Consulta salva!');
             }
-
-            const result = await response.json();
-            openModal('SUCESSO', 'Consulta salva!');
         } catch (error) {
             console.error('Error:', error);
-            openModal('CONFIRMAR', 'Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
+            openModal('ALERTA', 'Ocorreu um erro ao salvar a consulta. Tente novamente.');
         }
     };
 
     const updateQuery = async () => {
         try {
-            const dataToSave = {
+            const totalizersObject = getTotalizers() || {};
+            const totalizersArrayFormatted = Object.entries(totalizersObject).map(([key, totalizer]) => {
+                const [table, column] = key.split('.');
+                const formattedKey = `${table.toLowerCase()}.${column.toLowerCase()}`;
+                return {
+                    totalizer: {
+                        [formattedKey]: totalizer
+                    }
+                };
+            });
+
+            const dataToUpdate = {
                 queryName: inputValue,
-                query: sqlQuery,
+                finalQuery: sqlQuery,
+                totalizersQuery: sql2 || "",
+                titlePDF: titlePdf,
+                totalizers: totalizersArrayFormatted
             };
 
-            const query = JSON.stringify(dataToSave);
+            const formData = new FormData();
+            formData.append('stringSavedQuerySaving', JSON.stringify(dataToUpdate));
+            formData.append('imgPDF', img);
+
+            console.log('formData', formData);
 
             const response = await fetch('http://localhost:8080/update/saved-query', {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: query,
+                body: formData,
             });
 
             if (!response.ok) {
@@ -100,9 +135,10 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
             }
 
             const result = await response.json();
-            onClose(); // Fecha o modal após a atualização
+            openModal('SUCESSO', 'Consulta atualizada com sucesso!');
         } catch (error) {
             console.error('Error:', error);
+            openModal('ALERTA', 'Erro ao atualizar a consulta. Tente novamente.');
         }
     };
 
@@ -137,7 +173,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                     <h5 className="font-bold mx-2">SALVAR CONSULTA</h5>
                     <button
                         className="font-bold mx-2"
-                        onClick={onClose}
+                        onClick={handleOnClose}
                         style={{
                             borderRadius: '50px',
                             hover: 'pointer',
@@ -185,7 +221,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                         }}
                         onMouseEnter={() => setIsHoveredButtonCancelar(true)}
                         onMouseLeave={() => setIsHoveredButtonCancelar(false)}
-                        onClick={onClose}
+                        onClick={handleOnClose}
                     >
                         Cancelar
                     </button>
@@ -214,14 +250,10 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
             <ModalAlert
                 isOpen={modal.isOpen}
                 onClose={closeModal}
-                onConfirm={modal.type === 'SUCESSO' ? onClose : updateQuery}
-                modalType={modal.type || 'ALERTA'}
+                modalType={modal.type}
                 message={modal.message}
-                confirmText={modal.type === 'SUCESSO' ? 'Ok' : 'Substituir'}
-                title="Confirmação"
-                buttonColors={{
-                    ok: modal.type === 'SUCESSO' ? "bg-gray-600 hover:bg-red-700" : "bg-red-600 hover:bg-red-700"
-                }}
+                confirmText={modal.type === 'CONFIRMAR' ? 'Substituir' : 'Ok'}
+                onConfirm={handleConfirm}
             />
         </div>
     );
