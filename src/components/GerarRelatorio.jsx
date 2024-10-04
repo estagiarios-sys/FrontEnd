@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import ModalSql from "./modais/ModalSql";
-import ModalPdfView from "./modais/ModalPdfView";
-import ModalExpo, { downloadCSV, downloadPDF } from "./modais/ModalExpo";
+import ModalPrevia from "./modais/ModalPrevia";
+import ModalExportar, { downloadCSV, downloadPDF } from "./modais/ModalExportar";
 import ModalSalvos from "./modais/ModalSalvos";
 import ModalFiltro from "./modais/ModalFiltro";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
@@ -9,17 +9,17 @@ import ModalAlert from "./modais/ModalAlert";
 import ModalEditar from "./modais/ModalEditar";
 import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
-import ModalGerar from "./modais/ModalGerar";
+import ModalConsultar from "./modais/ModalConsultar";
 import Loading from "./genericos/Loading";
 
 // Hook personalizado para gerenciamento de modais
 function useModal() {
     const [modals, setModals] = useState({
         salvos: false,
-        gerar: false,
+        consultar: false,
         sql: false,
         filtro: false,
-        pdfView: false,
+        previa: false,
         expo: false,
         editar: false,
         salvarCon: false,
@@ -445,7 +445,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             setEstimatedTime(estimatedTimeBack);
             setLoading(false);
 
-            openModal('gerar');
+            openModal('consultar');
 
         } catch (error) {
             setLoading(false);
@@ -618,7 +618,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
                                         imgPDF: base64Image,
                                     };
                                     setCombinedData(combinedData);
-                                    openModal('pdfView');
+                                    openModal('previa');
                                 }
                             }} className="flex flex-col justify-center items-center">
                                 {/* Ícone e label */}
@@ -744,10 +744,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
-            <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
-            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty}/>
+            <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
+            <ModalExportar isOpen={modals.expo} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty}/>
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
-            <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
+            <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
