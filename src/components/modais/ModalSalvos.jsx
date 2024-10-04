@@ -8,16 +8,26 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
     const [excludeCampo, setExcludeCampo] = useState(null);
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Usando o estado modal
 
-    // Impedir scroll da página quando o modal está aberto
+    // useEffect para impedir o scroll da página quando o modal estiver aberto
     useEffect(() => {
-        document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-        document.body.style.paddingRight = isOpen ? '6px' : '';
-        
+        const hasScroll = document.body.scrollHeight > window.innerHeight;
+
+        if (isOpen) {
+            if (hasScroll) {
+                document.body.style.paddingRight = "6px"; // Adiciona padding para ajustar o layout
+            }
+            document.body.style.overflow = "hidden"; // Desativa o scroll da página
+        } else {
+            document.body.style.overflow = ""; // Restaura o scroll ao fechar o modal
+            document.body.style.paddingRight = ""; // Remove o padding ao fechar o modal
+        }
+
         return () => {
-            document.body.style.overflow = 'auto';
-            document.body.style.paddingRight = '';
+            // Limpeza ao desmontar o componente ou fechar o modal
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
         };
-    }, [isOpen]);
+    }, [isOpen]); // Executa o efeito sempre que o estado `isOpen` mudar
 
     useEffect(() => {
         async function fetchSavedQueries() {
@@ -92,8 +102,8 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
 
     async function handleCarregar(generateReport) {
         if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
-        
-        localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo)); 
+
+        localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo));
 
         const base64ImageWithMetadata = "data:image/png;base64," + selectedCampo.imgSaved;
 
@@ -121,21 +131,22 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
-                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
+                <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">CONSULTAS SALVAS</h5>
                     <button
-                        className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
+                        className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
                         onClick={() => {
                             onClose();
                             setSelectedCampo('');
                         }}
                         aria-label="Fechar modal"
+                        title="Fechar"
                     >
-                        ×
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div className="flex flex-col items-center mt-5 pb-16">
-                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4">
+                <div className="flex flex-col items-center mt-3">
+                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <h5 className="font-medium mb-4">Nome do Relatório</h5>
                         <Select
                             name="campos"

@@ -102,8 +102,8 @@ const ModalAlert = ({
           )}
           <button
             className={`text-white font-semibold py-2 px-4 rounded-lg ${modalType === 'ALERTA' || modalType === 'CONFIRMAR' || modalType === 'SUCESSO'
-                ? 'bg-custom-azul-escuro hover:bg-custom-azul focus:ring-custom-azul-escuro'
-                : 'bg-custom-vermelho hover:bg-custom-vermelho-escuro focus:ring-custom-vermelho'
+              ? 'bg-custom-azul-escuro hover:bg-custom-azul focus:ring-custom-azul-escuro'
+              : 'bg-custom-vermelho hover:bg-custom-vermelho-escuro focus:ring-custom-vermelho'
               }`}
             onClick={handleConfirm}
           >
