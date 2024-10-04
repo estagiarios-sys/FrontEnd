@@ -114,7 +114,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
             }
 
             const result = await response.json();
-            console.log('Success:', result);
             handleModalAlertSave();
         } catch (error) {
             console.error('Error:', error);
@@ -147,7 +146,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
 
             const result = await response.json();
 
-            console.log('Success:', result);
             onClose(); // Fecha o modal após a atualização
         } catch (error) {
             console.error('Error:', error);

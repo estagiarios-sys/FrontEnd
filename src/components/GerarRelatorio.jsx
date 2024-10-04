@@ -220,7 +220,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
 
             if (option === 'CSV') {
                 downloadCSV(columnsMap, dataFormat, handleModalAviso);
-                openModal('alert', 'SUCESSO', 'CSV gerado com sucesso.');
                 setPdfOK(true);
                 return;
             }
@@ -296,8 +295,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             }
 
             const responseData = await response.json();
-
-            console.log('responseData: ', responseData);
 
             const { columnsNameOrNickName, foundObjects, columnsAndTotalizersResult } = responseData;
 
@@ -744,7 +741,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, h
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPdfView isOpen={modals.pdfView} onClose={() => closeModal('pdfView')} combinedData={combinedData} />
-            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} />
+            <ModalExpo isOpen={modals.expo} onClose={() => closeModal('expo')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty}/>
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} generateReport={handleGenerateReport} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
             <ModalGerar isOpen={modals.gerar} onClose={() => closeModal('gerar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} sql2={sql2} img={imgPdf} titlePdf={titlePdf} />

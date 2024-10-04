@@ -127,12 +127,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
           return tabelas.includes(tabela1) && tabelas.includes(tabela2);
         });
 
-        console.log("Relacionamentos válidos (apenas do SQL):", relacionamentosValidos);
-
         // Atualiza relacionamentos no estado sem duplicatas
         setSelectedRelacionada(prevRelacionada => {
           const updatedRelacionada = [...new Set([...relacionamentosValidos])];
-          console.log("Relacionamentos finais (sem duplicatas):", updatedRelacionada);
           return updatedRelacionada;
         });
 
@@ -142,7 +139,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
             const [tabela, campoNome] = campo.split('.');
             return `${tabela}.${campoNome}`;
           })])];
-          console.log("Campos finais (sem duplicatas):", updatedCampos);
           return updatedCampos;
         });
       }

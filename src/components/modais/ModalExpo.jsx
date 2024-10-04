@@ -46,17 +46,14 @@ export function downloadCSV(columns, tableData, handleModalAviso) {
         );
         return;
     }
-    console.log('columns', columns);
 
     const columnsName = columns.map((col) => {
         if (col.value.includes(' as ')) {
             const aliasMatch = col.value.match(/as\s+"(.+?)"/i);
             return aliasMatch ? aliasMatch[1] : col.value;
         }
-        console.log('col', col);
         return col.value;
     });
-    console.log('columnsName', columnsName);
     const csvContent = convertToCSV(columnsName, tableData);
 
     if (!csvContent || csvContent.trim() === "") {

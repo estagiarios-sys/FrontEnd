@@ -63,11 +63,21 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     };
 
     const campoOptions = useMemo(() => 
-        columns.map(col => ({
-            value: col.value,
-            label: col.value,
-            type: col.type,
-        })), [columns]);
+        columns.map(col => {
+            if (col.value.includes(' as ')) {
+                const aliasMatch = col.value.match(/as\s+"(.+?)"/i);
+                return {
+                    value: aliasMatch ? aliasMatch[1] : col.value,
+                    label: aliasMatch ? aliasMatch[1] : col.value,
+                    type: col.type,
+                };
+            }
+            return {
+                value: col.value,
+                label: col.value,
+                type: col.type,
+            };
+        }), [columns]);
 
     const handleCampoChange = useCallback((selectedOptions) => {
         setSelectedCampos(selectedOptions?.map(option => option.value) || []);
