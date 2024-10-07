@@ -13,6 +13,7 @@ function Main() {
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
   const [checkedCampos, setCheckedCampos] = useState([]);
   const [pdfOK, setPdfOK] = useState(false);
+  const [mainRequestLoaded, setMainRequestLoaded] = useState(false);
 
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
@@ -120,7 +121,7 @@ function Main() {
         <div className="flex justify-around items-start">
           <div>
             <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} />
+            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} mainRequestLoaded={mainRequestLoaded} />
           </div>
           <div>
             <div className='mt-36'>
@@ -173,6 +174,7 @@ function Main() {
           selectTable={selectedTabela}
           selectedRelatedTables={selectedRelacionada}
           setPdfOK={setPdfOK}
+          setMainRequestLoaded={setMainRequestLoaded}
         />
         <footer className="footer">
           <span className="copyright-text">©  Copyright 2024 - Systextil - Todos os direitos reservados</span>

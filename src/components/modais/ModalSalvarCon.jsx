@@ -26,7 +26,7 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
             document.body.style.paddingRight = "";
         };
     }, [isOpen]); // Executa o efeito sempre que o estado `isOpen` mudar
-  
+
     const handleConfirm = () => {
         if (modal.type === 'CONFIRMAR') {
             updateQuery();
@@ -61,6 +61,7 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
     const saveQuery = async () => {
         if (!inputValue) {
             setModal({ isOpen: true, type: 'ALERTA', message: 'Digite um nome para a consulta.' });
+            return;
         }
 
         try {
@@ -70,7 +71,7 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
             });
 
             if (!response.ok) {
-                if (response.status === 409) {  // Verifica se o erro é de conflito (consulta já existente)
+                if (response.status === 409) {
                     openModal('CONFIRMAR', 'Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
                 } else {
                     throw new Error('Falha na solicitação');

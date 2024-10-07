@@ -20,7 +20,7 @@ function useModal() {
         sql: false,
         filtro: false,
         previa: false,
-        expo: false,
+        exportar: false,
         editar: false,
         salvarCon: false,
         alert: { isOpen: false, modalType: 'ALERTA', message: '' }, // Estado do modal alert com tipo e mensagem
@@ -51,7 +51,7 @@ function useModal() {
     return { modals, openModal, closeModal };
 }
 
-function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, setPdfOK }) {
+function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, setPdfOK, setMainRequestLoaded }) {
     const { modals, openModal, closeModal } = useModal(); // Usando o hook personalizado para modais
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
@@ -66,6 +66,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
     const [loading, setLoading] = useState(false);
+    const [requestLoaded, setRequestLoaded] = useState(false);
     const tableRef = useRef(null);
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
@@ -128,6 +129,25 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
         return jsonRequest;
     };
+
+    useEffect(() => {
+        if (requestLoaded) {
+            setBase64Image(requestLoaded.pdfImage);
+            setTitlePdf(requestLoaded.pdfTitle);
+
+            const mainRequestLoaded = {
+                mainTable: requestLoaded.mainTable,
+                conditions: requestLoaded.conditions,
+                columns: requestLoaded.columns,
+                orderBy: requestLoaded.orderBy,
+                totalizers: requestLoaded.totalizers,
+            };
+
+            setMainRequestLoaded(mainRequestLoaded);
+    
+            setRequestLoaded(false);
+        }
+    }, [requestLoaded]);
 
     useEffect(() => {
         const fetchRelationshipData = async () => {
@@ -458,14 +478,16 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                             onClick={() => {
                                 if (selectedColumns.length === 0) {
                                     openModal('alert', 'ALERTA', 'Por favor, monte uma consulta antes de salvar.');
-                                } else
+                                } else {
                                     ['request', 'imgPDF'].forEach(field => formData.delete(field));
-                                const request = buildJsonRequest();
-                                request.titlePDF = titlePdf;
-                                formData.append('request', JSON.stringify(request));
-                                formData.append('imgPDF', imgPdf);
-                                openModal('salvarCon');
-                            }}
+                                    const request = buildJsonRequest();
+                                    request.titlePDF = titlePdf;
+                                    formData.append('request', JSON.stringify(request));
+                                    formData.append('imgPDF', imgPdf);
+                                    openModal('salvarCon');
+                                }
+                            }
+                            }
                         >
                             Salvar Consulta
                         </button>
@@ -564,7 +586,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                                         imgPDF: base64Image,
                                     };
                                     setCombinedData(combinedData);
-                                    openModal('expo');
+                                    openModal('exportar');
                                 }
                             }} className="flex flex-col justify-center items-center">
                                 {/* Ícone e label */}
@@ -667,8 +689,8 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
-            <ModalExportar isOpen={modals.expo} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
-            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setBase64Image={setBase64Image} setTitlePdf={setTitlePdf} />
+            <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
+            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
             <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} formData={formData} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />

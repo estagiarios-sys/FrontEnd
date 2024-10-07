@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalAlert from './ModalAlert';
 
-function ModalSalvos({ isOpen, onClose, setBase64Image, setTitlePdf }) {
+function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
@@ -43,14 +43,8 @@ function ModalSalvos({ isOpen, onClose, setBase64Image, setTitlePdf }) {
                 const data = await response.json();
 
                 const options = data.map(item => ({
-                    label: item.queryName,
-                    finalQuery: item.finalQuery,
-                    queryWithTotalizers: {
-                        "query": item.totalizersQuery,
-                        "totalizers": item.totalizers.map(totalizerObj => totalizerObj.totalizer)
-                    },
-                    imgSaved: item.imgPDF,
-                    titleSaved: item.titlePDF
+                    id: item.id,
+                    queryName: item.queryName,
                 }));
                 setCampoOptions(options);
             } catch (error) {
@@ -101,14 +95,26 @@ function ModalSalvos({ isOpen, onClose, setBase64Image, setTitlePdf }) {
     async function handleCarregar() {
         if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
 
-        localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo));
+        try {
+            const response = await fetch(`http://localhost:8080/load/${selectedCampo.id}`, {
+                credentials: 'include',
+            });
 
-        const base64ImageWithMetadata = "data:image/png;base64," + selectedCampo.imgSaved;
+            if (!response.ok) {
+                throw new Error(`Erro na requisição: ${response.statusText}`);
+            }
 
-        setBase64Image(base64ImageWithMetadata);
-        setTitlePdf(selectedCampo.titleSaved);
-
-        setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta carregada com sucesso!' });
+            const data = await response.json();
+            
+            if (data.pdfImage) {
+                data.pdfImage = "data:image/png;base64," + data.pdfImage;
+            }
+            setRequestLoaded(data);
+        } catch (error) {
+            console.error('Erro ao carregar a consulta salva:', error);
+        } finally {
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta carregada com sucesso!' });
+        }
     }
 
     const handleConfirmar = () => {
