@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalAlert from './ModalAlert';
 
-function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitlePdf }) {
+function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
@@ -43,14 +43,8 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                 const data = await response.json();
 
                 const options = data.map(item => ({
-                    label: item.queryName,
-                    finalQuery: item.finalQuery,
-                    queryWithTotalizers: {
-                        "query": item.totalizersQuery,
-                        "totalizers": item.totalizers.map(totalizerObj => totalizerObj.totalizer)
-                    },
-                    imgSaved: item.imgPDF,
-                    titleSaved: item.titlePDF
+                    id: item.id,
+                    queryName: item.queryName,
                 }));
                 setCampoOptions(options);
             } catch (error) {
@@ -59,6 +53,7 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
         }
 
         fetchSavedQueries();
+        //ver para possivelmente trocar selectedCampo para a função deleteSavedQuery
     }, [selectedCampo, isOpen]);
 
     async function deleteSavedQuery() {
@@ -71,10 +66,7 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                 throw new Error(`Erro na requisição: ${response.statusText}`);
             }
 
-            setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo));
             setSelectedCampo(null);
-
-            // Exibir modal de sucesso ao excluir
             setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta excluída com sucesso!' });
 
         } catch (error) {
@@ -100,20 +92,28 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
         });
     };
 
-    async function handleCarregar(generateReport) {
+    async function handleCarregar() {
         if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
 
-        localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo));
+        try {
+            const response = await fetch(`http://localhost:8080/load/${selectedCampo.id}`, {
+                credentials: 'include',
+            });
 
-        const base64ImageWithMetadata = "data:image/png;base64," + selectedCampo.imgSaved;
+            if (!response.ok) {
+                throw new Error(`Erro na requisição: ${response.statusText}`);
+            }
 
-        setBase64Image(base64ImageWithMetadata);
-        setTitlePdf(selectedCampo.titleSaved);
-
-        setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta carregada com sucesso!' });
-
-        if (generateReport) {
-            await generateReport();
+            const data = await response.json();
+            
+            if (data.pdfImage) {
+                data.pdfImage = "data:image/png;base64," + data.pdfImage;
+            }
+            setRequestLoaded(data);
+        } catch (error) {
+            console.error('Erro ao carregar a consulta salva:', error);
+        } finally {
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta carregada com sucesso!' });
         }
     }
 
@@ -183,7 +183,7 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                         </button>
                         <button
                             className="align-left font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
-                            onClick={() => handleCarregar(generateReport)}
+                            onClick={() => handleCarregar()}
                         >
                             Carregar
                         </button>

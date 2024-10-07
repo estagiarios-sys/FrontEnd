@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ModalAlert from './ModalAlert';
-import { getTotalizers } from "../CamposSelecionados";
 
-function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
+function ModalSalvarCon({ isOpen, onClose, formData }) {
     const [inputValue, setInputValue] = useState('');
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
     const [error, setError] = useState(null);
@@ -27,10 +26,10 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
             document.body.style.paddingRight = "";
         };
     }, [isOpen]); // Executa o efeito sempre que o estado `isOpen` mudar
-  
+
     const handleConfirm = () => {
         if (modal.type === 'CONFIRMAR') {
-            updateQuery();  // Chama a função para atualizar a consulta
+            updateQuery();
         } else if (modal.type === 'ALERTA') {
             closeModal();
         } else {
@@ -47,7 +46,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
     const handleInputChange1 = (event) => {
         setInputValue(event.target.value);
         if (error) {
-            setError(null); // Limpa a mensagem de erro ao digitar
+            setError(null);
         }
     };
 
@@ -60,48 +59,19 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
     };
 
     const saveQuery = async () => {
-        if (inputValue.length === 0 && sqlQuery.length === 0) {
-            openModal('ALERTA', 'Faça uma consulta para salvar.');
-            return;
-        } else if (inputValue.length > 0 && sqlQuery.length === 0) {
-            openModal('ALERTA', 'Faça uma consulta para salvar.');
-            return;
-        } else if (inputValue.length === 0 && sqlQuery.length > 0) {
-            openModal('ALERTA', 'Digite um nome para salvar a consulta.');
+        if (!inputValue) {
+            setModal({ isOpen: true, type: 'ALERTA', message: 'Digite um nome para a consulta.' });
             return;
         }
 
         try {
-            const totalizersObject = getTotalizers() || {};
-            const totalizersArrayFormatted = Object.entries(totalizersObject).map(([key, totalizer]) => {
-                const [table, column] = key.split('.');
-                const formattedKey = `${table.toLowerCase()}.${column.toLowerCase()}`;
-                return {
-                    totalizer: {
-                        [formattedKey]: totalizer
-                    }
-                };
-            });
-
-            const dataToSave = {
-                queryName: inputValue,
-                finalQuery: sqlQuery,
-                totalizersQuery: sql2 || "",
-                titlePDF: titlePdf,
-                totalizers: totalizersArrayFormatted
-            };
-
-            const formData = new FormData();
-            formData.append('stringSavedQuerySaving', JSON.stringify(dataToSave));
-            formData.append('imgPDF', img);
-
             const response = await fetch('http://localhost:8080/save', {
                 method: 'POST',
                 body: formData,
             });
 
             if (!response.ok) {
-                if (response.status === 409) {  // Verifica se o erro é de conflito (consulta já existente)
+                if (response.status === 409) {
                     openModal('CONFIRMAR', 'Já existe uma consulta com esse nome. Deseja sobrescrever os dados existentes?');
                 } else {
                     throw new Error('Falha na solicitação');
@@ -118,31 +88,6 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
 
     const updateQuery = async () => {
         try {
-            const totalizersObject = getTotalizers() || {};
-            const totalizersArrayFormatted = Object.entries(totalizersObject).map(([key, totalizer]) => {
-                const [table, column] = key.split('.');
-                const formattedKey = `${table.toLowerCase()}.${column.toLowerCase()}`;
-                return {
-                    totalizer: {
-                        [formattedKey]: totalizer
-                    }
-                };
-            });
-
-            const dataToUpdate = {
-                queryName: inputValue,
-                finalQuery: sqlQuery,
-                totalizersQuery: sql2 || "",
-                titlePDF: titlePdf,
-                totalizers: totalizersArrayFormatted
-            };
-
-            const formData = new FormData();
-            formData.append('stringSavedQuerySaving', JSON.stringify(dataToUpdate));
-            formData.append('imgPDF', img);
-
-            console.log('formData', formData);
-
             const response = await fetch('http://localhost:8080/update/saved-query', {
                 method: 'PUT',
                 body: formData,
@@ -152,7 +97,7 @@ function ModalSalvarCon({ isOpen, onClose, sqlQuery, sql2, img, titlePdf }) {
                 throw new Error('Network response was not ok');
             }
 
-            const result = await response.json();
+            await response.json();
             openModal('SUCESSO', 'Consulta atualizada com sucesso!');
         } catch (error) {
             console.error('Error:', error);
