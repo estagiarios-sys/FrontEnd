@@ -13,7 +13,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
     // Usar useCallback para memorizar a função loadData
     const loadData = useCallback(async () => {
         try {
-            const response = await fetch('http://localhost:8080/pdf/list');
+            const response = await fetch('http://localhost:8082/back_reports/pdf/list');
             if (!response.ok) {
                 throw new Error('Erro ao buscar notificações');
             }
@@ -37,7 +37,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
 
     const fetchPdfById = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8080/pdf/get/${id}`, {
+            const response = await fetch(`http://localhost:8082/back_reports/pdf/get/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'

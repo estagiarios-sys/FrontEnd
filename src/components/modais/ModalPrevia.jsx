@@ -8,7 +8,7 @@ function ModalPrevia({ isOpen, onClose, combinedData }) {
   // Função para gerar o PDF
   const handlePreviewPDF = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8080/pdf/preview', {
+      const response = await fetch('http://localhost:8082/back_reports/pdf/preview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

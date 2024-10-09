@@ -65,7 +65,7 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/save', {
+            const response = await fetch('http://localhost:8082/back_reports/save', {
                 method: 'POST',
                 body: formData,
             });
@@ -88,7 +88,7 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
 
     const updateQuery = async () => {
         try {
-            const response = await fetch('http://localhost:8080/update/saved-query', {
+            const response = await fetch('http://localhost:8082/back_reports/update/saved-query', {
                 method: 'PUT',
                 body: formData,
             });

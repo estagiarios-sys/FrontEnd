@@ -32,7 +32,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
-                const response = await fetch('http://localhost:8080/find/saved-query', {
+                const response = await fetch('http://localhost:8082/back_reports/find/saved-query', {
                     credentials: 'include'
                 });
 
@@ -58,7 +58,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
 
     async function deleteSavedQuery() {
         try {
-            const response = await fetch(`http://localhost:8080/delete/${excludeCampo}`, {
+            const response = await fetch(`http://localhost:8082/back_reports/delete/${excludeCampo}`, {
                 method: 'DELETE',
             });
 
@@ -96,7 +96,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
         if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/load/${selectedCampo.id}`, {
+            const response = await fetch(`http://localhost:8082/back_reports/load/${selectedCampo.id}`, {
                 credentials: 'include',
             });
 

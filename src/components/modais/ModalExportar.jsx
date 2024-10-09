@@ -13,7 +13,7 @@ export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     }
 
     try {
-        const response = await fetch("http://localhost:8080/pdf/set-data", {
+        const response = await fetch("http://localhost:8082/back_reports/pdf/set-data", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

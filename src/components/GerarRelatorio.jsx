@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import ModalSql from "./modais/ModalSql";
 import ModalPrevia from "./modais/ModalPrevia";
 import ModalExportar, { downloadCSV, downloadPDF } from "./modais/ModalExportar";
-import ModalSalvos from "./modais/ModalSalvos";
+//import ModalSalvos from "./modais/ModalSalvos";
 import ModalFiltro from "./modais/ModalFiltro";
 import ModalSalvarCon from "./modais/ModalSalvarCon";
 import ModalAlert from "./modais/ModalAlert";
@@ -11,52 +11,137 @@ import { getTotalizers } from "./CamposSelecionados";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
 import ModalConsultar from "./modais/ModalConsultar";
 import Loading from "./genericos/Loading";
+import Pagination from "./PaginationComponents";
+import ActionButtons from "./ActionButtons";
+import DataTable from "./DataTable";
 
-// Hook personalizado para gerenciamento de modais
-function useModal() {
+const url2 = window.location.hostname;
+const completeUrl = process.env.REACT_APP_API_COMPLETE_URL;
+
+console.log(completeUrl);
+
+
+function generateFullTableHTML(columns, dataFormat, resultTotalizer, columnWidths, maxRows = null) {
+    if (!dataFormat || dataFormat.length === 0) return '<p>Nenhum dado encontrado.</p>';
+
+    let size = 0;
+    const filteredColumns = [];
+    const filteredWidths = [];
+
+    if (!columnWidths || columnWidths.length === 0) {
+        columnWidths = Array(columns.length).fill(1000 / columns.length);
+    }
+
+    columnWidths.forEach((width, index) => {
+        if (size + width <= 1000) {
+            size += width;
+            filteredColumns.push(columns[index]);
+            filteredWidths.push(width);
+        }
+    });
+
+    const tableHeaders = filteredColumns.map((column, index) =>
+        `<th class="p-2 border-b text-center" style="width: ${filteredWidths[index] || 'auto'}">${column}</th>`
+    ).join('');
+
+    const rowCount = maxRows ? Math.min(dataFormat[0].values.length, maxRows) : dataFormat[0].values.length;
+
+    const tableRows = dataFormat[0].values.slice(0, rowCount).map((_, rowIndex) => {
+        const rowHTML = filteredColumns.map((_, colIndex) =>
+            `<td class="p-2 border-b text-center">${dataFormat[colIndex]?.values[rowIndex]}</td>`
+        ).join('');
+        const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
+        return `<tr class="${rowClass}">${rowHTML}</tr>`;
+    }).join('');
+
+    const totalizerHTML = renderTotalizerHTML(filteredColumns, resultTotalizer);
+
+    return `
+    <table>
+        <thead class="text-black">
+            <tr>${tableHeaders}</tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+        ${totalizerHTML ? totalizerHTML : ''}
+    </table>
+    `;
+}
+
+function renderTotalizerHTML(columns, resultTotalizer) {
+    if (!resultTotalizer || Object.keys(resultTotalizer).length === 0) return null;
+
+    const totalizerKeys = Object.keys(resultTotalizer);
+
+    return `
+        <tfoot class="border-t border-black">
+            <tr class="bg-custom-azul-claro text-center">
+                <td class="p-2 border-t-2 border-black" colspan="${columns.length}">
+                    <table class="w-full">
+                        <tbody>
+                            <tr>
+                                <td class="text-left font-semibold text-custom-azul-escuro">
+                                    TOTALIZADORES:
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr class="bg-custom-azul-claro text-center">
+                ${columns.map((col, index) => {
+        const totalizerKey = totalizerKeys.find(key => key.includes(col));
+        return `
+                    <td class="font-regular text-black pb-3">
+                        ${totalizerKey ? resultTotalizer[totalizerKey] : ""}
+                    </td>
+                `;
+    }).join('')}
+            </tr>
+        </tfoot>
+    `;
+}
+
+function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, handleLoadFromLocalStorage, setPdfOK, setMainRequestLoaded }) {
     const [modals, setModals] = useState({
-        salvos: false,
         consultar: false,
-        sql: false,
         filtro: false,
-        previa: false,
-        exportar: false,
+        sql: false,
         editar: false,
+        pdfView: false,
+        exportar: false,
+        salvos: false,
+        gerar: false,
         salvarCon: false,
-        alert: { isOpen: false, modalType: 'ALERTA', message: '' }, // Estado do modal alert com tipo e mensagem
+        alert: { isOpen: false, modalType: 'ALERTA', message: '' },
     });
 
     const openModal = (modalName, modalType = 'ALERTA', message = '') => {
         if (modalName === 'alert') {
-            setModals((prev) => ({
+            setModals(prev => ({
                 ...prev,
                 alert: { isOpen: true, modalType, message },
             }));
         } else {
-            setModals((prev) => ({ ...prev, [modalName]: true }));
+            setModals(prev => ({ ...prev, [modalName]: true }));
         }
     };
 
     const closeModal = (modalName) => {
         if (modalName === 'alert') {
-            setModals((prev) => ({
+            setModals(prev => ({
                 ...prev,
                 alert: { isOpen: false, modalType: 'ALERTA', message: '' },
             }));
         } else {
-            setModals((prev) => ({ ...prev, [modalName]: false }));
+            setModals(prev => ({ ...prev, [modalName]: false }));
         }
     };
 
-    return { modals, openModal, closeModal };
-}
-
-function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, setPdfOK, setMainRequestLoaded }) {
-    const { modals, openModal, closeModal } = useModal(); // Usando o hook personalizado para modais
     const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [conditionsString, setConditionsString] = useState('');
+    const [sqlQuery, setSqlQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalizerResults, setTotalizerResults] = useState(null);
     const [columnWidths, setColumnWidths] = useState([]);
@@ -66,13 +151,11 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
     const [loading, setLoading] = useState(false);
-    const [requestLoaded, setRequestLoaded] = useState(false);
     const tableRef = useRef(null);
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
     const selectedColumnsValues = selectedColumns.map(column => column.value);
-    const formData = new FormData();
-    let idNotificacao = null;
+    const [requestLoaded, setRequestLoaded] = useState(false);
 
     const handleModalAviso = (message) => {
         openModal('alert', 'ALERTA', message);
@@ -82,12 +165,75 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         closeModal('alert');
     };
 
-    // Utilizando useMemo para otimizar cálculos
     const hasData = useMemo(() => tableData.length > 0 && tableData[0].values, [tableData]);
     const totalPages = useMemo(() => hasData ? Math.ceil(tableData[0].values.length / itemsPerPage) : 0, [hasData, tableData, itemsPerPage]);
     const startIndex = useMemo(() => (currentPage - 1) * itemsPerPage, [currentPage, itemsPerPage]);
     const endIndex = useMemo(() => startIndex + itemsPerPage, [startIndex, itemsPerPage]);
     const shouldShowPagination = useMemo(() => hasData && tableData[0].values.length > itemsPerPage, [hasData, tableData]);
+
+
+    const sendAnalysisData = async () => {
+        try {
+            setLoading(true);
+            const jsonRequest = buildJsonRequest();
+
+            const url = 'http://localhost:8082/back_reports/find/analysis';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonRequest),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
+            }
+
+            const estimatedTimeResponse = await response.json();
+            console.log('Resposta do backend:', estimatedTimeResponse);
+
+            let estimatedTimeBack;
+
+            if (typeof estimatedTimeResponse === 'number') {
+                estimatedTimeBack = estimatedTimeResponse;
+            } else if (typeof estimatedTimeResponse === 'object' && 'estimatedTime' in estimatedTimeResponse) {
+                estimatedTimeBack = estimatedTimeResponse.estimatedTime;
+            } else {
+                throw new Error('Resposta inesperada do backend.');
+            }
+
+            console.log('Tempo estimado recebido:', estimatedTimeBack);
+
+            if (typeof estimatedTimeBack !== 'number' || isNaN(estimatedTimeBack)) {
+                throw new Error('Tempo estimado inválido.');
+            }
+
+            setEstimatedTime(estimatedTimeBack);
+            console.log('Tempo estimado definido no estado:', estimatedTimeBack);
+
+            setLoading(false);
+
+            openModal('consultar');
+
+        } catch (error) {
+            setLoading(false);
+            openModal('alert', 'ALERTA', 'Erro ao enviar os dados. Por favor, tente novamente.');
+            console.error('Erro ao enviar os dados:', error);
+        }
+    };
+
+
+
+
+    const handleModalGenerate = () => {
+        if (selectedColumns.length === 0) {
+            openModal('alert', 'ALERTA', 'Por favor, Selecione pelo menos uma coluna!');
+            return;
+        }
+        sendAnalysisData();
+    }
 
     const changePage = (direction) => {
         switch (direction) {
@@ -108,7 +254,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
     };
 
-    // Função para construir o JSON Request
     const buildJsonRequest = () => {
         const jsonRequest = {
             table: selectTable,
@@ -141,10 +286,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 columns: requestLoaded.columns,
                 orderBy: requestLoaded.orderBy,
                 totalizers: requestLoaded.totalizers,
+                
             };
 
             setMainRequestLoaded(mainRequestLoaded);
-    
             setRequestLoaded(false);
         }
     }, [requestLoaded]);
@@ -152,7 +297,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     useEffect(() => {
         const fetchRelationshipData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/find/relationship');
+                const response = await fetch('http://localhost:8082/back_reports/find/relationship');
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar os relacionamentos');
+                }
                 const data = await response.json();
                 setRelationshipData(data);
             } catch (error) {
@@ -166,7 +314,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         setConditionsString(conditions);
     };
 
-    // Use useEffect para rolar para a parte inferior sempre que currentPage mudar
     useEffect(() => {
         window.scrollTo({
             top: document.documentElement.scrollHeight,
@@ -176,39 +323,35 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
 
     const createEmpty = async () => {
         try {
-            // Faz a requisição para criar um ID da notificação
-            const response = await fetch('http://localhost:8080/pdf/create-empty', {
+            const response = await fetch('http://localhost:8082/back_reports/pdf/create-empty', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: titlePdf, // Serializa o título como JSON
+                body: titlePdf,
             });
 
-            // Verifica se a resposta foi bem-sucedida
             if (!response.ok) {
                 throw new Error(`Erro ao criar ID da notificação: ${response.statusText}`);
             }
 
-            // Pega o ID retornado
-            idNotificacao = await response.json();
+            const idNotificacao = await response.json();
             return idNotificacao;
         } catch (error) {
             console.error('Erro ao criar a notificação:', error);
-            throw error; // Propaga o erro para ser tratado em outro local se necessário
+            throw error;
         }
     };
 
     const fetchData = async (option) => {
         try {
-
+            let idNotificacao = null;
             if (option === 'PDF') {
-                createEmpty();
+                idNotificacao = await createEmpty();
             }
 
             const jsonRequest = buildJsonRequest();
-
-            const url = 'http://localhost:8080/find';
+            const url = 'http://localhost:8082/back_reports/find';
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -223,15 +366,12 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             }
 
             const responseData = await response.json();
-
             const [sql, sql2, updatedColumns, data, resultTotalizer] = responseData;
 
-            const dataFormat = updatedColumns.map((column, index) => {
-                return {
-                    column,
-                    values: data.map(row => row[index]),
-                };
-            });
+            const dataFormat = updatedColumns.map((column, index) => ({
+                column,
+                values: data.map(row => row[index]),
+            }));
 
             const columnsMap = updatedColumns.map((column) => ({
                 value: column,
@@ -250,6 +390,8 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                     titlePDF: titlePdf,
                     imgPDF: base64Image,
                 };
+
+                
                 await downloadPDF(combinedData, handleModalAviso, setPdfOK);
                 return;
             }
@@ -257,442 +399,67 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             let sqlFinal = "Primeira Consulta: " + sql;
 
             if (sql2) {
-                sqlFinal = "Primeira Consulta: " + sql + " Consulta do totalizador: " + sql2;
+                sqlFinal += " Consulta do totalizador: " + sql2;
             }
 
             localStorage.setItem('SQLGeradoFinal', sqlFinal);
 
             setTotalizerResults(resultTotalizer);
+            setSqlQuery(sql);
             setColumns(updatedColumns);
-
             setTableData(dataFormat);
             setCurrentPage(1);
 
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
-            throw error;
+            openModal('alert', 'ALERTA', 'Erro ao buscar os dados. Por favor, tente novamente.');
         }
     };
 
-    const generateFullTableHTML = (columns, dataFormat, resultTotalizer, updatedColumnWidths, maxRows = null) => {
-        if (!dataFormat || dataFormat.length === 0) return '<p>Nenhum dado encontrado.</p>';
-
-        let size = 0;
-        const filteredColumns = [];
-        const filteredWidths = [];
-
-        if (!updatedColumnWidths || updatedColumnWidths.length === 0) {
-            updatedColumnWidths = Array(columns.length).fill(1000 / columns.length);
-        }
-
-        updatedColumnWidths.forEach((width, index) => {
-            if (size + width <= 1000) {
-                size += width;
-                filteredColumns.push(columns[index]);
-                filteredWidths.push(width);
-            }
-        });
-
-        const tableHeaders = filteredColumns.map((column, index) =>
-            `<th class="p-2 border-b text-center" style="width: ${filteredWidths[index] || 'auto'}">${column}</th>`
-        ).join('');
-
-        const rowCount = maxRows ? Math.min(dataFormat[0].values.length, maxRows) : dataFormat[0].values.length;
-
-        const tableRows = dataFormat[0].values.slice(0, rowCount).map((_, rowIndex) => {
-            const rowHTML = filteredColumns.map((_, colIndex) =>
-                `<td class="p-2 border-b text-center">${dataFormat[colIndex]?.values[rowIndex]}</td>`
-            ).join('');
-            const rowClass = rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white";
-            return `<tr class="${rowClass}">${rowHTML}</tr>`;
-        }).join('');
-
-        const totalizerHTML = renderTotalizerHTML(filteredColumns, resultTotalizer);
-
-        return `
-        <table>
-            <thead class="text-black">
-                <tr>${tableHeaders}</tr>
-            </thead>
-            <tbody>${tableRows}</tbody>
-            ${totalizerHTML ? totalizerHTML : ''}
-        </table>
-        `;
-    };
-
-    const updateColumnWidths = () => {
-        if (tableRef.current) {
-            const thElements = tableRef.current.querySelectorAll('th');
-            const newColumnWidths = Array.from(thElements).map(th => th.offsetWidth);
-            setColumnWidths(newColumnWidths);
-            return newColumnWidths;
-        }
-    };
-
-    const handleTitlePdf = (title) => {
-        setTitlePdf(title);
-    };
-
-    const handleImgPdf = (img) => {
-        setImgPdf(img);
-    };
-
-    useEffect(() => {
-        const convertToBase64 = (imgPdf) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(imgPdf);
-            reader.onloadend = () => {
-                setBase64Image(reader.result);
-            };
-        };
-
-        if (imgPdf) {
-            convertToBase64(imgPdf);
-        } else {
-            setBase64Image('');
-        }
-    }, [imgPdf]);
-
-    const sendAnalysisData = async () => {
-        try {
-            setLoading(true);
-            const jsonRequest = buildJsonRequest();
-
-            const url = 'http://localhost:8080/find/analysis';
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(jsonRequest),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
-            }
-
-            const estimatedTimeBack = await response.json();
-
-            setEstimatedTime(estimatedTimeBack);
-            setLoading(false);
-
-            openModal('consultar');
-
-        } catch (error) {
-            setLoading(false);
-            openModal('alert', 'ALERTA', 'Erro ao enviar os dados. Por favor, tente novamente.');
-            console.error('Erro ao enviar os dados:', error);
-        }
-    };
-
-    const handleModalGenerate = () => {
-        if (selectedColumns.length === 0) {
-            openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
-            return;
-        }
-        sendAnalysisData();
-    };
-
-    const renderTotalizerHTML = (columns, resultTotalizer) => {
-        if (!totalizerResults || Object.keys(totalizerResults).length === 0) return null;
-
-        const totalizerKeys = Object.keys(resultTotalizer);
-
-        return `
-            <ftotalizer class="border-t border-black">
-                <tr class="bg-custom-azul-claro text-center">
-                    <td class="p-2 border-t-2 border-black" colspan="${columns.length}">
-                        <table class="w-full">
-                            <tbody>
-                                <tr>
-                                    <td class="text-left font-semibold text-custom-azul-escuro">
-                                        TOTALIZADORES:
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-                <tr class="bg-custom-azul-claro text-center">
-                    ${columns.map((col, index) => {
-            const totalizerKey = totalizerKeys.find(key => key.includes(col));
-            return `
-                            <td class="font-regular text-black pb-3">
-                                ${totalizerKey ? resultTotalizer[totalizerKey] : ""}
-                            </td>
-                        `;
-        }).join('')}
-                </tr>
-            </ftotalizer>
-        `;
-    };
-
-    const renderTotalizer = () => {
-        if (!totalizerResults || Object.keys(totalizerResults).length === 0) return null;
-
-        return (
-            <tfoot className="border-t border-black">
-                <tr className="bg-custom-azul-claro text-center">
-                    <td className="p-2 border-t-2 border-black" colSpan={columns.length}>
-                        <table className="w-full ">
-                            <tbody>
-                                <tr>
-                                    <td className="text-left font-semibold text-custom-azul-escuro ">TOTALIZADORES:</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-                <tr className="bg-custom-azul-claro text-center">
-                    {columns.map((column, index) => {
-                        const totalizerKey = Object.keys(totalizerResults).find(key => key.includes(column));
-                        return (
-                            <td
-                                className="font-regular text-black pb-3"
-                                key={index}>
-                                {totalizerKey ? totalizerResults[totalizerKey] : ""}
-                            </td>
-                        );
-                    })}
-                </tr>
-            </tfoot>
-        );
-    };
 
     return (
         <div className="flex flex-col w-full justify-center items-center">
             {loading && <Loading />}
-            <div className="w-full flex flex-row justify-between mt-4">
-                <div className="flex flex-col justify-start items-start ml-36">
-                    <h1 className="font-bold text-3xl">Ações</h1>
-                    <div className="flex mt-3">
-                        <button
-                            className="p-2 px-5 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-lg mr-2"
-                            onClick={handleModalGenerate}
-                        >
-                            Consultar
-                        </button>
-                        <button
-                            className="p-2 px-5 text-white bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul rounded-lg mr-2"
-                            onClick={() => {
-                                if (selectedColumns.length === 0) {
-                                    openModal('alert', 'ALERTA', 'Por favor, monte uma consulta antes de salvar.');
-                                } else {
-                                    ['request', 'imgPDF'].forEach(field => formData.delete(field));
-                                    const request = buildJsonRequest();
-                                    request.titlePDF = titlePdf;
-                                    formData.append('request', JSON.stringify(request));
-                                    formData.append('imgPDF', imgPdf);
-                                    openModal('salvarCon');
-                                }
-                            }
-                            }
-                        >
-                            Salvar Consulta
-                        </button>
-                    </div>
-                </div>
-                <div className="flex mr-36 justify-center items-center">
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => openModal('salvos')} className="flex flex-col justify-center items-center">
-                                {/* Ícone e label */}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0 1 20.25 6v12A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6A2.25 2.25 0 0 1 6 3.75h1.5m9 0h-9" />
-                                </svg>
-                                <label htmlFor="mais">Salvos</label>
-                            </button>
-                        </div>
-                    </div>
-                    {/* Outros botões de modais */}
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => openModal('sql')} className="flex flex-col justify-center items-center">
-                                {/* Ícone e label */}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-                                </svg>
-                                <span>SQL</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => {
-                                if (selectedColumns.length === 0) {
-                                    openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
-                                } else {
-                                    openModal('filtro');
-                                }
-                            }} className="relative flex flex-col justify-center items-center">
-                                {conditionsString && (
-                                    <span className="absolute -top-2 -right-1 bg-custom-vermelho text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
-                                        {conditionsString.split('AND').length}
-                                    </span>
-                                )}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10" >
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" name="mais" />
-                                </svg>
-                                <span>Filtros</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => openModal('editar')} className="flex flex-col justify-center items-center">
-                                {/* Ícone e label */}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                                </svg>
-                                <span>Editar</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
-                            <button onClick={() => {
-                                if (tableData.length === 0) {
-                                    openModal('alert', 'ALERTA', 'Gere o relatório para visualizar a prévia.');
-                                } else {
-                                    const updatedColumnWidths = updateColumnWidths();
-                                    const combinedData = {
-                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, updatedColumnWidths, 15),
-                                        titlePDF: titlePdf,
-                                        imgPDF: base64Image,
-                                    };
-                                    setCombinedData(combinedData);
-                                    openModal('previa');
-                                }
-                            }} className="flex flex-col justify-center items-center">
-                                {/* Ícone e label */}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Zm3.75 11.625a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                                </svg>
-                                <span>Prévia</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="mx-2">
-                        <div className="flex flex-col justify-center items-center">
-                            <button onClick={async () => {
-                                if (tableData.length === 0) {
-                                    openModal('alert', 'ALERTA', 'Gere o relatório antes de exportar.');
-                                } else {
-                                    const updatedColumnWidths = updateColumnWidths();
-                                    const combinedData = {
-                                        fullTableHTML: generateFullTableHTML(columns, tableData, totalizerResults, updatedColumnWidths),
-                                        titlePDF: titlePdf,
-                                        imgPDF: base64Image,
-                                    };
-                                    setCombinedData(combinedData);
-                                    openModal('exportar');
-                                }
-                            }} className="flex flex-col justify-center items-center">
-                                {/* Ícone e label */}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25a.75.75 0 00.75.75h16.5a.75.75 0 00.75-.75V16.5M7.5 12l4.5 4.5m0 0l4.5-4.5M12 3v13.5" />
-                                </svg>
-                                <span>Exportar</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div className="text-center w-[1200px]">
-                <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
-                    <table ref={tableRef} className="w-full text-tiny">
-                        {hasData && (
-                            <thead className="bg-custom-azul-escuro text-white">
-                                <tr>
-                                    {columns.map((column, index) => (
-                                        <th
-                                            key={index}
-                                            className="p-2 border-b text-center"
-                                            style={{
-                                                resize: 'horizontal',
-                                                overflow: 'auto',
-                                                width: columnWidths[index] || 'auto'
-                                            }}
-                                        >
-                                            {column}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                        )}
-                        <tbody>
-                            {hasData ? (
-                                tableData[0].values.slice(startIndex, endIndex).map((_, rowIndex) => (
-                                    <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                                        {columns.map((column, colIndex) => (
-                                            <td
-                                                key={colIndex}
-                                                className="p-2 border-b text-center"
-                                            >
-                                                {tableData[colIndex]?.values[startIndex + rowIndex]}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={columns.length} className="p-2 text-center">Nenhum dado encontrado.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                        {renderTotalizer()}
-                    </table>
-                </div>
-                {shouldShowPagination && (
-                    <div className="flex justify-center mt-4 mb-4 items-center">
-                        <button
-                            onClick={() => changePage('first')}
-                            disabled={currentPage === 1}
-                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
-                            title="Ir para a primeira página"
-                        >
-                            <FaAngleDoubleLeft />
-                        </button>
-                        <button
-                            onClick={() => changePage('prev')}
-                            disabled={currentPage === 1}
-                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
-                            title="Ir para a página anterior"
-                        >
-                            <FaAngleLeft />
-                        </button>
-                        <span className="flex items-center mx-2">
-                            Página {currentPage} de {totalPages}
-                        </span>
-                        <button
-                            onClick={() => changePage('next')}
-                            disabled={currentPage === totalPages}
-                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
-                            title="Ir para a página seguinte"
-                        >
-                            <FaAngleRight />
-                        </button>
-                        <button
-                            onClick={() => changePage('last')}
-                            disabled={currentPage === totalPages}
-                            className="px-4 py-2 mx-2 bg-custom-azul hover:bg-custom-azul-escuro focus:ring-custom-azul text-white rounded"
-                            title="Ir para a última página"
-                        >
-                            <FaAngleDoubleRight />
-                        </button>
-                    </div>
-                )}
-            </div>
-            {/* Modais */}
+            <ActionButtons
+                handleModalGenerate={() => fetchData()}
+                handleModalAlert={handleModalAviso}
+                modals={modals}
+                openModal={openModal}
+                closeModal={closeModal}
+                selectedColumns={selectedColumns}
+                setCombinedData={setCombinedData}
+                generateFullTableHTML={generateFullTableHTML}
+                columns={columns}
+                tableData={tableData}
+                columnWidths={columnWidths}
+                titlePdf={titlePdf}
+                base64Image={base64Image}
+            />
+            <DataTable
+                hasData={hasData}
+                columns={columns}
+                tableData={tableData}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                columnWidths={columnWidths}
+                tableRef={tableRef}
+                totalizerResults={totalizerResults}
+            />
+            {shouldShowPagination && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    changePage={changePage}
+                />
+            )}
             <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} />
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
-            <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
+            <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={setTitlePdf} handleImgPdf={setImgPdf} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
-            <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
+            {/* <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} /> */}
             <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
-            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} formData={formData} />
+            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} sqlQuery={sqlQuery} img={imgPdf} titlePdf={titlePdf} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
     );

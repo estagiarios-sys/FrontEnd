@@ -10,6 +10,10 @@ function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        console.log('Tempo estimado recebido no ModalConsultar:', tempoEstimado);
+    }, [tempoEstimado]);
+
     const handleConfirmar = () => {
         setModal({ isOpen: false, type: '', message: '' });
         onClose();
@@ -89,6 +93,7 @@ function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     }, [showDropdown]);
 
     const formatTime = (seconds) => {
+        if (typeof seconds !== 'number' || isNaN(seconds)) return 'indisponível';
         const totalSeconds = Math.floor(seconds);
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);

@@ -22,7 +22,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch('http://localhost:8080/find/table', {
+        const response = await fetch('http://localhost:8082/back_reports/find/table', {
           credentials: 'include'
         });
 
@@ -39,7 +39,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
     async function fetchRelationships() {
       try {
-        const response = await fetch('http://localhost:8080/find/relationship', {
+        const response = await fetch('http://localhost:8082/back_reports/find/relationship', {
           credentials: 'include'
         });
 
