@@ -107,9 +107,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       selectedRelacionada.forEach(relacionadaTabela => {
         relacionadaTabela = relacionadaTabela.split(' e ')[1];
         relationships
-          .filter(rel => rel.tabelas.includes(relacionadaTabela))
+          .filter(rel => rel.includes(relacionadaTabela))
           .forEach(rel => {
-            const tabelas = rel.tabelas.split(' e ');
+            const tabelas = rel.split(' e ');
 
             tabelas.forEach(table => {
               if (table !== selectedTabela && table === relacionadaTabela && jsonData[table]) {
@@ -139,8 +139,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
     // Adiciona as tabelas relacionadas automaticamente com o formato "tabela_principal e tabela_relacionada"
     relationships
-      .filter(rel => rel.tabelas.includes(selectedTabela))
-      .flatMap(rel => rel.tabelas.split(' e '))
+      .filter(rel => rel.includes(selectedTabela))
+      .flatMap(rel => rel.split(' e '))
       .forEach(tabela => {
         if (tabela !== selectedTabela) {
           const relacionamento = `${selectedTabela} e ${tabela}`;
@@ -158,8 +158,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
       // Verifica se essa relação já foi adicionada antes de processar
       relationships
-        .filter(rel => rel.tabelas.includes(relacionadaTabelaNome))
-        .flatMap(rel => rel.tabelas.split(' e '))
+        .filter(rel => rel.includes(relacionadaTabelaNome))
+        .flatMap(rel => rel.split(' e '))
         .forEach(tabela => {
           if (tabela !== relacionadaTabelaNome && tabela !== selectedTabela) {
             const relacionamento = `${relacionadaTabelaNome} e ${tabela}`;
