@@ -53,7 +53,6 @@ function useModal() {
 
 function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, setPdfOK, setMainRequestLoaded }) {
     const { modals, openModal, closeModal } = useModal(); // Usando o hook personalizado para modais
-    const [relationshipData, setRelationshipData] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [conditionsString, setConditionsString] = useState('');
@@ -116,18 +115,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             columns: selectedColumnsValues,
             conditions: conditionsString,
             orderBy: orderByString,
-            joins: [],
+            tablesPairs: selectedRelatedTables,
             totalizers: getTotalizers(),
         };
 
-        if (selectedRelatedTables && relationshipData.length > 0) {
-            selectedRelatedTables.forEach((tablePair) => {
-                const relationship = relationshipData.find(rel => rel.tabelas === tablePair);
-                if (relationship) {
-                    jsonRequest.joins.push(relationship.join);
-                }
-            });
-        }
         return jsonRequest;
     };
 
@@ -149,19 +140,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setRequestLoaded(false);
         }
     }, [requestLoaded]);
-
-    useEffect(() => {
-        const fetchRelationshipData = async () => {
-            try {
-                const response = await fetch(`${API_URL}/find/relationship`);
-                const data = await response.json();
-                setRelationshipData(data);
-            } catch (error) {
-                console.error('Erro ao buscar os relacionamentos:', error);
-            }
-        };
-        fetchRelationshipData();
-    }, []);
 
     const handleSaveConditions = (conditions) => {
         setConditionsString(conditions);
