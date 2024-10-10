@@ -7,6 +7,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Usando o estado modal
+    const API_URL = process.env.REACT_APP_API_URL;
 
     // useEffect para impedir o scroll da página quando o modal estiver aberto
     useEffect(() => {
@@ -32,7 +33,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
-                const response = await fetch('http://localhost:8080/find/saved-query', {
+                const response = await fetch(`${API_URL}/find/saved-query`, {
                     credentials: 'include'
                 });
 
@@ -58,7 +59,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
 
     async function deleteSavedQuery() {
         try {
-            const response = await fetch(`http://localhost:8080/delete/${excludeCampo}`, {
+            const response = await fetch(`${API_URL}/delete/${excludeCampo}`, {
                 method: 'DELETE',
             });
 
@@ -96,7 +97,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
         if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/load/${selectedCampo.id}`, {
+            const response = await fetch(`${API_URL}/load/${selectedCampo.id}`, {
                 credentials: 'include',
             });
 

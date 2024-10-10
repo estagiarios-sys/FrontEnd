@@ -73,6 +73,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const selectedColumnsValues = selectedColumns.map(column => column.value);
     const formData = new FormData();
     let idNotificacao = null;
+    const API_URL = process.env.REACT_APP_API_URL;
 
     const handleModalAviso = (message) => {
         openModal('alert', 'ALERTA', message);
@@ -152,7 +153,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     useEffect(() => {
         const fetchRelationshipData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/find/relationship');
+                const response = await fetch(`${API_URL}/find/relationship`);
                 const data = await response.json();
                 setRelationshipData(data);
             } catch (error) {
@@ -177,7 +178,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const createEmpty = async () => {
         try {
             // Faz a requisição para criar um ID da notificação
-            const response = await fetch('http://localhost:8080/pdf/create-empty', {
+            const response = await fetch(`${API_URL}/pdf/create-empty`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -208,7 +209,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
 
             const jsonRequest = buildJsonRequest();
 
-            const url = 'http://localhost:8080/find';
+            const url = `${API_URL}/find`;
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -358,7 +359,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setLoading(true);
             const jsonRequest = buildJsonRequest();
 
-            const url = 'http://localhost:8080/find/analysis';
+            const url = `${API_URL}/find/analysis`;
 
             const response = await fetch(url, {
                 method: 'POST',

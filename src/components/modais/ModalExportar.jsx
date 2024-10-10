@@ -4,6 +4,8 @@ import Papa from "papaparse";
 import ModalAlert from "./ModalAlert";
 import { FiFile, FiDownload } from "react-icons/fi";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     if (!combinedData || Object.keys(combinedData).length === 0) {
         handleModalAviso(
@@ -13,7 +15,7 @@ export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     }
 
     try {
-        const response = await fetch("http://localhost:8080/pdf/set-data", {
+        const response = await fetch(`${API_URL}/pdf/set-data`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

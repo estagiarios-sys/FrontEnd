@@ -11,18 +11,18 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [mostrarInfo1, setMostrarInfo1] = useState(false);
   const [mostrarInfo2, setMostrarInfo2] = useState(false);
   const [mostrarInfo3, setMostrarInfo3] = useState(false);
-
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
-
   const campos = getSelectedCampos();
+
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch('http://localhost:8080/find/table', {
+        const response = await fetch(`${API_URL}/find/table`, {
           credentials: 'include'
         });
 
@@ -39,7 +39,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
     async function fetchRelationships() {
       try {
-        const response = await fetch('http://localhost:8080/find/relationship', {
+        const response = await fetch(`${API_URL}/find/relationship`, {
           credentials: 'include'
         });
 
