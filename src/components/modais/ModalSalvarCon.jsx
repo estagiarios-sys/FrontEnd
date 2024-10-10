@@ -5,6 +5,7 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
     const [inputValue, setInputValue] = useState('');
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
     const [error, setError] = useState(null);
+    const API_URL = process.env.REACT_APP_API_URL;
 
     // useEffect para impedir o scroll da página quando o modal estiver aberto
     useEffect(() => {
@@ -65,7 +66,7 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/save', {
+            const response = await fetch(`${API_URL}/save`, {
                 method: 'POST',
                 body: formData,
             });
@@ -88,7 +89,7 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
 
     const updateQuery = async () => {
         try {
-            const response = await fetch('http://localhost:8080/update/saved-query', {
+            const response = await fetch(`${API_URL}/update/saved-query`, {
                 method: 'PUT',
                 body: formData,
             });

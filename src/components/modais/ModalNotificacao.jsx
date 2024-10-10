@@ -9,11 +9,12 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
     const [notificacoes, setNotificacoes] = useState([]);
     const [pdfUrl, setPdfUrl] = useState(null); // Estado para armazenar o URL do PDF
     const [pdfModalIsOpen, setPdfModalIsOpen] = useState(false); // Modal para PDF em tela cheia
+    const API_URL = process.env.REACT_APP_API_URL;
 
     // Usar useCallback para memorizar a função loadData
     const loadData = useCallback(async () => {
         try {
-            const response = await fetch('http://localhost:8080/pdf/list');
+            const response = await fetch(`${API_URL}/pdf/list`);
             if (!response.ok) {
                 throw new Error('Erro ao buscar notificações');
             }
@@ -37,7 +38,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
 
     const fetchPdfById = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8080/pdf/get/${id}`, {
+            const response = await fetch(`${API_URL}/pdf/get/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'

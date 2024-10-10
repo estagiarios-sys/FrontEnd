@@ -4,11 +4,12 @@ import Loading from "../genericos/Loading";
 function ModalPrevia({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   // Função para gerar o PDF
   const handlePreviewPDF = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8080/pdf/preview', {
+      const response = await fetch(`${API_URL}/pdf/preview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
