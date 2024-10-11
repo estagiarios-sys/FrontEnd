@@ -37,12 +37,11 @@ const getFilteredTotalizerOptions = (type) => {
   }
 };
 
-let totalizers = [];
+let totalizers = {};
 
 export function removeSelectedTotalizers(camposParaRemover) {
   camposParaRemover.forEach((campo) => {
-    const campoSemApelido = campo.replace(/\s+as\s+.*$/, '');
-    delete totalizers[campoSemApelido];
+    delete totalizers[campo];
   });
 }
 
@@ -61,12 +60,7 @@ function CamposSelecionados({
   checkedCampos = [],
   onSelectedCamposChange,
 }) {
-  const selectedCamposSemApelido = selectedCampos.map((campo) => ({
-    value: campo.value.replace(/\s+as\s+.*$/i, ''),
-    type: campo.type,
-  }));
-
-  exportedSelectedCampos = selectedCamposSemApelido;
+  exportedSelectedCampos = selectedCampos;
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [openSelect, setOpenSelect] = useState(null); // Para rastrear qual select está aberto
@@ -74,12 +68,10 @@ function CamposSelecionados({
   const selectTotalizerRefs = useRef({});
 
   const handleTotalizerSave = (selectedOption, campo) => {
-    const campoSemApelido = campo.value.replace(/\s+as\s+.*$/, '');
-
     if (selectedOption) {
-      totalizers[campoSemApelido] = selectedOption.value;
+      totalizers[campo.value] = selectedOption.value;
     } else {
-      delete totalizers[campoSemApelido];
+      delete totalizers[campo.value];
     }
   };
 
@@ -106,24 +98,18 @@ function CamposSelecionados({
   };
 
   const handleCustomNameChange = (event, campo) => {
-    let { value } = event.target;
+    let inputValue = event.target.value;
 
-    if (value.length > 40) {
-      value = value.substring(0, 40);
+    if (inputValue.length > 40) {
+      inputValue = inputValue.substring(0, 40);
     }
 
     const updatedCampos = selectedCampos.map((selectedCampo) => {
-      if (selectedCampo && selectedCampo.value && campo && campo.value) {
-        const campoSemApelidoComparacao = selectedCampo.value.replace(/\s+as\s+.*$/i, '');
-        const campoSemApelido = campo.value.replace(/\s+as\s+.*$/i, '');
-
-        if (campoSemApelidoComparacao === campoSemApelido) {
-          return {
-            value: value ? `${campoSemApelido} as "${value} "` : campoSemApelido,
-            type: selectedCampo.type
-          };
-        }
-        return selectedCampo;
+      if (selectedCampo.value === campo.value) {
+        return {
+          ...selectedCampo,
+          apelido: inputValue,
+        };
       }
       return selectedCampo;
     });
@@ -170,8 +156,8 @@ function CamposSelecionados({
                 </tr>
               </thead>
               <tbody>
-                {selectedCamposSemApelido.length > 0 ? (
-                  selectedCamposSemApelido.map(({ value, type }, index) => (
+                {selectedCampos.length > 0 ? (
+                  selectedCampos.map(({ value, type, apelido }, index) => (
                     <Draggable key={value} draggableId={value} index={index}>
                       {(provided) => (
                         <tr
@@ -184,8 +170,8 @@ function CamposSelecionados({
                             <td className="py-2 px-4 border-b border-custom-azul text-sm">
                               <input
                                 type="checkbox"
-                                id={`checkbox-${value}`} // Adding a unique ID
-                                name={`checkbox-${value}`} // Adding a name attribute
+                                id={`checkbox-${value}`}
+                                name={`checkbox-${value}`}
                                 checked={checkedCampos.includes(value)}
                                 onChange={() => handleCheckboxChange(value)}
                                 className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
@@ -195,8 +181,9 @@ function CamposSelecionados({
                           <td className="py-2 px-4 border-b border-custom-azul text-sm">
                             <input
                               type="text"
-                              id={`input-${value}`} // Adding a unique ID
-                              name={`input-${value}`} // Adding a name attribute
+                              id={`input-${value}`}
+                              name={`input-${value}`}
+                              defaultValue={apelido || ''}
                               onBlur={(e) => handleCustomNameChange(e, { value })}
                               className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none"
                               placeholder={value}
