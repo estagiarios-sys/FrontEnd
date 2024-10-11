@@ -55,7 +55,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const { modals, openModal, closeModal } = useModal(); // Usando o hook personalizado para modais
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
-    const [conditionsString, setConditionsString] = useState('');
+    const [conditionsArray, setConditionsArray] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalizerResults, setTotalizerResults] = useState(null);
     const [columnWidths, setColumnWidths] = useState([]);
@@ -113,7 +113,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         const jsonRequest = {
             table: selectTable,
             columns: selectedColumnsValues,
-            conditions: conditionsString,
+            conditions: conditionsArray,
             orderBy: orderByString,
             tablesPairs: selectedRelatedTables,
             totalizers: getTotalizers(),
@@ -142,7 +142,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     }, [requestLoaded]);
 
     const handleSaveConditions = (conditions) => {
-        setConditionsString(conditions);
+        setConditionsArray(conditions);
     };
 
     // Use useEffect para rolar para a parte inferior sempre que currentPage mudar
@@ -505,9 +505,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                                     openModal('filtro');
                                 }
                             }} className="relative flex flex-col justify-center items-center">
-                                {conditionsString && (
+                                {conditionsArray.length > 0 && (
                                     <span className="absolute -top-2 -right-1 bg-custom-vermelho text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
-                                        {conditionsString.split('AND').length}
+                                        {conditionsArray.length}
                                     </span>
                                 )}
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10" >

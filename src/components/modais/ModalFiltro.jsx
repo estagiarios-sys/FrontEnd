@@ -40,21 +40,19 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     const [selectedCampos, setSelectedCampos] = useState([]);
     const [addedCampos, setAddedCampos] = useState([]);
     const [modal, setModal] = useState({ isOpen: false, message: "", type: "ALERTA" });
-    const [condicoesStringComparacao, setCondicoesStringComparacao] = useState('');
+    const [condicoesArrayComparacao, setCondicoesArrayComparacao] = useState([]);
     const selectRefs = useRef([]);
     const containerRef = useRef(null);
 
-    // Contar comparações
-    const comparacao = condicoesStringComparacao.split(' AND ').length - (condicoesStringComparacao ? 1 : 0);
 
     const handleClose = useCallback(() => {
         const hasEmptyFields = addedCampos.some(campo => !campo.valor.trim() || !campo.ordenacao);
-        if (comparacao < addedCampos.length || hasEmptyFields) {
+        if (condicoesArrayComparacao < addedCampos.length || hasEmptyFields) {
             setModal({ isOpen: true, message: "Os dados carregados não foram salvos, deseja realmente sair?", type: "CONFIRMAR" });
             return;
         }
         onClose();
-    }, [onClose, addedCampos, comparacao]);
+    }, [onClose, addedCampos]);
 
     const handleScroll = () => {
         selectRefs.current.forEach(ref => {
@@ -101,7 +99,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
     }, [selectedCampos, campoOptions]);
 
     const handleRemoveAllCampos = useCallback(() => {
-        setCondicoesStringComparacao('');
+        setCondicoesArrayComparacao('');
         setAddedCampos([]);
         onSave?.("");
     }, [onSave]);
@@ -112,12 +110,13 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
 
     const handleRemoveCheckedCampos = useCallback(() => {
         const updatedCampos = addedCampos.filter(campo => !campo.checked);
-        const condicoesString = updatedCampos
-            .map(({ value, ordenacao, valor }) => `${value.split(/\sas\s/)[0].trim()} ${ordenacao} '${valor.trim().replace(/'/g, "\\'")}'`)
-            .join(' AND ');
-        setCondicoesStringComparacao(condicoesString);
+        const condicoesArray = updatedCampos.map(({ value, ordenacao, valor }) => 
+            `${value.split(/\sas\s/)[0].trim()} ${ordenacao} '${valor.trim().replace(/'/g, "'")}'`
+        );
+    
+        setCondicoesArrayComparacao(condicoesArray); // Define o array de strings
         setAddedCampos(updatedCampos);
-        onSave?.(condicoesString);
+        onSave?.(condicoesArray);
     }, [addedCampos, onSave]);
 
     const handleValorChange = useCallback((id, value) => {
@@ -142,14 +141,15 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
             setModal({ isOpen: true, message: "Preencha todos os campos", type: "ALERTA" });
             return;
         }
-
-        const condicoesString = addedCampos
-            .map(({ value, ordenacao, valor }) => `${value.split(/\sas\s/)[0].trim()} ${ordenacao} '${valor.trim().replace(/'/g, "\\'")}'`)
-            .join(' AND ');
-        setCondicoesStringComparacao(condicoesString);
+    
+        const condicoesArray = addedCampos.map(({ value, ordenacao, valor }) => 
+            `${value.split(/\sas\s/)[0].trim()} ${ordenacao} '${valor.trim().replace(/'/g, "'")}'`
+        );
+    
+        setCondicoesArrayComparacao(condicoesArray); // Define o array de strings
         setModal({ isOpen: true, message: "Filtro salvo com sucesso", type: "SUCESSO" });
-        onSave?.(condicoesString);
-    }, [addedCampos, onSave]);
+        onSave?.(condicoesArray); // Passa o array de strings para a função onSave
+    }, [addedCampos, onSave]);    
 
     const handleConfirm = useCallback(() => {
         if (modal.type === "SUCESSO" || modal.type === "CONFIRMAR") {
@@ -361,7 +361,6 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                         </button>
                     ))}
                 </div>
-
 
                 {/* Modal de Alerta */}
                 <ModalAlert
