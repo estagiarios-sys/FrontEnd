@@ -50,9 +50,8 @@ export function downloadCSV(columns, tableData, handleModalAviso) {
     }
 
     const columnsName = columns.map((col) => {
-        if (col.value.includes(' as ')) {
-            const aliasMatch = col.value.match(/as\s+"(.+?)"/i);
-            return aliasMatch ? aliasMatch[1] : col.value;
+        if (col.apelido && col.apelido !== "") {
+            return col.apelido;
         }
         return col.value;
     });
@@ -78,8 +77,8 @@ const downloadFile = (blob, filename) => {
     URL.revokeObjectURL(link.href);
 };
 
-const convertToCSV = (columns, tableData) => {
-    if (!columns || !tableData || tableData.length === 0) {
+const convertToCSV = (columnsName, tableData) => {
+    if (!columnsName || !tableData || tableData.length === 0) {
         console.error(
             "As colunas ou os dados da tabela não estão definidos corretamente."
         );
@@ -87,7 +86,7 @@ const convertToCSV = (columns, tableData) => {
     }
 
     const data = tableData[0].values.map((_, rowIndex) => {
-        return columns.reduce((acc, col, colIndex) => {
+        return columnsName.reduce((acc, col, colIndex) => {
             acc[col] = tableData[colIndex]?.values[rowIndex] || "";
             return acc;
         }, {});

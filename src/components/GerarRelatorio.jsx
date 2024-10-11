@@ -69,7 +69,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const tableRef = useRef(null);
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
-    const selectedColumnsValues = selectedColumns.map(column => column.value);
     const formData = new FormData();
     let idNotificacao = null;
     const API_URL = process.env.REACT_APP_API_URL;
@@ -112,13 +111,14 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const buildJsonRequest = () => {
         const jsonRequest = {
             table: selectTable,
-            columns: selectedColumnsValues,
+            columns: selectedColumns,
             conditions: conditionsArray,
             orderBy: orderByString,
             tablesPairs: selectedRelatedTables,
             totalizers: getTotalizers(),
         };
 
+        console.log('JSON Request:', jsonRequest);
         return jsonRequest;
     };
 

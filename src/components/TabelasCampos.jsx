@@ -223,7 +223,11 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   }, []);
 
   const handleChange = (selectedOptions) => {
-    setSelectedCampos(selectedOptions ? selectedOptions.map(option => ({ value: option.value, type: option.type })) : []);
+    setSelectedCampos(selectedOptions ? selectedOptions.map(option => ({
+      value: option.value,
+      type: option.type,
+      apelido: ''
+    })) : []);
     // Mantém o menu aberto após a seleção
     setMenuIsOpen(true);
   };
