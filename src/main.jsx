@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TabelaCampos from './components/TabelasCampos';
 import CamposSelecionados from './components/CamposSelecionados';
 import GerarRelatorio from './components/GerarRelatorio';
@@ -15,6 +15,26 @@ function Main() {
   const [pdfOK, setPdfOK] = useState(false);
   const [mainRequestLoaded, setMainRequestLoaded] = useState(false);
 
+  useEffect(() => {
+    if (mainRequestLoaded) {
+      const camposToAdd = mainRequestLoaded.columns.map(campo => ({
+        value: campo.name,
+        type: campo.type,
+        apelido: campo.nickName || ''
+      }));
+    
+      setSelectedCampos(prevSelectedCampos => {
+        const newCampos = camposToAdd.filter(campo => {
+          return !prevSelectedCampos.some(selected => selected.value === campo.value);
+        });
+    
+        return [...prevSelectedCampos, ...newCampos];
+      });
+    
+      setAvailableCampos([]);
+    }
+  }, [mainRequestLoaded]);
+  
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
   };
@@ -166,6 +186,7 @@ function Main() {
               checkedCampos={checkedCampos}
               handleCheckboxChange={handleCheckboxChange}
               onSelectedCamposChange={handleSelectedCamposChange}
+              mainRequestLoaded={mainRequestLoaded}
             />
           </div>
         </div>

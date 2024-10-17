@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import CustomSelect from './genericos/CustomSelect';
 
@@ -59,6 +59,7 @@ function CamposSelecionados({
   handleCheckboxChange,
   checkedCampos = [],
   onSelectedCamposChange,
+  mainRequestLoaded,
 }) {
   exportedSelectedCampos = selectedCampos;
 
@@ -66,6 +67,30 @@ function CamposSelecionados({
   const [openSelect, setOpenSelect] = useState(null); // Para rastrear qual select está aberto
   const selectRefs = useRef({});
   const selectTotalizerRefs = useRef({});
+
+  useEffect(() => {
+    if (mainRequestLoaded) {
+      if (mainRequestLoaded.orderBy) {
+        const orderByString = mainRequestLoaded.orderBy;
+        const [fieldName, orderDirection] = orderByString.trim().split(/\s+/);
+        setSelectedOrder({ fieldName, value: orderDirection });
+        localStorage.setItem('orderByString', orderByString);
+      } else {
+        setSelectedOrder(null);
+        localStorage.removeItem('orderByString');
+      }
+  
+      if (mainRequestLoaded.totalizers) {
+        totalizers = mainRequestLoaded.totalizers;
+      }
+    }
+  }, [mainRequestLoaded]);  
+
+  useEffect(() => {
+    if(localStorage.getItem('orderByString') === '') {
+      setSelectedOrder(null);
+    }
+  }, [selectedCampos]);
 
   const handleTotalizerSave = (selectedOption, campo) => {
     if (selectedOption) {
@@ -217,6 +242,13 @@ function CamposSelecionados({
                             <CustomSelect
                               ref={(ref) => (selectTotalizerRefs.current[value] = ref)}
                               options={getFilteredTotalizerOptions(type)}
+                              value={
+                                totalizers[value]
+                                  ? getFilteredTotalizerOptions(type).find(
+                                      (option) => option.value === totalizers[value]
+                                    ) || null
+                                  : null
+                              }
                               onChange={(selectedOption) => handleTotalizerSave(selectedOption, { value })}
                               placeholder="Selecione..."
                               className="basic-single"
