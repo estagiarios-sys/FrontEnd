@@ -33,7 +33,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
-                const response = await fetch(`${API_URL}/find/saved-query`, {
+                const response = await fetch(`${API_URL}/list/saved-query`, {
                     credentials: 'include'
                 });
 
@@ -43,11 +43,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
 
                 const data = await response.json();
 
-                const options = data.map(item => ({
-                    id: item.id,
-                    queryName: item.queryName,
-                }));
-                setCampoOptions(options);
+                setCampoOptions(data);
             } catch (error) {
                 console.error('Erro ao buscar as consultas salvas:', error);
             }

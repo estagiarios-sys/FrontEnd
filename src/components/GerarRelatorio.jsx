@@ -66,10 +66,12 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [base64Image, setBase64Image] = useState('');
     const [loading, setLoading] = useState(false);
     const [requestLoaded, setRequestLoaded] = useState(false);
+    const [sqlGeral, setSqlGeral] = useState('');
+    const [sqlTotalizers, setSqlTotalizers] = useState('');
+    const [jsonRequest, setJsonRequest] = useState({});
     const tableRef = useRef(null);
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
-    const formData = new FormData();
     let idNotificacao = null;
     const API_URL = process.env.REACT_APP_API_URL;
 
@@ -109,9 +111,15 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
 
     // Função para construir o JSON Request
     const buildJsonRequest = () => {
+        const modifiedColumns = selectedColumns.map(column => ({
+            name: column.value,
+            type: column.type,
+            nickName: column.apelido
+        }));
+
         const jsonRequest = {
             table: selectTable,
-            columns: selectedColumns,
+            columns: modifiedColumns,
             conditions: conditionsArray,
             orderBy: orderByString,
             tablesPairs: selectedRelatedTables,
@@ -119,6 +127,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         };
 
         console.log('JSON Request:', jsonRequest);
+        setJsonRequest(jsonRequest);
         return jsonRequest;
     };
 
@@ -232,18 +241,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 await downloadPDF(combinedData, handleModalAviso, setPdfOK);
                 return;
             }
-
-            let sqlFinal = "Primeira Consulta: " + sql;
-
-            if (sql2) {
-                sqlFinal = "Primeira Consulta: " + sql + " Consulta do totalizador: " + sql2;
-            }
-
-            localStorage.setItem('SQLGeradoFinal', sqlFinal);
-
+            setSqlGeral(sql);
+            setSqlTotalizers(sql2);
             setTotalizerResults(resultTotalizer);
             setColumns(updatedColumns);
-
             setTableData(dataFormat);
             setCurrentPage(1);
 
@@ -458,11 +459,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                                 if (selectedColumns.length === 0) {
                                     openModal('alert', 'ALERTA', 'Por favor, monte uma consulta antes de salvar.');
                                 } else {
-                                    ['request', 'imgPDF'].forEach(field => formData.delete(field));
-                                    const request = buildJsonRequest();
-                                    request.titlePDF = titlePdf;
-                                    formData.append('request', JSON.stringify(request));
-                                    formData.append('imgPDF', imgPdf);
                                     openModal('salvarCon');
                                 }
                             }
@@ -665,13 +661,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             </div>
             {/* Modais */}
             <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} />
-            <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} />
+            <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} sqlGeral={sqlGeral} sqlTotalizers={sqlTotalizers} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
             <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
-            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} formData={formData} />
+            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} imgPDF={imgPdf} titlePdf={titlePdf} jsonRequest={jsonRequest}/>
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
     );

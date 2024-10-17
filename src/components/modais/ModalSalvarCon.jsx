@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import ModalAlert from './ModalAlert';
+import { json } from "react-router-dom";
 
-function ModalSalvarCon({ isOpen, onClose, formData }) {
+function ModalSalvarCon({ isOpen, onClose, imgPdf, titlePdf, jsonRequest }) {
     const [inputValue, setInputValue] = useState('');
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
     const [error, setError] = useState(null);
     const API_URL = process.env.REACT_APP_API_URL;
+    const formData = new FormData();
 
     // useEffect para impedir o scroll da página quando o modal estiver aberto
     useEffect(() => {
@@ -64,6 +66,13 @@ function ModalSalvarCon({ isOpen, onClose, formData }) {
             setModal({ isOpen: true, type: 'ALERTA', message: 'Digite um nome para a consulta.' });
             return;
         }
+
+        jsonRequest.queryName = inputValue;
+        jsonRequest.pdfTitle = titlePdf;
+        
+        ['stringSavedQuerySaving', 'imgPDF'].forEach(field => formData.delete(field));
+        formData.append('stringSavedQuerySaving', JSON.stringify(jsonRequest));
+        formData.append('imgPDF', imgPdf);
 
         try {
             const response = await fetch(`${API_URL}/save`, {
