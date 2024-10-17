@@ -33,10 +33,10 @@ function Main() {
     }
 
     const camposParaRemover = selectedCampos.filter(campo =>
-      typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, ''))
+      typeof campo.value === 'string' && checkedCampos.includes(campo.value)
     );
     const camposRestantes = selectedCampos.filter(campo =>
-      !(typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, '')))
+      !(typeof campo.value === 'string' && checkedCampos.includes(campo.value))
     );
     const orderByString = localStorage.getItem('orderByString') || '';
 
