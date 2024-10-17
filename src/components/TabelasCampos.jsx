@@ -60,9 +60,16 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
   useEffect(() => {
     if (mainRequestLoaded) {
-      setSelectedTabela(mainRequestLoaded.mainTable);
-      // setSelectedRelacionada(mainRequestLoaded.joins);
-      // setSelectedCampos(mainRequestLoaded.columns);
+      setSelectedTabela(mainRequestLoaded.table);
+      setSelectedRelacionada(mainRequestLoaded.tablesPairs);
+
+      const mappedColumns = mainRequestLoaded.columns.map(column => ({
+        value: column.name,
+        type: column.type,
+        apelido: column.nickName || ''
+      }));
+      
+      setSelectedCampos(mappedColumns);
     }
   }, [mainRequestLoaded]);
 

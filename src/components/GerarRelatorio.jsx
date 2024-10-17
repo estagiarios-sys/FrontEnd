@@ -137,11 +137,12 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setTitlePdf(requestLoaded.pdfTitle);
 
             const mainRequestLoaded = {
-                mainTable: requestLoaded.mainTable,
+                table: requestLoaded.table,
                 conditions: requestLoaded.conditions,
                 columns: requestLoaded.columns,
                 orderBy: requestLoaded.orderBy,
                 totalizers: requestLoaded.totalizers,
+                tablesPairs: requestLoaded.tablesPairs,
             };
 
             setMainRequestLoaded(mainRequestLoaded);
