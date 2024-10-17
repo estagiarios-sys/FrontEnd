@@ -93,7 +93,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
         if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
 
         try {
-            const response = await fetch(`${API_URL}/load/${selectedCampo.id}`, {
+            const response = await fetch(`${API_URL}/get/saved-query/${selectedCampo.id}`, {
                 credentials: 'include',
             });
 
@@ -102,10 +102,12 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
             }
 
             const data = await response.json();
-            
+           
             if (data.pdfImage) {
                 data.pdfImage = "data:image/png;base64," + data.pdfImage;
             }
+
+            console.log('data: ', data);
             setRequestLoaded(data);
         } catch (error) {
             console.error('Erro ao carregar a consulta salva:', error);
@@ -153,11 +155,11 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                             placeholder="Selecione o Campo..."
                             onChange={(selectedOption) => {
                                 setSelectedCampo(selectedOption);
-                                setExcludeCampo(selectedOption ? selectedOption.label : null);
+                                setExcludeCampo(selectedOption ? selectedOption.id : null);
                             }}
                             value={selectedCampo}
-                            getOptionLabel={(option) => option.label}
-                            getOptionValue={(option) => option.label}
+                            getOptionLabel={(option) => option.queryName}
+                            getOptionValue={(option) => option.queryName}
                         />
                     </div>
                 </div>
