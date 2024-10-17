@@ -69,6 +69,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [sqlGeral, setSqlGeral] = useState('');
     const [sqlTotalizers, setSqlTotalizers] = useState('');
     const [jsonRequest, setJsonRequest] = useState({});
+    const [editarRequestLoad, setEditarRequestLoad] = useState(false);
     const tableRef = useRef(null);
     const itemsPerPage = 14;
     const orderByString = localStorage.getItem('orderByString');
@@ -136,6 +137,11 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setBase64Image(requestLoaded.pdfImage);
             setTitlePdf(requestLoaded.pdfTitle);
 
+            const editarRequestLoad = {
+                pdfImage: requestLoaded.pdfImage,
+                pdfTitle: requestLoaded.pdfTitle,
+            };
+
             const mainRequestLoaded = {
                 table: requestLoaded.table,
                 conditions: requestLoaded.conditions,
@@ -146,7 +152,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             };
 
             setMainRequestLoaded(mainRequestLoaded);
-    
+            setEditarRequestLoad(editarRequestLoad);
             setRequestLoaded(false);
         }
     }, [requestLoaded]);
@@ -661,9 +667,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 )}
             </div>
             {/* Modais */}
-            <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} />
+            <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded.conditions} loadedColumns={requestLoaded.columns}/>
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} sqlGeral={sqlGeral} sqlTotalizers={sqlTotalizers} />
-            <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} />
+            <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} editarRequestLoad={editarRequestLoad}/>
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />

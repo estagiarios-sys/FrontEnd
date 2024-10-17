@@ -2,11 +2,38 @@ import React, { useState, useEffect } from "react";
 import DragDropFile from "../genericos/DragDrop.jsx"; // Componente de arrastar e soltar para upload de arquivos
 import ModalAlert from "./ModalAlert.jsx"; // Componente de modal personalizado para exibir alertas
 
-function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf }) {
+function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequestLoad }) {
     // Estados para armazenar o título, imagem e as informações do modal
     const [title, setTitle] = useState(''); // Armazena o título do PDF
     const [image, setImage] = useState(null); // Armazena a imagem (logotipo) carregada
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Controla o estado do modal de alerta (aberto/fechado, tipo, mensagem)
+
+    //Função para converter uma string base64 em um arquivo File
+    const base64ToFile = (base64String, fileName) => {
+        const byteString = atob(base64String.split(',')[1]);
+        const mimeType = base64String.split(',')[0].match(/:(.*?);/)[1];
+        const arrayBuffer = new ArrayBuffer(byteString.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        for (let i = 0; i < byteString.length; i++) {
+            uint8Array[i] = byteString.charCodeAt(i);
+        }
+
+        return new File([uint8Array], fileName, { type: mimeType });
+    };
+
+    // Carrega os dados do editarRequestLoad ao montar o componente
+    useEffect(() => {
+        if (editarRequestLoad) {
+            setTitle(editarRequestLoad.pdfTitle);
+
+            // Se a imagem estiver em base64, converte para File
+            if (editarRequestLoad.pdfImage) {
+                const imageFile = base64ToFile(editarRequestLoad.pdfImage, 'image.png');
+                setImage(imageFile);
+            }
+        }
+    }, [editarRequestLoad]);
 
     // Função para armazenar o arquivo de imagem carregado
     const handleImageUpload = (file) => {

@@ -62,14 +62,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     if (mainRequestLoaded) {
       setSelectedTabela(mainRequestLoaded.table);
       setSelectedRelacionada(mainRequestLoaded.tablesPairs);
-
-      const mappedColumns = mainRequestLoaded.columns.map(column => ({
-        value: column.name,
-        type: column.type,
-        apelido: column.nickName || ''
-      }));
-      
-      setSelectedCampos(mappedColumns);
     }
   }, [mainRequestLoaded]);
 

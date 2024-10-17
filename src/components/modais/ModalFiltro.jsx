@@ -36,13 +36,46 @@ const CustomSingleValue = (props) => (
     </components.SingleValue>
 );
 
-function ModalFiltro({ isOpen, onClose, columns, onSave }) {
+function ModalFiltro({ isOpen, onClose, columns, onSave, loadedConditions, loadedColumns }) {
     const [selectedCampos, setSelectedCampos] = useState([]);
     const [addedCampos, setAddedCampos] = useState([]);
     const [modal, setModal] = useState({ isOpen: false, message: "", type: "ALERTA" });
     const [condicoesArrayComparacao, setCondicoesArrayComparacao] = useState([]);
     const selectRefs = useRef([]);
     const containerRef = useRef(null);
+
+    useEffect(() => {
+        if (loadedConditions && loadedConditions.length > 0) {
+
+            const parsedCampos = loadedConditions.map((conditionStr) => {
+                const conditionMatch = conditionStr.match(/^(.+?)\s*(>=|<=|!=|=|>|<)\s*'(.+)'$/);
+
+                if (conditionMatch) {
+                    const [, field, operator, value] = conditionMatch;
+
+                    const column = loadedColumns.find((col) => col.name === field.trim());
+
+                    if (column) {
+                        return {
+                            id: `${field}-${Date.now()}-${Math.random()}`,
+                            value: field.trim(),
+                            label: column.apelido || field.trim(),
+                            type: column.type,
+                            checked: false,
+                            valor: value.replace(/''/g, "'"),
+                            ordenacao: operator,
+                        };
+                    }
+                }
+
+                return null;
+            }).filter(Boolean);
+
+            setAddedCampos(parsedCampos);
+            setCondicoesArrayComparacao(loadedConditions);
+            onSave?.(loadedConditions);
+        }
+    }, [loadedConditions, columns]);
 
     const handleClose = useCallback(() => {
         const hasEmptyFields = addedCampos.some(campo => !campo.valor.trim() || !campo.ordenacao);
