@@ -108,7 +108,8 @@ function CamposSelecionados({
       if (selectedCampo.value === campo.value) {
         return {
           ...selectedCampo,
-          apelido: inputValue,
+          //DEIXAR O ESPAÇO NO FINAL PARA VOLTAR O VALOR CORRETO DO BANCO DE DADOS POSTERIORMENTE
+          apelido: inputValue + ' ',
         };
       }
       return selectedCampo;

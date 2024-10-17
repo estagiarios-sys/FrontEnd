@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ModalAlert from './ModalAlert';
 import { json } from "react-router-dom";
 
-function ModalSalvarCon({ isOpen, onClose, imgPdf, titlePdf, jsonRequest }) {
+function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     const [inputValue, setInputValue] = useState('');
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
     const [error, setError] = useState(null);
@@ -72,7 +72,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPdf, titlePdf, jsonRequest }) {
         
         ['stringSavedQuerySaving', 'imgPDF'].forEach(field => formData.delete(field));
         formData.append('stringSavedQuerySaving', JSON.stringify(jsonRequest));
-        formData.append('imgPDF', imgPdf);
+        formData.append('imgPDF', imgPDF);
 
         try {
             const response = await fetch(`${API_URL}/save`, {
@@ -136,6 +136,8 @@ function ModalSalvarCon({ isOpen, onClose, imgPdf, titlePdf, jsonRequest }) {
                         <h5 className="font-medium mb-4">Nome da Consulta</h5>
                         <input
                             type="text"
+                            id='consultaNome'
+                            name='consultaNome'
                             onChange={handleInputChange1}
                             className="w-full border border-custom-azul-escuro rounded p-1 focus:ring-1 focus:ring-custom-azul-escuro focus:outline-none"
                         />
@@ -161,7 +163,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPdf, titlePdf, jsonRequest }) {
             <ModalAlert
                 isOpen={modal.isOpen}
                 onClose={closeModal}
-                modalType={modal.type}
+                modalType={modal.type || 'ALERTA'}
                 message={modal.message}
                 confirmText={modal.type === 'CONFIRMAR' ? 'Substituir' : 'Ok'}
                 onConfirm={handleConfirm}
