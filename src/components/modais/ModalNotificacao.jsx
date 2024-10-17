@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
 import { FaBell } from 'react-icons/fa';
+import { linkFinal } from '../../config';
 
 Modal.setAppElement('#root');
 
@@ -9,12 +10,12 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
     const [notificacoes, setNotificacoes] = useState([]);
     const [pdfUrl, setPdfUrl] = useState(null); // Estado para armazenar o URL do PDF
     const [pdfModalIsOpen, setPdfModalIsOpen] = useState(false); // Modal para PDF em tela cheia
-    const API_URL = process.env.REACT_APP_API_URL;
+  
 
     // Usar useCallback para memorizar a função loadData
     const loadData = useCallback(async () => {
         try {
-            const response = await fetch(`${API_URL}/pdf/list`);
+            const response = await fetch(`${linkFinal}/pdf/list`);
             if (!response.ok) {
                 throw new Error('Erro ao buscar notificações');
             }
@@ -38,7 +39,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
 
     const fetchPdfById = async (id) => {
         try {
-            const response = await fetch(`${API_URL}/pdf/get/${id}`, {
+            const response = await fetch(`${linkFinal}/pdf/get/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'

@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalAlert from './ModalAlert';
+import { linkFinal } from '../../config.js';
 
 function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Usando o estado modal
-    const API_URL = process.env.REACT_APP_API_URL;
 
-    // useEffect para impedir o scroll da página quando o modal estiver aberto
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
 
@@ -33,17 +32,20 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
-                const response = await fetch(`${API_URL}/list/saved-query`, {
+                const response = await fetch(`${linkFinal}/list/saved-query`, {
                     credentials: 'include'
                 });
+
 
                 if (!response.ok) {
                     throw new Error(`Erro na requisição: ${response.statusText}`);
                 }
 
-                const data = await response.json();
+                console.log(response.json())
 
-                setCampoOptions(data);
+                // const data = await response.json();
+
+                // setCampoOptions(data);
             } catch (error) {
                 console.error('Erro ao buscar as consultas salvas:', error);
             }
@@ -55,7 +57,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
 
     async function deleteSavedQuery() {
         try {
-            const response = await fetch(`${API_URL}/delete/${excludeCampo}`, {
+            const response = await fetch(`${linkFinal}/delete/${excludeCampo}`, {
                 method: 'DELETE',
             });
 
@@ -93,9 +95,10 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
         if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
 
         try {
-            const response = await fetch(`${API_URL}/load/${selectedCampo.id}`, {
+            const response = await fetch(`${linkFinal}/load/${selectedCampo.id}`, {
                 credentials: 'include',
             });
+
 
             if (!response.ok) {
                 throw new Error(`Erro na requisição: ${response.statusText}`);

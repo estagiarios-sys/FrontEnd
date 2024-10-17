@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Loading from "../genericos/Loading";
+import { linkFinal } from "../../config";
 
 function ModalPrevia({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const API_URL = process.env.REACT_APP_API_URL;
+
 
   // Função para gerar o PDF
   const handlePreviewPDF = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/pdf/preview`, {
+      const response = await fetch(`${linkFinal}/pdf/preview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
