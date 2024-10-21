@@ -563,7 +563,7 @@ module.exports = function (webpackEnv) {
       ].filter(Boolean),
     },
     devServer:{
-      allowedHosts: 'all'
+      allowedHosts: 'erp.systextil.com.br'
     },
     plugins: [
       // Generates an `index.html` file with the <script> injected.
