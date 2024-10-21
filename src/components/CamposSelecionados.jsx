@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import CustomSelect from './genericos/CustomSelect';
 
-
 let exportedSelectedCampos = [];
 
 // Suas opções de ordenação e totalizadores
