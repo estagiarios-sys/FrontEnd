@@ -24,7 +24,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch(`${linkFinal}/find/table`, {
+        const response = await fetch(`${linkFinal}/tables`, {
           credentials: 'include'
         });
 
@@ -41,7 +41,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
     async function fetchRelationships() {
       try {
-        const response = await fetch(`${linkFinal}/find/relationship`, {
+        const response = await fetch(`${linkFinal}/relationships`, {
           credentials: 'include'
         });
 

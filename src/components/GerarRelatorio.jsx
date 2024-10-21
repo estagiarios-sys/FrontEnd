@@ -204,7 +204,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
 
             const jsonRequest = buildJsonRequest();
 
-            const url = `${linkFinal}/find`;
+            const url = `${linkFinal}/report-data`;
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -346,7 +346,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setLoading(true);
             const jsonRequest = buildJsonRequest();
 
-            const url = `${linkFinal}/find/analysis`;
+            const url = `${linkFinal}/report-data/analyze`;
 
             const response = await fetch(url, {
                 method: 'POST',

@@ -7,9 +7,9 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     const [inputValue, setInputValue] = useState('');
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
     const [error, setError] = useState(null);
+    const [savedQueryId, setSavedQueryId] = useState(null);  // Armazena o ID da consulta salva
     const formData = new FormData();
 
-    // useEffect para impedir o scroll da página quando o modal estiver aberto
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
 
@@ -24,11 +24,10 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
         }
 
         return () => {
-            // Limpeza ao desmontar o componente ou fechar o modal
             document.body.style.overflow = "";
             document.body.style.paddingRight = "";
         };
-    }, [isOpen]); // Executa o efeito sempre que o estado `isOpen` mudar
+    }, [isOpen]);
 
     const handleConfirm = () => {
         if (modal.type === 'CONFIRMAR') {
@@ -41,7 +40,6 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     };
 
     const handleOnClose = () => {
-        //AINDA é preciso fazer teste quando o update estiver pronto, para saber se o inputValue está sendo limpo
         setInputValue('');
         onClose();
     };
@@ -69,13 +67,13 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
 
         jsonRequest.queryName = inputValue;
         jsonRequest.pdfTitle = titlePdf;
-        
+
         ['stringSavedQuerySaving', 'imgPDF'].forEach(field => formData.delete(field));
         formData.append('stringSavedQuerySaving', JSON.stringify(jsonRequest));
         formData.append('imgPDF', imgPDF);
 
         try {
-            const response = await fetch(`${linkFinal}/save`, {
+            const response = await fetch(`${linkFinal}/saved-query`, {
                 method: 'POST',
                 body: formData,
             });
@@ -87,7 +85,8 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                     throw new Error('Falha na solicitação');
                 }
             } else {
-                await response.json();
+                const data = await response.json();
+                setSavedQueryId(data.id);  // Armazena o ID da consulta salva
                 openModal('SUCESSO', 'Consulta salva!');
             }
         } catch (error) {
@@ -97,8 +96,13 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     };
 
     const updateQuery = async () => {
+        if (!savedQueryId) {
+            openModal('ALERTA', 'ID da consulta não encontrado. Não é possível atualizar.');
+            return;
+        }
+
         try {
-            const response = await fetch(`${linkFinal}/update/saved-query`, {
+            const response = await fetch(`${linkFinal}/saved-query/${savedQueryId}`, {
                 method: 'PUT',
                 body: formData,
             });
@@ -168,7 +172,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 confirmText={modal.type === 'CONFIRMAR' ? 'Substituir' : 'Ok'}
                 onConfirm={handleConfirm}
             />
-        </div >
+        </div>
     );
 }
 
