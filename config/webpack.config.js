@@ -563,7 +563,7 @@ module.exports = function (webpackEnv) {
       ].filter(Boolean),
     },
     devServer:{
-      allowedHosts: 'auto' || 'all'
+      allowedHosts: 'all'
     },
     plugins: [
       // Generates an `index.html` file with the <script> injected.
