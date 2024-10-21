@@ -1,19 +1,20 @@
-# Use the official Node.js image as the base image
 FROM node:18
 
-# Set the working directory in the container
-WORKDIR /FrontEnd
 
-# Copy the application files into the working directory
-COPY . /FrontEnd
-# Install the application dependencies
+WORKDIR /
+
+
+COPY . /
+
 RUN npm install
 
-# Build the React application
+
 RUN npm run build
 
-# Expose port 3000
+RUN npm install -g serve
+
+
 EXPOSE 3000
 
-# Define the entry point for the container
-CMD ["npm", "start"]
+
+CMD ["server", "-s", "build", "-l", "3000"]
