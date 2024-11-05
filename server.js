@@ -9,3 +9,5 @@ app.get('/reports/*', function (req, res) {
 });
 
 app.listen(3000);
+
+console.log("Servidor rodando")
