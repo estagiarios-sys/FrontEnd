@@ -41,11 +41,11 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                     throw new Error(`Erro na requisição: ${response.statusText}`);
                 }
 
-                console.log(response.json())
+                const data = await response.json();
+                console.log('Consultas salvas:', data);
 
-                // const data = await response.json();
-
-                // setCampoOptions(data);
+                setCampoOptions(data);
+                
             } catch (error) {
                 console.error('Erro ao buscar as consultas salvas:', error);
             }
