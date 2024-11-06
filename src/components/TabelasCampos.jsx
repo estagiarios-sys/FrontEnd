@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Select from 'react-select';
 import { getSelectedCampos } from './CamposSelecionados';
+import { linkFinal } from '../config.js';
 
 function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [jsonData, setJsonData] = useState({});
@@ -17,12 +18,13 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const buttonRef = useRef(null);
   const campos = getSelectedCampos();
 
-  const API_URL = process.env.REACT_APP_API_URL;
+
+  
 
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch(`${API_URL}/find/table`, {
+        const response = await fetch(`${linkFinal}/tables`, {
           credentials: 'include'
         });
 
@@ -39,7 +41,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
     async function fetchRelationships() {
       try {
-        const response = await fetch(`${API_URL}/find/relationship`, {
+        const response = await fetch(`${linkFinal}/relationships`, {
           credentials: 'include'
         });
 
