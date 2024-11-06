@@ -102,8 +102,8 @@ const ModalAlert = ({
           )}
           <button
             className={`text-white font-semibold py-2 px-4 rounded-lg ${modalType === 'ALERTA' || modalType === 'CONFIRMAR' || modalType === 'SUCESSO'
-                ? 'bg-custom-azul-escuro hover:bg-custom-azul focus:ring-custom-azul-escuro'
-                : 'bg-custom-vermelho hover:bg-custom-vermelho-escuro focus:ring-custom-vermelho'
+              ? 'bg-custom-azul-escuro hover:bg-custom-azul focus:ring-custom-azul-escuro'
+              : 'bg-custom-vermelho hover:bg-custom-vermelho-escuro focus:ring-custom-vermelho'
               }`}
             onClick={handleConfirm}
           >
@@ -122,7 +122,7 @@ ModalAlert.propTypes = {
   onClose: PropTypes.func, // Função chamada ao fechar o modal
   onConfirm: PropTypes.func, // Função chamada ao confirmar
   message: PropTypes.string, // Mensagem a ser exibida no modal
-  modalType: PropTypes.oneOf(['APAGAR', 'ALERTA', 'SUCESSO']), // Define os tipos permitidos para o modal
+  modalType: PropTypes.oneOf(['APAGAR', 'ALERTA', 'SUCESSO', 'CONFIRMAR']), // Define os tipos permitidos para o modal
   confirmText: PropTypes.string, // Texto do botão de confirmação
   children: PropTypes.node, // Conteúdo opcional a ser exibido no modal
 };

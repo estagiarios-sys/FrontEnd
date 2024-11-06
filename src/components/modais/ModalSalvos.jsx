@@ -1,60 +1,63 @@
 import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalAlert from './ModalAlert';
+import { linkFinal } from '../../config.js';
 
-function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitlePdf }) {
+function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
-    const [modalType, setModalType] = useState(null);
-    const [modalMessage, setModalMessage] = useState('');
+    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Usando o estado modal
 
-    // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
-        document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-        document.body.style.paddingRight = isOpen ? '6px' : '';
-        
+        const hasScroll = document.body.scrollHeight > window.innerHeight;
+
+        if (isOpen) {
+            if (hasScroll) {
+                document.body.style.paddingRight = "6px"; // Adiciona padding para ajustar o layout
+            }
+            document.body.style.overflow = "hidden"; // Desativa o scroll da página
+        } else {
+            document.body.style.overflow = ""; // Restaura o scroll ao fechar o modal
+            document.body.style.paddingRight = ""; // Remove o padding ao fechar o modal
+        }
+
         return () => {
-            document.body.style.overflow = 'auto';
-            document.body.style.paddingRight = '';
+            // Limpeza ao desmontar o componente ou fechar o modal
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
         };
-    }, [isOpen]);
+    }, [isOpen]); // Executa o efeito sempre que o estado `isOpen` mudar
 
     useEffect(() => {
         async function fetchSavedQueries() {
             try {
-                const response = await fetch('http://localhost:8080/find/saved-query', {
+                const response = await fetch(`${linkFinal}/saved-query`, {
                     credentials: 'include'
                 });
+
 
                 if (!response.ok) {
                     throw new Error(`Erro na requisição: ${response.statusText}`);
                 }
 
                 const data = await response.json();
+                console.log('Consultas salvas:', data);
 
-                const options = data.map(item => ({
-                    label: item.queryName,
-                    finalQuery: item.finalQuery,
-                    queryWithTotalizers: {
-                        "query": item.totalizersQuery,
-                        "totalizers": item.totalizers.map(totalizerObj => totalizerObj.totalizer)
-                    },
-                    imgSaved: item.imgPDF,
-                    titleSaved: item.titlePDF
-                }));
-                setCampoOptions(options);
+                setCampoOptions(data);
+                
             } catch (error) {
                 console.error('Erro ao buscar as consultas salvas:', error);
             }
         }
 
         fetchSavedQueries();
+        //ver para possivelmente trocar selectedCampo para a função deleteSavedQuery
     }, [selectedCampo, isOpen]);
 
     async function deleteSavedQuery() {
         try {
-            const response = await fetch(`http://localhost:8080/delete/${excludeCampo}`, {
+            const response = await fetch(`${linkFinal}/saved-query/${excludeCampo}`, {
                 method: 'DELETE',
             });
 
@@ -62,66 +65,90 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                 throw new Error(`Erro na requisição: ${response.statusText}`);
             }
 
-            setCampoOptions(prevOptions => prevOptions.filter(option => option.value !== excludeCampo));
             setSelectedCampo(null);
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta excluída com sucesso!' });
 
         } catch (error) {
             console.error('Erro ao excluir a consulta salva:', error);
-        } finally {
-            setModalType(null); // Fechar o modal após a exclusão
         }
+    }
+
+    // Função para verificar se a consulta foi selecionada
+    function verifyCampoSelected(message) {
+        if (!selectedCampo) {
+            setModal({ isOpen: true, type: 'ALERTA', message });
+            return false;
+        }
+        return true;
     }
 
     const handleApagar = () => {
-        if (selectedCampo) {
-            setModalMessage('Você tem certeza de que deseja apagar essa consulta?');
-            setModalType('confirmDelete'); // Definir modal de confirmação
-        } else {
-            setModalMessage('Selecione uma consulta para apagar.');
-            setModalType('warning'); // Definir modal de aviso
-        }
+        if (!verifyCampoSelected('Selecione uma consulta para apagar.')) return;
+        setModal({
+            isOpen: true,
+            type: 'CONFIRMAR',
+            message: 'Você tem certeza de que deseja apagar essa consulta?',
+        });
     };
 
-    async function handleCarregar(generateReport) {
-        if (selectedCampo && selectedCampo.finalQuery) {
-            localStorage.setItem('loadedQuery', JSON.stringify(selectedCampo)); 
+    async function handleCarregar() {
+        if (!verifyCampoSelected('Selecione uma consulta para carregar.')) return;
 
-            const base64ImageWithMetadata = "data:image/png;base64," + selectedCampo.imgSaved;
+        try {
+            const response = await fetch(`${linkFinal}/saved-query/${selectedCampo.id}`, {
+                credentials: 'include',
+            });
 
-            setBase64Image(base64ImageWithMetadata);
-            setTitlePdf(selectedCampo.titleSaved);
-            setModalMessage('Consulta carregada!');
-            setModalType('warning'); // Definir modal de aviso
 
-            if (generateReport) {
-                await generateReport();
+            if (!response.ok) {
+                throw new Error(`Erro na requisição: ${response.statusText}`);
             }
-        } else {
-            setModalMessage('Selecione uma consulta para carregar.');
-            setModalType('warning'); // Definir modal de aviso
+
+            const data = await response.json();
+           
+            if (data.pdfImage) {
+                data.pdfImage = "data:image/png;base64," + data.pdfImage;
+            }
+
+            console.log('data: ', data);
+            setRequestLoaded(data);
+        } catch (error) {
+            console.error('Erro ao carregar a consulta salva:', error);
+        } finally {
+            setModal({ isOpen: true, type: 'SUCESSO', message: 'Consulta carregada com sucesso!' });
         }
     }
+
+    const handleConfirmar = () => {
+        if (modal.type === 'CONFIRMAR') {
+            deleteSavedQuery();
+        } else if (modal.message === 'Consulta carregada com sucesso!') {
+            onClose();
+        }
+        setModal(prev => ({ ...prev, isOpen: false }));
+    };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
-                <div className="w-full bg-custom-azul-escuro flex flex-row justify-between items-center text-white p-2">
+                <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-2">
                     <h5 className="font-bold mx-2">CONSULTAS SALVAS</h5>
                     <button
-                        className="font-bold mx-2 w-8 h-8 flex justify-center items-center rounded-full hover:bg-[#0A7F8E] transition-colors duration-300"
+                        className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
                         onClick={() => {
                             onClose();
                             setSelectedCampo('');
                         }}
                         aria-label="Fechar modal"
+                        title="Fechar"
                     >
-                        ×
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div className="flex flex-col items-center mt-5 pb-16">
-                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4">
+                <div className="flex flex-col items-center mt-3">
+                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <h5 className="font-medium mb-4">Nome do Relatório</h5>
                         <Select
                             name="campos"
@@ -131,11 +158,11 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                             placeholder="Selecione o Campo..."
                             onChange={(selectedOption) => {
                                 setSelectedCampo(selectedOption);
-                                setExcludeCampo(selectedOption ? selectedOption.label : null);
+                                setExcludeCampo(selectedOption ? selectedOption.id : null);
                             }}
                             value={selectedCampo}
-                            getOptionLabel={(option) => option.label}
-                            getOptionValue={(option) => option.label}
+                            getOptionLabel={(option) => option.queryName}
+                            getOptionValue={(option) => option.queryName}
                         />
                     </div>
                 </div>
@@ -158,41 +185,21 @@ function ModalSalvos({ isOpen, onClose, generateReport, setBase64Image, setTitle
                         </button>
                         <button
                             className="align-left font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
-                            onClick={() => handleCarregar(generateReport)}
+                            onClick={() => handleCarregar()}
                         >
                             Carregar
                         </button>
                     </div>
                 </div>
             </div>
-            {/* Modais */}
-            {modalType === 'confirmDelete' && (
-                <ModalAlert
-                    modalType="APAGAR"
-                    isOpen={true}
-                    onClose={() => setModalType(null)}
-                    onConfirm={deleteSavedQuery}
-                    confirmText="Excluir"
-                    message={modalMessage}
-                    title="Confirmação"
-                    buttonColors={{
-                        confirm: "bg-red-600 hover:bg-red-700 focus:ring-red-600",
-                        cancel: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-600",
-                    }}
-                />
-            )}
-            {/* Modal de Aviso */}
-            {modalType === 'warning' && (
-                <ModalAlert
-                    modalType={"ALERTA"}
-                    isOpen={true}
-                    onClose={() => setModalType(null)}
-                    onConfirm={() => setModalType(null)}
-                    confirmText="Confirmar"
-                    message={modalMessage}
-                    title="Aviso"
-                />
-            )}
+            {/* Renderização do modal de alerta */}
+            <ModalAlert
+                isOpen={modal.isOpen}
+                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={handleConfirmar}
+                modalType={modal.type || 'ALERTA'} // Usar 'ALERTA' como valor padrão
+                message={modal.message}
+            />
         </div>
     );
 }

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-function ModalSql({ isOpen, onClose }) {
+function ModalSql({ isOpen, onClose, sqlGeral, sqlTotalizers }) {
     const [isCopied, setIsCopied] = useState(false);
-
-    const SQL = localStorage.getItem('SQLGeradoFinal') || '';
 
     // Impedir scroll da página quando o modal está aberto
     useEffect(() => {
@@ -25,10 +23,12 @@ function ModalSql({ isOpen, onClose }) {
         };
     }, [isOpen]);
 
+    const sqlCopy = 'Consulta Geral: ' + sqlGeral + '\n\nConsulta com Totalizers: ' + sqlTotalizers;
+
     // Copiar o SQL gerado para a área de transferência
     const handleCopy = async () => {
         try {
-            await navigator.clipboard.writeText(SQL);
+            await navigator.clipboard.writeText(sqlCopy);
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 4000); // Reseta após 4 segundos
         } catch (err) {
@@ -54,7 +54,9 @@ function ModalSql({ isOpen, onClose }) {
                 </div>
                 <div className="w-full h-[370px] flex flex-col justify-center items-center mt-4 relative overflow-auto">
                     <div className="w-11/12 h-full bg-gray-200 bg-opacity-30 rounded-md p-4 overflow-auto">
-                        <p>{SQL}</p>
+                        <p>Consulta Geral: {sqlGeral}</p>
+                        <br />
+                        <p>Consulta com Totalizers: {sqlTotalizers}</p>
                     </div>
                 </div>
                 {/* Rodapé com botão */}

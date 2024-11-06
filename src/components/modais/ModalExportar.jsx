@@ -3,6 +3,9 @@ import PropTypes from "prop-types";
 import Papa from "papaparse";
 import ModalAlert from "./ModalAlert";
 import { FiFile, FiDownload } from "react-icons/fi";
+import { linkFinal } from "../../config";
+
+
 
 export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     if (!combinedData || Object.keys(combinedData).length === 0) {
@@ -13,7 +16,7 @@ export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     }
 
     try {
-        const response = await fetch("http://localhost:8080/pdf/set-data", {
+        const response = await fetch(`${linkFinal}/pdf/set-data`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -48,9 +51,8 @@ export function downloadCSV(columns, tableData, handleModalAviso) {
     }
 
     const columnsName = columns.map((col) => {
-        if (col.value.includes(' as ')) {
-            const aliasMatch = col.value.match(/as\s+"(.+?)"/i);
-            return aliasMatch ? aliasMatch[1] : col.value;
+        if (col.apelido && col.apelido !== "") {
+            return col.apelido;
         }
         return col.value;
     });
@@ -76,8 +78,8 @@ const downloadFile = (blob, filename) => {
     URL.revokeObjectURL(link.href);
 };
 
-const convertToCSV = (columns, tableData) => {
-    if (!columns || !tableData || tableData.length === 0) {
+const convertToCSV = (columnsName, tableData) => {
+    if (!columnsName || !tableData || tableData.length === 0) {
         console.error(
             "As colunas ou os dados da tabela não estão definidos corretamente."
         );
@@ -85,7 +87,7 @@ const convertToCSV = (columns, tableData) => {
     }
 
     const data = tableData[0].values.map((_, rowIndex) => {
-        return columns.reduce((acc, col, colIndex) => {
+        return columnsName.reduce((acc, col, colIndex) => {
             acc[col] = tableData[colIndex]?.values[rowIndex] || "";
             return acc;
         }, {});
@@ -94,7 +96,7 @@ const convertToCSV = (columns, tableData) => {
     return Papa.unparse(data);
 };
 
-function ModalExpo({
+function ModalExportar({
     isOpen,
     onClose,
     table = [],
@@ -211,7 +213,7 @@ DownloadButton.propTypes = {
     label: PropTypes.string.isRequired,
 };
 
-ModalExpo.propTypes = {
+ModalExportar.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     table: PropTypes.arrayOf(
@@ -224,4 +226,4 @@ ModalExpo.propTypes = {
     setPdfOK: PropTypes.func.isRequired, // Adicionado setPdfOK aos propTypes
 };
 
-export default ModalExpo;
+export default ModalExportar;

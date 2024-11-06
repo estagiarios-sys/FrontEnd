@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import PropTypes from 'prop-types';
 import Select, { components } from 'react-select';
 import ModalAlert from './ModalAlert';
@@ -32,29 +32,59 @@ const getInputType = (type) => inputTypeMap[type] || 'text';
 
 const CustomSingleValue = (props) => (
     <components.SingleValue {...props}>
-        <div>{props.data.label}</div>
+        <div>{props.data.apelido || props.data.value}</div>
     </components.SingleValue>
 );
 
-function ModalFiltro({ isOpen, onClose, columns, onSave }) {
+function ModalFiltro({ isOpen, onClose, columns, onSave, loadedConditions, loadedColumns }) {
     const [selectedCampos, setSelectedCampos] = useState([]);
     const [addedCampos, setAddedCampos] = useState([]);
     const [modal, setModal] = useState({ isOpen: false, message: "", type: "ALERTA" });
-    const [condicoesStringComparacao, setCondicoesStringComparacao] = useState('');
+    const [condicoesArrayComparacao, setCondicoesArrayComparacao] = useState([]);
     const selectRefs = useRef([]);
     const containerRef = useRef(null);
 
-    // Contar comparações
-    const comparacao = condicoesStringComparacao.split(' AND ').length - (condicoesStringComparacao ? 1 : 0);
+    useEffect(() => {
+        if (loadedConditions && loadedConditions.length > 0) {
+
+            const parsedCampos = loadedConditions.map((conditionStr) => {
+                const conditionMatch = conditionStr.match(/^(.+?)\s*(>=|<=|!=|=|>|<)\s*'(.+)'$/);
+
+                if (conditionMatch) {
+                    const [, field, operator, value] = conditionMatch;
+
+                    const column = loadedColumns.find((col) => col.name === field.trim());
+
+                    if (column) {
+                        return {
+                            id: `${field}-${Date.now()}-${Math.random()}`,
+                            value: field.trim(),
+                            label: column.apelido || field.trim(),
+                            type: column.type,
+                            checked: false,
+                            valor: value.replace(/''/g, "'"),
+                            ordenacao: operator,
+                        };
+                    }
+                }
+
+                return null;
+            }).filter(Boolean);
+
+            setAddedCampos(parsedCampos);
+            setCondicoesArrayComparacao(loadedConditions);
+            onSave?.(loadedConditions);
+        }
+    }, [loadedConditions, columns]);
 
     const handleClose = useCallback(() => {
         const hasEmptyFields = addedCampos.some(campo => !campo.valor.trim() || !campo.ordenacao);
-        if (comparacao < addedCampos.length || hasEmptyFields) {
+        if (condicoesArrayComparacao.length < addedCampos.length || hasEmptyFields) {
             setModal({ isOpen: true, message: "Os dados carregados não foram salvos, deseja realmente sair?", type: "CONFIRMAR" });
             return;
         }
         onClose();
-    }, [onClose, addedCampos, comparacao]);
+    }, [onClose, addedCampos, condicoesArrayComparacao]);
 
     const handleScroll = () => {
         selectRefs.current.forEach(ref => {
@@ -62,48 +92,28 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
         });
     };
 
-    const campoOptions = useMemo(() => 
-        columns.map(col => {
-            if (col.value.includes(' as ')) {
-                const aliasMatch = col.value.match(/as\s+"(.+?)"/i);
-                return {
-                    value: col.value,
-                    label: aliasMatch ? aliasMatch[1] : col.value,
-                    type: col.type,
-                };
-            }
-            return {
-                value: col.value,
-                label: col.value,
-                type: col.type,
-            };
-        }), [columns]);
-
     const handleCampoChange = useCallback((selectedOptions) => {
-        setSelectedCampos(selectedOptions?.map(option => option.value) || []);
+        setSelectedCampos(selectedOptions || []);
     }, []);
 
     const handleAddSelectedCampos = useCallback(() => {
-        const camposToAdd = selectedCampos.map(value => {
-            const option = campoOptions.find(option => option.value === value);
-            return {
-                id: `${value}-${Date.now()}-${Math.random()}`,
-                value: option.value,
-                label: option.label,
-                type: option.type,
-                checked: false,
-                valor: '',
-                ordenacao: ''
-            };
-        });
+        const camposToAdd = selectedCampos.map(option => ({
+            id: `${option.value}-${Date.now()}-${Math.random()}`,
+            value: option.value,
+            label: option.apelido || option.value,
+            type: option.type,
+            checked: false,
+            valor: '',
+            ordenacao: '',
+        }));
         setAddedCampos(prev => [...prev, ...camposToAdd]);
         setSelectedCampos([]);
-    }, [selectedCampos, campoOptions]);
+    }, [selectedCampos]);
 
     const handleRemoveAllCampos = useCallback(() => {
-        setCondicoesStringComparacao('');
+        setCondicoesArrayComparacao([]);
         setAddedCampos([]);
-        onSave?.("");
+        onSave?.([]);
     }, [onSave]);
 
     const handleCheckboxChange = useCallback((id) => {
@@ -112,12 +122,13 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
 
     const handleRemoveCheckedCampos = useCallback(() => {
         const updatedCampos = addedCampos.filter(campo => !campo.checked);
-        const condicoesString = updatedCampos
-            .map(({ value, ordenacao, valor }) => `${value.split(/\sas\s/)[0].trim()} ${ordenacao} '${valor.trim().replace(/'/g, "\\'")}'`)
-            .join(' AND ');
-        setCondicoesStringComparacao(condicoesString);
+        const condicoesArray = updatedCampos.map(({ value, ordenacao, valor }) =>
+            `${value.trim()} ${ordenacao} '${valor.trim().replace(/'/g, "''")}'`
+        );
+
+        setCondicoesArrayComparacao(condicoesArray);
         setAddedCampos(updatedCampos);
-        onSave?.(condicoesString);
+        onSave?.(condicoesArray);
     }, [addedCampos, onSave]);
 
     const handleValorChange = useCallback((id, value) => {
@@ -143,12 +154,13 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
             return;
         }
 
-        const condicoesString = addedCampos
-            .map(({ value, ordenacao, valor }) => `${value.split(/\sas\s/)[0].trim()} ${ordenacao} '${valor.trim().replace(/'/g, "\\'")}'`)
-            .join(' AND ');
-        setCondicoesStringComparacao(condicoesString);
+        const condicoesArray = addedCampos.map(({ value, ordenacao, valor }) =>
+            `${value.trim()} ${ordenacao} '${valor.trim().replace(/'/g, "''")}'`
+        );
+
+        setCondicoesArrayComparacao(condicoesArray);
         setModal({ isOpen: true, message: "Filtro salvo com sucesso", type: "SUCESSO" });
-        onSave?.(condicoesString);
+        onSave?.(condicoesArray);
     }, [addedCampos, onSave]);
 
     const handleConfirm = useCallback(() => {
@@ -203,19 +215,21 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                             <h6 className="font-bold p-1">Campos</h6>
                             <Select
                                 isMulti
-                                options={campoOptions}
+                                options={columns}
                                 components={{ SingleValue: CustomSingleValue }}
                                 className="w-full"
                                 classNamePrefix="Select"
                                 placeholder="Selecione..."
                                 onChange={handleCampoChange}
-                                value={campoOptions.filter(option => selectedCampos.includes(option.value))}
+                                value={selectedCampos}
+                                getOptionLabel={(option) => option.apelido || option.value}
+                                getOptionValue={(option) => option.value}
                                 closeMenuOnSelect={false}
                                 styles={{
                                     valueContainer: (provided) => ({
                                         ...provided,
-                                        maxHeight: '120px', // Altura máxima do container de opções selecionadas
-                                        overflowY: 'auto', // Habilita o scroll quando a altura for excedida
+                                        maxHeight: '120px',
+                                        overflowY: 'auto',
                                     }),
                                     multiValue: (provided) => ({
                                         ...provided,
@@ -314,9 +328,9 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                                                         className="basic-single"
                                                         classNamePrefix="Select"
                                                         placeholder="Selecione..."
-                                                        menuPortalTarget={containerRef.current} // Referencia a div que será o limite
-                                                        menuShouldScrollIntoView={false} // Evita que ele saia da área visível
-                                                        menuPosition="fixed" // Posiciona o menu fixo
+                                                        menuPortalTarget={containerRef.current}
+                                                        menuShouldScrollIntoView={false}
+                                                        menuPosition="fixed"
                                                         styles={{ menuPortal: base => ({ ...base, zIndex: 20000 }) }}
                                                         onChange={(option) => handleOrdenacaoChange(campo.id, option)}
                                                         value={ordenacaoOptions.find(option => option.value === campo.ordenacao)}
@@ -362,7 +376,6 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     ))}
                 </div>
 
-
                 {/* Modal de Alerta */}
                 <ModalAlert
                     isOpen={modal.isOpen}
@@ -372,7 +385,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave }) {
                     message={modal.message}
                 />
             </div>
-        </div >
+        </div>
     );
 }
 
@@ -382,6 +395,7 @@ ModalFiltro.propTypes = {
     columns: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         type: PropTypes.string.isRequired,
+        apelido: PropTypes.string,
     })).isRequired,
     onSave: PropTypes.func,
 };

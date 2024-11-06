@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Loading from "../genericos/Loading";
+import { linkFinal } from "../../config";
 
-function ModalPdfView({ isOpen, onClose, combinedData }) {
+function ModalPrevia({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
 
   // Função para gerar o PDF
   const handlePreviewPDF = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8080/pdf/preview', {
+      const response = await fetch(`${linkFinal}/pdf/preview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,4 +85,4 @@ function ModalPdfView({ isOpen, onClose, combinedData }) {
   );
 }
 
-export default ModalPdfView;
+export default ModalPrevia;

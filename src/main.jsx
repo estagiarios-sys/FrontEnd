@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import TabelaCampos from './components/tabelas_campos';
+import React, { useState, useEffect } from 'react';
+import TabelaCampos from './components/TabelasCampos';
 import CamposSelecionados from './components/CamposSelecionados';
 import GerarRelatorio from './components/GerarRelatorio';
 import logoSystextil from './imagens/logo-systextil-branca.png';
@@ -12,12 +12,29 @@ function Main() {
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState('');
   const [checkedCampos, setCheckedCampos] = useState([]);
-  const [handleLoadFromLocalStorage, setHandleLoadFromLocalStorage] = useState(null);
   const [pdfOK, setPdfOK] = useState(false);
+  const [mainRequestLoaded, setMainRequestLoaded] = useState(false);
 
-  const passHandleLoadFromLocalStorage = (fn) => {
-    setHandleLoadFromLocalStorage(() => fn); // Armazena a função no estado
-  };
+  useEffect(() => {
+    if (mainRequestLoaded) {
+      const camposToAdd = mainRequestLoaded.columns.map(campo => ({
+        value: campo.name,
+        type: campo.type,
+        apelido: campo.nickName || ''
+      }));
+    
+      setSelectedCampos(prevSelectedCampos => {
+        const newCampos = camposToAdd.filter(campo => {
+          return !prevSelectedCampos.some(selected => selected.value === campo.value);
+        });
+    
+        return [...prevSelectedCampos, ...newCampos];
+      });
+    
+      setAvailableCampos([]);
+    }
+  }, [mainRequestLoaded]);
+  
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
   };
@@ -36,10 +53,10 @@ function Main() {
     }
 
     const camposParaRemover = selectedCampos.filter(campo =>
-      typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, ''))
+      typeof campo.value === 'string' && checkedCampos.includes(campo.value)
     );
     const camposRestantes = selectedCampos.filter(campo =>
-      !(typeof campo.value === 'string' && checkedCampos.includes(campo.value.replace(/\s+as\s+.*$/, '')))
+      !(typeof campo.value === 'string' && checkedCampos.includes(campo.value))
     );
     const orderByString = localStorage.getItem('orderByString') || '';
 
@@ -124,7 +141,7 @@ function Main() {
         <div className="flex justify-around items-start">
           <div>
             <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} passHandleLoadFromLocalStorage={passHandleLoadFromLocalStorage} />
+            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} mainRequestLoaded={mainRequestLoaded} />
           </div>
           <div>
             <div className='mt-36'>
@@ -169,6 +186,7 @@ function Main() {
               checkedCampos={checkedCampos}
               handleCheckboxChange={handleCheckboxChange}
               onSelectedCamposChange={handleSelectedCamposChange}
+              mainRequestLoaded={mainRequestLoaded}
             />
           </div>
         </div>
@@ -176,8 +194,8 @@ function Main() {
           selectedColumns={selectedCampos}
           selectTable={selectedTabela}
           selectedRelatedTables={selectedRelacionada}
-          handleLoadFromLocalStorage={handleLoadFromLocalStorage}
           setPdfOK={setPdfOK}
+          setMainRequestLoaded={setMainRequestLoaded}
         />
         <footer className="footer">
           <span className="copyright-text">©  Copyright 2024 - Systextil - Todos os direitos reservados</span>

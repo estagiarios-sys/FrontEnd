@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Select from 'react-select';
 import { getSelectedCampos } from './CamposSelecionados';
+import { linkFinal } from '../config.js';
 
-function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLocalStorage }) {
+function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [jsonData, setJsonData] = useState({});
   const [relationships, setRelationships] = useState([]);
   const [selectedTabela, setSelectedTabela] = useState('');
@@ -11,18 +12,19 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   const [mostrarInfo1, setMostrarInfo1] = useState(false);
   const [mostrarInfo2, setMostrarInfo2] = useState(false);
   const [mostrarInfo3, setMostrarInfo3] = useState(false);
-
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
-
   const campos = getSelectedCampos();
+
+
+  
 
   useEffect(() => {
     async function fetchJsonData() {
       try {
-        const response = await fetch('http://localhost:8080/find/table', {
+        const response = await fetch(`${linkFinal}/tables`, {
           credentials: 'include'
         });
 
@@ -39,7 +41,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
     async function fetchRelationships() {
       try {
-        const response = await fetch('http://localhost:8080/find/relationship', {
+        const response = await fetch(`${linkFinal}/relationships`, {
           credentials: 'include'
         });
 
@@ -58,98 +60,12 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
     fetchRelationships();
   }, []);
 
-  const extractFieldsAndTablesFromSQL = (sqlQuery, relationships) => {
-    // Captura a tabela principal do FROM e as tabelas relacionadas do JOIN
-    const regexTabelas = /FROM\s+(\w+)|JOIN\s+(\w+)/g;
-    const regexCampos = /SELECT\s+(.*?)\s+FROM/;
-
-    const tabelas = [];
-    const campos = [];
-
-    let matchTabelas;
-
-    // Loop para capturar todas as tabelas do SQL
-    while ((matchTabelas = regexTabelas.exec(sqlQuery)) !== null) {
-      const tabela = matchTabelas[1] || matchTabelas[2];
-      if (tabela && !tabelas.includes(tabela)) {
-        tabelas.push(tabela);
-      }
-    }
-
-    // Captura os campos da consulta
-    const matchCampos = sqlQuery.match(regexCampos);
-    if (matchCampos) {
-      const listaCampos = matchCampos[1].split(',').map(campo => campo.trim());
-      campos.push(...listaCampos);
-    }
-
-    // Filtra os relacionamentos para incluir apenas aqueles que estão realmente no SQL
-    const relacionadas = [...new Set(tabelas.reduce((acc, tabelaPrincipal) => {
-      relationships.forEach(rel => {
-        const [tabela1, tabela2] = rel.tabelas.split(' e ');
-
-        // Verifica se a tabelaPrincipal faz parte do relacionamento e se não está já invertido.
-        if ((tabela1 === tabelaPrincipal || tabela2 === tabelaPrincipal) && !acc.includes(`${tabela2} e ${tabela1}`) && !acc.includes(`${tabela1} e ${tabela2}`)) {
-
-          // Verifica se ambas as tabelas estão nas tabelas extraídas da SQL
-          if (tabelas.includes(tabela1) && tabelas.includes(tabela2)) {
-            const isTabelaPrincipalPrimeira = tabela1 === tabelaPrincipal;
-            const relacao = isTabelaPrincipalPrimeira ? `${tabela1} e ${tabela2}` : `${tabela2} e ${tabela1}`;
-
-            // Adiciona a relação apenas se ela ainda não estiver presente.
-            if (!acc.includes(relacao)) {
-              acc.push(relacao);
-            }
-          }
-        }
-      });
-
-      return acc;
-    }, []))]; // Garante que não haja duplicatas com Set
-
-    return { tabelas, relacionadas, campos };
-  };
-
-  const handleLoadFromLocalStorage = useCallback(() => {
-    const sqlQuery = localStorage.getItem('loadedQuery');
-    if (sqlQuery) {
-      const { tabelas, relacionadas, campos } = extractFieldsAndTablesFromSQL(sqlQuery, relationships);
-
-      if (tabelas.length > 0) {
-        setSelectedTabela(tabelas[0]);
-
-        // Vamos garantir que o relacionamento seja filtrado de acordo com o que está no SQL
-        const relacionamentosValidos = relacionadas.filter(relacionada => {
-          // Pega ambas as tabelas do relacionamento, que estão no formato "tabela1 e tabela2"
-          const [tabela1, tabela2] = relacionada.split(' e ');
-
-          // Verifica se ambas as tabelas do relacionamento estão na lista de tabelas extraídas do SQL
-          return tabelas.includes(tabela1) && tabelas.includes(tabela2);
-        });
-
-        // Atualiza relacionamentos no estado sem duplicatas
-        setSelectedRelacionada(prevRelacionada => {
-          const updatedRelacionada = [...new Set([...relacionamentosValidos])];
-          return updatedRelacionada;
-        });
-
-        // Atualiza campos sem duplicação
-        setSelectedCampos(prevCampos => {
-          const updatedCampos = [...new Set([...prevCampos, ...campos.map(campo => {
-            const [tabela, campoNome] = campo.split('.');
-            return `${tabela}.${campoNome}`;
-          })])];
-          return updatedCampos;
-        });
-      }
-    }
-  }, [relationships]);
-
   useEffect(() => {
-    if (passHandleLoadFromLocalStorage) {
-      passHandleLoadFromLocalStorage(handleLoadFromLocalStorage);
+    if (mainRequestLoaded) {
+      setSelectedTabela(mainRequestLoaded.table);
+      setSelectedRelacionada(mainRequestLoaded.tablesPairs);
     }
-  }, [handleLoadFromLocalStorage, passHandleLoadFromLocalStorage]); // Inclua handleLoadFromLocalStorage como dependência
+  }, [mainRequestLoaded]);
 
   const tabelas = Object.keys(jsonData);
 
@@ -192,9 +108,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
       selectedRelacionada.forEach(relacionadaTabela => {
         relacionadaTabela = relacionadaTabela.split(' e ')[1];
         relationships
-          .filter(rel => rel.tabelas.includes(relacionadaTabela))
+          .filter(rel => rel.includes(relacionadaTabela))
           .forEach(rel => {
-            const tabelas = rel.tabelas.split(' e ');
+            const tabelas = rel.split(' e ');
 
             tabelas.forEach(table => {
               if (table !== selectedTabela && table === relacionadaTabela && jsonData[table]) {
@@ -224,8 +140,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
     // Adiciona as tabelas relacionadas automaticamente com o formato "tabela_principal e tabela_relacionada"
     relationships
-      .filter(rel => rel.tabelas.includes(selectedTabela))
-      .flatMap(rel => rel.tabelas.split(' e '))
+      .filter(rel => rel.includes(selectedTabela))
+      .flatMap(rel => rel.split(' e '))
       .forEach(tabela => {
         if (tabela !== selectedTabela) {
           const relacionamento = `${selectedTabela} e ${tabela}`;
@@ -243,8 +159,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
       // Verifica se essa relação já foi adicionada antes de processar
       relationships
-        .filter(rel => rel.tabelas.includes(relacionadaTabelaNome))
-        .flatMap(rel => rel.tabelas.split(' e '))
+        .filter(rel => rel.includes(relacionadaTabelaNome))
+        .flatMap(rel => rel.split(' e '))
         .forEach(tabela => {
           if (tabela !== relacionadaTabelaNome && tabela !== selectedTabela) {
             const relacionamento = `${relacionadaTabelaNome} e ${tabela}`;
@@ -273,9 +189,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
 
     return relacionamentosAdicionados;
   }, [selectedTabela, selectedRelacionada, relationships]);
-
-
-
 
   useEffect(() => {
     const handleClearSelectedCampos = () => {
@@ -311,7 +224,11 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, passHandleLoadFromLoca
   }, []);
 
   const handleChange = (selectedOptions) => {
-    setSelectedCampos(selectedOptions ? selectedOptions.map(option => ({ value: option.value, type: option.type })) : []);
+    setSelectedCampos(selectedOptions ? selectedOptions.map(option => ({
+      value: option.value,
+      type: option.type,
+      apelido: ''
+    })) : []);
     // Mantém o menu aberto após a seleção
     setMenuIsOpen(true);
   };
