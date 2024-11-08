@@ -73,7 +73,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [editarRequestLoad, setEditarRequestLoad] = useState(false);
     const tableRef = useRef(null);
     const itemsPerPage = 14;
-    const orderByString = localStorage.getItem('orderByString');
+    let orderByString = localStorage.getItem('orderByString');
     let idNotificacao = null;
     
 
@@ -118,6 +118,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             type: column.type,
             nickName: column.apelido
         }));
+
+        if (orderByString == null) {
+            orderByString = '';
+        }
 
         const jsonRequest = {
             table: selectTable,

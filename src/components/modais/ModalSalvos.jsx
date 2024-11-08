@@ -50,10 +50,11 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                 console.error('Erro ao buscar as consultas salvas:', error);
             }
         }
-
-        fetchSavedQueries();
+        if (isOpen) {
+            fetchSavedQueries();
+        }
         //ver para possivelmente trocar selectedCampo para a função deleteSavedQuery
-    }, [selectedCampo, isOpen]);
+    }, [isOpen]);
 
     async function deleteSavedQuery() {
         try {
