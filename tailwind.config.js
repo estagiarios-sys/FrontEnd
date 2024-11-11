@@ -15,6 +15,7 @@ module.exports = {
         'custom-azul': '#00AAB5',
         'custom-azul-claro': ' rgba(0, 105, 115, 0.2)',
         'custom-azul-escuro': '#0A7F8E',
+        'cor-footer': '#0E8F98'
       },
       fontFamily: {
         sans: ['Montserrat', 'sans-serif'],  // Isso define Montserrat como fonte padrão para "font-sans"

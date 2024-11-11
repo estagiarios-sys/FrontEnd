@@ -12,6 +12,7 @@ import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from
 import ModalConsultar from "./modais/ModalConsultar";
 import Loading from "./genericos/Loading";
 import { linkFinal } from '../config.js';
+import { object } from "prop-types";
 
 // Hook personalizado para gerenciamento de modais
 function useModal() {
@@ -139,26 +140,51 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
 
     useEffect(() => {
         if (requestLoaded) {
-            setBase64Image(requestLoaded.pdfImage);
-            setTitlePdf(requestLoaded.pdfTitle);
+            if (Object.keys(requestLoaded).length === 0) {
+                setBase64Image(requestLoaded.pdfImage);
+                setTitlePdf(requestLoaded.pdfTitle);
 
-            const editarRequestLoad = {
-                pdfImage: requestLoaded.pdfImage,
-                pdfTitle: requestLoaded.pdfTitle,
-            };
+                const editarRequestLoad = {
+                    pdfImage: requestLoaded.pdfImage,
+                    pdfTitle: requestLoaded.pdfTitle,
+                };
 
-            const mainRequestLoaded = {
-                table: requestLoaded.table,
-                conditions: requestLoaded.conditions,
-                columns: requestLoaded.columns,
-                orderBy: requestLoaded.orderBy,
-                totalizers: requestLoaded.totalizers,
-                tablesPairs: requestLoaded.tablesPairs,
-            };
+                const mainRequestLoaded = {
+                    table: requestLoaded.table,
+                    conditions: requestLoaded.conditions,
+                    columns: requestLoaded.columns,
+                    orderBy: requestLoaded.orderBy,
+                    totalizers: requestLoaded.totalizers,
+                    tablesPairs: requestLoaded.tablesPairs,
+                };
 
-            setMainRequestLoaded(mainRequestLoaded);
-            setEditarRequestLoad(editarRequestLoad);
-            setRequestLoaded(false);
+                setMainRequestLoaded(mainRequestLoaded);
+                setEditarRequestLoad(editarRequestLoad);
+                setRequestLoaded(false);
+            } else {
+                // Limpa requestLoaded e insere os novos dados
+                const newRequestLoaded = { ...requestLoaded };
+                setBase64Image(newRequestLoaded.pdfImage);
+                setTitlePdf(newRequestLoaded.pdfTitle);
+
+                const editarRequestLoad = {
+                    pdfImage: newRequestLoaded.pdfImage,
+                    pdfTitle: newRequestLoaded.pdfTitle,
+                };
+
+                const mainRequestLoaded = {
+                    table: newRequestLoaded.table,
+                    conditions: newRequestLoaded.conditions,
+                    columns: newRequestLoaded.columns,
+                    orderBy: newRequestLoaded.orderBy,
+                    totalizers: newRequestLoaded.totalizers,
+                    tablesPairs: newRequestLoaded.tablesPairs,
+                };
+
+                setMainRequestLoaded(mainRequestLoaded);
+                setEditarRequestLoad(editarRequestLoad);
+                setRequestLoaded(false);
+            }
         }
     }, [requestLoaded]);
 

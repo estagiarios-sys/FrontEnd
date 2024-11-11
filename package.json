@@ -32,8 +32,12 @@
     "jest": "^27.4.3",
     "jest-resolve": "^27.4.2",
     "jest-watch-typeahead": "^1.0.0",
+    "jsonwebtoken": "^9.0.2",
     "mini-css-extract-plugin": "^2.4.5",
+    "nodemon": "^3.1.7",
     "papaparse": "^5.4.1",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "postcss": "^8.4.4",
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-loader": "^6.2.1",
@@ -67,7 +71,8 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js",
+    "dev": "nodemon server.js"
   },
   "eslintConfig": {
     "extends": [
