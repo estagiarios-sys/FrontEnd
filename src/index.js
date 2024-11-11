@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import "./index.css";
-import Main from "./main";
-import Login from "./Login";
+import Main from "./pages/main";
+import Login from "./pages/Login";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
 function App() {
