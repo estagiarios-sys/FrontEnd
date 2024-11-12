@@ -1,6 +1,4 @@
-// Importa o React para criar o componente funcional
 import React from 'react';
-// Importa o logo da Systextil da pasta de imagens
 import logo from '../../imagens/logo-systextil-cinza.png';
 
 const Loading = () => {

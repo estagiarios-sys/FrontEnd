@@ -1,4 +1,3 @@
-// Importa as bibliotecas necessárias do React e do react-select
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import Select from 'react-select';
 

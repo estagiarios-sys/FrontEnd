@@ -1,4 +1,3 @@
-// Importa os hooks do React e outros componentes necessários
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ModalModal from '../modais/ModalAlert'; // Importa o modal de alerta
 import PropTypes from 'prop-types'; // Biblioteca para validação de props

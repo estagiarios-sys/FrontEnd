@@ -60,7 +60,7 @@ export default function Login() {
                   type="text"
                   name="username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value.toUpperCase())}
                   className="pl-10 w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   placeholder="Digite seu nome..."
                   required
