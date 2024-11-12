@@ -1,14 +1,38 @@
+import React, { useState } from "react";
+import axios from "axios";
 import imagem from "./imagens/image.png";
 
+
 export default function Login() {
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:8082/back_reports/login", {
+        login: username,
+        senha: password,
+      });
+
+      localStorage.setItem("token", response.data.token);
+      
+      window.location.href = "/reports";
+    } catch (error) {
+      setErrorMessage("Usuário ou senha incorretos.");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen bg-slate-200">
       <div className="w-1/4 rounded-md shadow-xl bg-white">
         <div className="flex flex-col items-center justify-center">
-          <img src={imagem} className="mt-5 w-2/3" />
+          <img src={imagem} className="mt-5 w-2/3" alt="Login" />
         </div>
         <div className="flex flex-col m-10 text-2xl">
-          <form method="POST">
+          <form onSubmit={handleSubmit} method="POST">
             <div className="mb-4">
               <label className="block text-gray-700 text-lg font-bold mb-2">
                 Usuário:
@@ -32,8 +56,11 @@ export default function Login() {
                 <input
                   type="text"
                   name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="pl-10 w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   placeholder="Digite seu nome..."
+                  required
                 />
               </div>
             </div>
@@ -59,11 +86,15 @@ export default function Login() {
                 <input
                   type="password"
                   name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   placeholder="Digite sua senha..."
+                  required
                 />
               </div>
             </div>
+            {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
             <div className="w-full flex flex-col items-center justify-center">
               <button
                 type="submit"
