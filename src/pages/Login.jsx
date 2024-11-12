@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import imagem from "./imagens/image.png";
+import imagem from "../imagens/image.png";
 
 
 export default function Login() {
@@ -18,7 +18,7 @@ export default function Login() {
       });
 
       localStorage.setItem("token", response.data.token);
-      
+
       window.location.href = "/reports";
     } catch (error) {
       setErrorMessage("Usuário ou senha incorretos.");
