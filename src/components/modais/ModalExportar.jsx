@@ -20,6 +20,7 @@ export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
+                'Authorization': localStorage.getItem('token'),
             },
             body: JSON.stringify(combinedData),
         });

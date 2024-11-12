@@ -16,10 +16,13 @@ export default function Login() {
         login: username,
         senha: password,
       });
+      
+      console.log(response.data);
 
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("token", response.data);
 
       window.location.href = "/reports";
+    
     } catch (error) {
       setErrorMessage("Usuário ou senha incorretos.");
     }

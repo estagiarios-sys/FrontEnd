@@ -25,7 +25,10 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     async function fetchJsonData() {
       try {
         const response = await fetch(`${linkFinal}/tables`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: {
+            'Authorization': localStorage.getItem('token'),
+          },
         });
 
         if (!response.ok) {
@@ -42,7 +45,10 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     async function fetchRelationships() {
       try {
         const response = await fetch(`${linkFinal}/relationships`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: {
+            'Authorization': localStorage.getItem('token'),
+          },
         });
 
         if (!response.ok) {

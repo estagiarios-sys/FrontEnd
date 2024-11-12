@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TabelaCampos from '../components/TabelasCampos';
 import CamposSelecionados from '../components/CamposSelecionados';
 import GerarRelatorio from '../components/GerarRelatorio';
-import logoSystextil from './imagens/logo-systextil-branca.png';
+import logoSystextil from '../imagens/logo-systextil-branca.png';
 import { resetTotalizers, removeSelectedTotalizers } from '../components/CamposSelecionados';
 import ModalNotificacao from '../components/modais/ModalNotificacao';
 

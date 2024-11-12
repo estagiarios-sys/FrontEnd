@@ -33,7 +33,10 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
         async function fetchSavedQueries() {
             try {
                 const response = await fetch(`${linkFinal}/saved-query`, {
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Authorization': localStorage.getItem('token'),
+                    }
                 });
 
 
@@ -60,6 +63,9 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
         try {
             const response = await fetch(`${linkFinal}/saved-query/${excludeCampo}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': localStorage.getItem('token'),
+                }
             });
 
             if (!response.ok) {
@@ -98,6 +104,9 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
         try {
             const response = await fetch(`${linkFinal}/saved-query/${selectedCampo.id}`, {
                 credentials: 'include',
+                headers: {
+                    'Authorization': localStorage.getItem('token'),
+                }
             });
 
 

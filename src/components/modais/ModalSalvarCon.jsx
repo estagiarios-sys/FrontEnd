@@ -76,6 +76,9 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
             const response = await fetch(`${linkFinal}/saved-query`, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'Authorization': localStorage.getItem('token'),
+                }
             });
 
             if (!response.ok) {
@@ -105,6 +108,9 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
             const response = await fetch(`${linkFinal}/saved-query/${savedQueryId}`, {
                 method: 'PUT',
                 body: formData,
+                headers: {
+                    'Authorization': localStorage.getItem('token'),
+                }
             });
 
             if (!response.ok) {
