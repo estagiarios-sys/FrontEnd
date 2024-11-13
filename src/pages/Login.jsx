@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
 import imagem from "../imagens/image.png";
+import { linkFinal } from "../config";
+import { object } from "prop-types";
+import Select from 'react-select';
 
 
 export default function Login() {
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [nome_empresa, setNome_empresa] = useState("");
+  const [empresas, setEmpresas] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,6 +20,7 @@ export default function Login() {
       const response = await axios.post("http://localhost:8082/back_reports/login", {
         login: username,
         senha: password,
+        codigoEmpresa: nome_empresa,
       });
       
       console.log(response.data);
@@ -28,14 +34,60 @@ export default function Login() {
     }
   };
 
+  const getEmpresas = async () => {
+    try {
+      const response = await axios.get(`${linkFinal}/companies`);
+      setEmpresas(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  React.useEffect(() => {
+    getEmpresas();
+  }, []);
+
+  
+  const empresasMapeamento = Object.keys(empresas).map((key) => ({
+    codigo: empresas[key].codigo,
+    nome: empresas[key].nome,
+  }));
+
+  console.log(nome_empresa)
+
+
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen bg-slate-200">
-      <div className="w-1/4 rounded-md shadow-xl bg-white">
+      <div className="w-1/4 rounded-md shadow-xl bg-white w-2/5">
         <div className="flex flex-col items-center justify-center">
           <img src={imagem} className="mt-5 w-2/3" alt="Login" />
         </div>
-        <div className="flex flex-col m-10 text-2xl">
-          <form onSubmit={handleSubmit} method="POST">
+        <div className="flex flex-col m-10 text-xl">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-5 w-full flex flex-col ">
+              <Select name="nome_empresa"
+              className="w-full"
+              value={empresasMapeamento.find((option) => option.value === nome_empresa)}
+              placeholder="Selecione a empresa"
+              options={empresasMapeamento.map((empresa) => ({
+                value: empresa.codigo,
+                label: [empresa.codigo + " - ",empresa.nome]
+              }))}
+              styles={{
+                control: (provided, state) => ({
+                  ...provided,
+                  backgroundColor: state.isFocused ? 'yellow' : provided.backgroundColor,
+                  boxShadow: state.isFocused ? '0 0 0 1px yellow' : provided.boxShadow,
+                  '&:hover': {
+                    backgroundColor: state.isFocused ? 'yellow' : provided['&:hover'].backgroundColor,
+                  },
+                }),
+              }}
+              onChange={(selectedOption) => setNome_empresa(selectedOption.value)}
+              >
+
+              </Select>
+            </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-lg font-bold mb-2">
                 Usuário:
