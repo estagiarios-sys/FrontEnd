@@ -373,47 +373,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
     }, [imgPdf]);
 
-    const sendAnalysisData = async () => {
-        try {
-            setLoading(true);
-            const jsonRequest = buildJsonRequest();
-
-            const url = `${linkFinal}/report-data/analyze`;
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token'),
-                   
-                },
-                body: JSON.stringify(jsonRequest),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
-            }
-
-            const estimatedTimeBack = await response.json();
-
-            setEstimatedTime(estimatedTimeBack);
-            setLoading(false);
-
-            openModal('consultar');
-
-        } catch (error) {
-            setLoading(false);
-            openModal('alert', 'ALERTA', 'Erro ao enviar os dados. Por favor, tente novamente.');
-            console.error('Erro ao enviar os dados:', error);
-        }
-    };
 
     const handleModalGenerate = () => {
         if (selectedColumns.length === 0) {
             openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
             return;
         }
-        sendAnalysisData();
+        openModal('consultar');
     };
 
     const renderTotalizerHTML = (columns, resultTotalizer) => {
