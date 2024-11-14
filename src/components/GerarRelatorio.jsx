@@ -12,9 +12,7 @@ import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from
 import ModalConsultar from "./modais/ModalConsultar";
 import Loading from "./genericos/Loading";
 import { linkFinal } from '../config.js';
-import { object } from "prop-types";
 
-// Hook personalizado para gerenciamento de modais
 function useModal() {
     const [modals, setModals] = useState({
         salvos: false,

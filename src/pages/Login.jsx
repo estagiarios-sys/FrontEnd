@@ -2,62 +2,58 @@ import React, { useState } from "react";
 import axios from "axios";
 import imagem from "../imagens/image.png";
 import { linkFinal } from "../config";
-import { object } from "prop-types";
 import Select from 'react-select';
-
+import Loading from '../components/genericos/Loading';
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [nome_empresa, setNome_empresa] = useState("");
-  const [empresas, setEmpresas] = useState({});
+  const [empresas, setEmpresas] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:8082/back_reports/login", {
-        login: username,
-        senha: password,
-        codigoEmpresa: nome_empresa,
-      });
-      
-      console.log(response.data);
-
-      localStorage.setItem("token", response.data);
-
-      window.location.href = "/reports";
-    
-    } catch (error) {
-      setErrorMessage("Usuário ou senha incorretos.");
-    }
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const [focusField, setFocusField] = useState(null); 
 
   const getEmpresas = async () => {
     try {
       const response = await axios.get(`${linkFinal}/companies`);
       setEmpresas(response.data);
+      setIsLoading(false);
     } catch (error) {
       console.error(error);
+      setIsLoading(false);
     }
   };
 
-  React.useEffect(() => {
+  if (isLoading) {
     getEmpresas();
-  }, []);
+  }
 
-  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(`${linkFinal}/login`, {
+        login: username,
+        senha: password,
+        codigoEmpresa: nome_empresa,
+      });
+
+      console.log(response.data);
+      localStorage.setItem("token", response.data);
+      window.location.href = "/reports";
+    } catch (error) {
+      setErrorMessage("Usuário ou senha incorretos.");
+    }
+  };
+
   const empresasMapeamento = Object.keys(empresas).map((key) => ({
-    codigo: empresas[key].codigo,
-    nome: empresas[key].nome,
+    value: empresas[key].codigo,
+    label: `${empresas[key].codigo} - ${empresas[key].nome}`,
   }));
-
-  console.log(nome_empresa)
-
 
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen bg-slate-200">
+      {isLoading && <Loading />}
       <div className="w-1/4 rounded-md shadow-xl bg-white w-2/5">
         <div className="flex flex-col items-center justify-center">
           <img src={imagem} className="mt-5 w-2/3" alt="Login" />
@@ -65,38 +61,39 @@ export default function Login() {
         <div className="flex flex-col m-10 text-xl">
           <form onSubmit={handleSubmit}>
             <div className="mb-5 w-full flex flex-col ">
-              <Select name="nome_empresa"
-              className="w-full"
-              value={empresasMapeamento.find((option) => option.value === nome_empresa)}
-              placeholder="Selecione a empresa"
-              options={empresasMapeamento.map((empresa) => ({
-                value: empresa.codigo,
-                label: [empresa.codigo + " - ",empresa.nome]
-              }))}
-              styles={{
-                control: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isFocused ? 'yellow' : provided.backgroundColor,
-                  boxShadow: state.isFocused ? '0 0 0 1px yellow' : provided.boxShadow,
-                  '&:hover': {
-                    backgroundColor: state.isFocused ? 'yellow' : provided['&:hover'].backgroundColor,
-                  },
-                }),
-              }}
-              onChange={(selectedOption) => setNome_empresa(selectedOption.value)}
-              >
+              <Select
+                name="nome_empresa"
+                className="w-full"
+                value={empresasMapeamento.find((option) => option.value === nome_empresa)}
 
-              </Select>
+                placeholder="Selecione a empresa"
+                options={empresasMapeamento}
+                styles={{
+                  control: (provided, state) => ({
+                    ...provided,
+                    backgroundColor: state.isFocused ? '#fdba74' : provided.backgroundColor,
+                    boxShadow: state.isFocused ? '0 0 0 0px #fdba74' : provided.boxShadow,
+                    '&:hover': {
+                      backgroundColor: state.isFocused ? '#fdba74' : provided['&:hover'].backgroundColor,
+                    },
+                  }),
+                  singleValue: (provided, state) => ({
+                    ...provided,
+                    color: state.isFocused || state.hasValue ? 'black' : provided.color,
+
+                  })
+                }}
+                onChange={(selectedOption) => setNome_empresa(selectedOption.value)}
+              />
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-lg font-bold mb-2">
                 Usuário:
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  {/* User icon */}
+                <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none ${focusField === "username" ? "text-black" : "text-gray-400"}`}>
                   <svg
-                    className="h-5 w-5 text-gray-400"
+                    className="h-5 w-5"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -112,9 +109,11 @@ export default function Login() {
                   type="text"
                   name="username"
                   value={username}
+                  onFocus={() => setFocusField("username")}
+                  onBlur={() => setFocusField(null)}
                   onChange={(e) => setUsername(e.target.value.toUpperCase())}
-                  className="pl-10 w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Digite seu nome..."
+                  className="pl-10 w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:bg-orange-300 focus:text-black"
+                  placeholder="USUÁRIO"
                   required
                 />
               </div>
@@ -124,10 +123,9 @@ export default function Login() {
                 Senha:
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  {/* Lock icon */}
+                <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none ${focusField === "password" ? "text-black" : "text-gray-400"}`}>
                   <svg
-                    className="h-5 w-5 text-gray-400"
+                    className="h-5 w-5"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -142,9 +140,11 @@ export default function Login() {
                   type="password"
                   name="password"
                   value={password}
+                  onFocus={() => setFocusField("password")}
+                  onBlur={() => setFocusField(null)}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Digite sua senha..."
+                  className="pl-10 w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:bg-orange-300 focus:text-black"
+                  placeholder="SENHA"
                   required
                 />
               </div>
