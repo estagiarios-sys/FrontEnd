@@ -14,7 +14,7 @@ function ModalPrevia({ isOpen, onClose, combinedData }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('token'),
+          'Authorization': sessionStorage.getItem('token'),
         },
         body: JSON.stringify(combinedData),
       });

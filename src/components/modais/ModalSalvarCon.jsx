@@ -77,7 +77,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Authorization': localStorage.getItem('token'),
+                    'Authorization': sessionStorage.getItem('token'),
                 }
             });
 
@@ -109,7 +109,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 method: 'PUT',
                 body: formData,
                 headers: {
-                    'Authorization': localStorage.getItem('token'),
+                    'Authorization': sessionStorage.getItem('token'),
                 }
             });
 
