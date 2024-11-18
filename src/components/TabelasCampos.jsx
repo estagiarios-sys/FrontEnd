@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Select from 'react-select';
 import { getSelectedCampos } from './CamposSelecionados';
 import { linkFinal } from '../config.js';
@@ -9,18 +9,21 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [selectedTabela, setSelectedTabela] = useState('');
   const [selectedRelacionada, setSelectedRelacionada] = useState([]);
   const [selectedCampos, setSelectedCampos] = useState([]);
+  const [columnsData, setColumnsData] = useState({});
   const [mostrarInfo1, setMostrarInfo1] = useState(false);
   const [mostrarInfo2, setMostrarInfo2] = useState(false);
   const [mostrarInfo3, setMostrarInfo3] = useState(false);
   const [menuIsOpen, setMenuIsOpen] = useState(false);
+  const [valores, setValores] = useState([]);
+
 
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
   const campos = getSelectedCampos();
+  const tablesPairs = [];
+  // const valores = [];
 
-
-  
-
+  // Busca os dados de tabelas e relacionamentos
   useEffect(() => {
     async function fetchJsonData() {
       try {
@@ -67,37 +70,77 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   }, []);
 
   useEffect(() => {
+    async function fetchColumns() {
+      if (!selectedTabela) return;
+
+      try {
+        const response = await fetch(`${linkFinal}/tables/columns`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': localStorage.getItem('token'),
+          },
+          body: JSON.stringify({ mainTable: selectedTabela, tablesPairs: tablesPairs }),
+        });
+
+        const data = await response.json();
+
+        // Extraia os valores do primeiro item
+        const extractedValues = Object.values(data)[0];
+        console.log('Valores:', extractedValues);
+
+        // Atualize o estado valores
+        setValores(extractedValues);
+
+        // Atualize as colunas no estado
+        setColumnsData(data);
+      } catch (error) {
+        console.error('Erro ao buscar as colunas:', error);
+        setColumnsData({});
+      }
+    }
+
+    fetchColumns();
+  }, [selectedTabela]);
+
+
+  // Atualiza o estado quando usar o ModalSalvos
+  useEffect(() => {
     if (mainRequestLoaded) {
       setSelectedTabela(mainRequestLoaded.table);
       setSelectedRelacionada(mainRequestLoaded.tablesPairs);
     }
   }, [mainRequestLoaded]);
 
-  const tabelas = Array.from(jsonData).map(tabela => ({ value: tabela, label: tabela }));
+  const tabelas = Array.from(jsonData).map(tabela => ({
+    value: tabela,
+    label: tabela
+  }));
 
   useEffect(() => {
     if (onDataChange) {
-      onDataChange({
+      const data = {
         tabela: selectedTabela,
         relacionada: [...new Set(selectedRelacionada)],
-        campos: [...new Set(selectedCampos)]
-      });
+        campos: [...new Set(selectedCampos)],
+      };
+      console.log('onDataChange Triggered:', data);
+      onDataChange(data);
     }
   }, [selectedTabela, selectedRelacionada, selectedCampos]);
 
   const campoOptions = useMemo(() => {
-    const selectedValues = new Set(campos.map(campo => campo.value)); // Move para dentro do useMemo
-
+    const selectedValues = new Set(campos.map(campo => campo.value));
     const options = new Map();
 
     if (selectedTabela && jsonData[selectedTabela]) {
-      Object.keys(jsonData[selectedTabela]).forEach(campo => {
+      Object.entries(jsonData[selectedTabela]).forEach(([campo, tipo]) => {
         const optionValue = `${selectedTabela}.${campo}`;
-        if (!selectedValues.has(optionValue)) { // Verifica se o campo já está selecionado
+        if (!selectedValues.has(optionValue)) {
           options.set(optionValue, {
             value: optionValue,
             label: `${selectedTabela} - ${campo}`,
-            type: jsonData[selectedTabela][campo]
+            type: tipo,
           });
         }
       });
@@ -106,39 +149,34 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     // Adiciona campos das tabelas selecionadas como relacionadas
     if (selectedRelacionada.length > 0) {
       selectedRelacionada.forEach(relacionadaTabela => {
-        relacionadaTabela = relacionadaTabela.split(' e ')[1];
-        relationships
-          .filter(rel => rel.includes(relacionadaTabela))
-          .forEach(rel => {
-            const tabelas = rel.split(' e ');
+        const relacionadaTabelaNome = relacionadaTabela.includes(' e ')
+          ? relacionadaTabela.split(' e ')[1]
+          : relacionadaTabela;
 
-            tabelas.forEach(table => {
-              if (table !== selectedTabela && table === relacionadaTabela && jsonData[table]) {
-                Object.keys(jsonData[table]).forEach(campo => {
-                  const optionValue = `${table}.${campo}`;
-                  if (!selectedValues.has(optionValue)) { // Verifica se o campo já está selecionado
-                    options.set(optionValue, {
-                      value: optionValue,
-                      label: `${table} - ${campo}`,
-                      type: jsonData[table][campo]
-                    });
-                  }
-                });
-              }
-            });
+        if (jsonData[relacionadaTabelaNome]) {
+          Object.entries(jsonData[relacionadaTabelaNome]).forEach(([campo, tipo]) => {
+            const optionValue = `${relacionadaTabelaNome}.${campo}`;
+            if (!selectedValues.has(optionValue)) {
+              options.set(optionValue, {
+                value: optionValue,
+                label: `${relacionadaTabelaNome} - ${campo}`,
+                type: tipo,
+              });
+            }
           });
+        }
       });
     }
 
-    return Array.from(options.values());
-  }, [selectedTabela, jsonData, selectedRelacionada, relationships, campos]); // 'selectedValues' não precisa estar aqui
+    // Ordena as opções
+    return Array.from(options.values()).sort((a, b) => a.label.localeCompare(b.label));
+  }, [selectedTabela, jsonData, selectedRelacionada, relationships, campos]);
 
   const relacionadaOptions = useMemo(() => {
     if (!selectedTabela) return [];
 
     const todasRelacionadas = new Set();
 
-    // Adiciona as tabelas relacionadas automaticamente com o formato "tabela_principal e tabela_relacionada"
     relationships
       .filter(rel => rel.includes(selectedTabela))
       .flatMap(rel => rel.split(' e '))
@@ -148,16 +186,14 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
           const relacionamentoInverso = `${tabela} e ${selectedTabela}`;
 
           if (!todasRelacionadas.has(relacionamentoInverso) && !todasRelacionadas.has(relacionamento)) {
-            todasRelacionadas.add(relacionamento); // Adiciona o relacionamento corretamente formatado
+            todasRelacionadas.add(relacionamento);
           }
         }
       });
 
-    // Adiciona as tabelas que já foram selecionadas ou extraídas do LocalStorage
     selectedRelacionada.forEach(relacionadaTabela => {
       const relacionadaTabelaNome = relacionadaTabela.includes(' e ') ? relacionadaTabela.split(' e ')[1] : relacionadaTabela;
 
-      // Verifica se essa relação já foi adicionada antes de processar
       relationships
         .filter(rel => rel.includes(relacionadaTabelaNome))
         .flatMap(rel => rel.split(' e '))
@@ -167,21 +203,18 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
             const relacionamentoInverso = `${tabela} e ${relacionadaTabelaNome}`;
 
             if (!todasRelacionadas.has(relacionamentoInverso) && !todasRelacionadas.has(relacionamento)) {
-              todasRelacionadas.add(relacionamento); // Adiciona o relacionamento corretamente formatado
+              todasRelacionadas.add(relacionamento);
             }
           }
         });
 
-      // Adiciona a própria tabela relacionada do LocalStorage (sem duplicação)
       if (!todasRelacionadas.has(relacionadaTabela)) {
-        todasRelacionadas.add(relacionadaTabela); // Adiciona do localStorage se não estiver já presente
+        todasRelacionadas.add(relacionadaTabela);
       }
     });
 
-    // Garante que o select de "Relacionadas" fique vazio se não houver relacionamentos
     if (todasRelacionadas.size === 0) return [];
 
-    // Mapeia as tabelas relacionadas para o formato do select
     const relacionamentosAdicionados = Array.from(todasRelacionadas).map(value => ({
       value: value,
       label: value,
@@ -223,21 +256,74 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     };
   }, []);
 
-  const handleChange = (selectedOptions) => {
-    setSelectedCampos(selectedOptions ? selectedOptions.map(option => ({
-      value: option.value,
-      type: option.type,
-      apelido: ''
-    })) : []);
-    // Mantém o menu aberto após a seleção
+  // Função para remover um campo
+  const removeField = (fieldToRemove) => {
+    setSelectedCampos((prev) => prev.filter((field) => field.value !== fieldToRemove));
+  };
+
+  const handleChange = selectedOptions => {
+    const updatedCampos = selectedOptions
+      ? selectedOptions.map(option => ({
+        value: option.value,
+        type: option.type,
+        apelido: '',
+      }))
+      : [];
+    console.log('handleChange Triggered. New selectedCampos:', updatedCampos);
+    setSelectedCampos(updatedCampos);
     setMenuIsOpen(true);
   };
+
+  // Adiciona campos automaticamente ao selecionar tabela ou relacionamentos
+  useEffect(() => {
+    if (selectedTabela && jsonData[selectedTabela]) {
+      const defaultFields = Object.keys(jsonData[selectedTabela]).map(campo => ({
+        value: `${selectedTabela}.${campo}`,
+        type: jsonData[selectedTabela][campo],
+        apelido: '',
+      }));
+
+      setSelectedCampos(prev => {
+        const newFields = defaultFields.filter(
+          field => !prev.some(f => f.value === field.value)
+        );
+        console.log('Auto-selecting default fields for selectedTabela:', newFields);
+        return [...prev, ...newFields];
+      });
+    }
+  }, [selectedTabela, jsonData]);
+
+  useEffect(() => {
+    if (selectedRelacionada.length > 0) {
+      const relatedFields = selectedRelacionada.flatMap(relacionada => {
+        const tableName = relacionada.includes(' e ')
+          ? relacionada.split(' e ')[1]
+          : relacionada;
+        if (jsonData[tableName]) {
+          return Object.keys(jsonData[tableName]).map(campo => ({
+            value: `${tableName}.${campo}`,
+            type: jsonData[tableName][campo],
+            apelido: '',
+          }));
+        }
+        return [];
+      });
+
+      setSelectedCampos(prev => {
+        const newFields = relatedFields.filter(
+          field => !prev.some(f => f.value === field.value)
+        );
+        console.log('Auto-selecting related fields for selectedRelacionada:', newFields);
+        return [...prev, ...newFields];
+      });
+    }
+  }, [selectedRelacionada, jsonData]);
 
   const customStyles = {
     valueContainer: (provided) => ({
       ...provided,
-      maxHeight: '120px', // Altura máxima do container de opções selecionadas
-      overflowY: 'auto', // Habilita o scroll quando a altura for excedida
+      maxHeight: '120px',
+      overflowY: 'auto',
     }),
     multiValue: (provided) => ({
       ...provided,
@@ -283,18 +369,18 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
             isMulti
             name="relacionadas"
             inputId="relacionadas"
-            options={relacionadaOptions} // Opções geradas pelo useMemo
+            options={relacionadaOptions}
             className="basic-single w-96"
             classNamePrefix="Select"
             placeholder="Selecione uma relação..."
             onChange={(selectedOptions) => {
               const selectedValues = selectedOptions ? selectedOptions.map(option => option.value) : [];
-              setSelectedRelacionada(selectedValues); // Atualiza o estado de tabelas relacionadas
-              handleAllLeftClick(); // Alguma ação que você já está utilizando
+              setSelectedRelacionada(selectedValues);
+              handleAllLeftClick();
             }}
-            value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))} // Mantém os valores selecionados
+            value={relacionadaOptions.filter(option => selectedRelacionada.includes(option.value))}
             closeMenuOnSelect={false}
-            styles={customStyles} // Aplica os estilos customizados
+            styles={customStyles}
           />
 
           <div id='info-click' className={mostrarInfo2 ? 'up show' : 'up'} ref={dicaRef}>
@@ -308,26 +394,31 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         </div>
       </div>
       <div className="mt-5">
-        <label htmlFor="campos">Campos</label>
+        <label htmlFor="Campos">Campos</label>
         <div className="containerHover">
           <Select
             isMulti
             name="campos"
             inputId="campos"
-            options={campoOptions} // Campos gerados a partir das tabelas selecionadas
+            options={Object.entries(valores).map(([key, value]) => ({
+              value: key,
+              label: key,
+            }))}
             className="basic-multi-select w-96"
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."
             onChange={handleChange}
-            value={campoOptions.filter(option =>
-              selectedCampos.some(selected => selected.value === option.value) // Filtra pelos objetos em selectedCampos
-            )}
-            menuIsOpen={menuIsOpen} // Controla a visibilidade do menu
-            onMenuOpen={() => setMenuIsOpen(true)} // Abre o menu
-            onMenuClose={() => setMenuIsOpen(false)} // Fecha o menu
-            styles={customStyles} // Aplica os estilos customizados
+            value={selectedCampos.map(campo => ({
+              value: campo.value,
+              label: campo.value,
+            }))}
+            menuIsOpen={menuIsOpen}
+            onMenuOpen={() => setMenuIsOpen(true)}
+            onMenuClose={() => setMenuIsOpen(false)}
+            styles={customStyles}
           />
 
+            
           <div id='info-click' className={mostrarInfo3 ? 'up show' : 'up'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo3(prev => !prev)} ref={buttonRef}>
               <svg className="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
