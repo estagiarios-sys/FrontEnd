@@ -73,7 +73,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     }
   }, [mainRequestLoaded]);
 
-  const tabelas = Object.keys(jsonData);
+  const tabelas = Array.from(jsonData).map(tabela => ({ value: tabela, label: tabela }));
 
   useEffect(() => {
     if (onDataChange) {
@@ -84,12 +84,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       });
     }
   }, [selectedTabela, selectedRelacionada, selectedCampos]);
-
-
-  const tabelaOptions = tabelas.map(tabela => ({
-    value: tabela,
-    label: tabela,
-  }));
 
   const campoOptions = useMemo(() => {
     const selectedValues = new Set(campos.map(campo => campo.value)); // Move para dentro do useMemo
@@ -260,7 +254,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
           <Select
             name="tabelas"
             inputId="tabelas"
-            options={tabelaOptions}
+            options={tabelas}
             className="basic-single w-96"
             classNamePrefix="Select"
             placeholder="Selecione uma tabela..."
@@ -270,7 +264,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
               setSelectedCampos([]);
               handleAllLeftClick();
             }}
-            value={tabelaOptions.find(option => option.value === selectedTabela)}
+            value={tabelas.find(option => option.value === selectedTabela)}
           />
           <div id='info-click' className={mostrarInfo1 ? 'up show' : 'up'} ref={dicaRef}>
             <button id="info-click-button" onClick={() => setMostrarInfo1(prev => !prev)} ref={buttonRef}>
