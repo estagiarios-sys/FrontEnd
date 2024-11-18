@@ -17,7 +17,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
         try {
             const response = await fetch(`${linkFinal}/pdf`, {
                 headers: {
-                    'Authorization': localStorage.getItem('token'),
+                    'Authorization': sessionStorage.getItem('token'),
                 }
             });
             if (!response.ok) {
@@ -47,7 +47,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token'),
+                    'Authorization': sessionStorage.getItem('token'),
                 }
             });
 

@@ -5,6 +5,7 @@ import GerarRelatorio from '../components/GerarRelatorio';
 import logoSystextil from '../imagens/logo-systextil-branca.png';
 import { resetTotalizers, removeSelectedTotalizers } from '../components/CamposSelecionados';
 import ModalNotificacao from '../components/modais/ModalNotificacao';
+import Footer from '../components/Campos/Footer';
 
 function Main() {
   const [selectedCampos, setSelectedCampos] = useState([]);
@@ -197,14 +198,7 @@ function Main() {
           setPdfOK={setPdfOK}
           setMainRequestLoaded={setMainRequestLoaded}
         />
-        <footer className="footer">
-          <span className="copyright-text">©  Copyright 2024 - Systextil - Todos os direitos reservados</span>
-          <div className="text-and-logo">
-            <img src={logoSystextil} alt="Descrição da Imagem" />
-            <span className="separator">|</span>
-            <span>Simplificando a cadeia têxtil!</span>
-          </div>
-        </footer>
+       <Footer logoSystextil={logoSystextil} />
       </div>
     </div>
   );

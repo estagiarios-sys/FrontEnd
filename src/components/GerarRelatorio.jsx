@@ -205,7 +205,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token'),
+                    'Authorization': sessionStorage.getItem('token'),
                 },
                 body: titlePdf, // Serializa o título como JSON
             });
@@ -239,7 +239,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token'),
+                    'Authorization': sessionStorage.getItem('token'),
                 },
                 body: JSON.stringify(jsonRequest),
             });

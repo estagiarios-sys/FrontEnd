@@ -3,6 +3,7 @@ import Select from 'react-select';
 import { getSelectedCampos } from './CamposSelecionados';
 import { linkFinal } from '../config.js';
 
+
 function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [jsonData, setJsonData] = useState({});
   const [relationships, setRelationships] = useState([]);
@@ -19,7 +20,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const campos = getSelectedCampos();
 
 
-  
+
 
   useEffect(() => {
     async function fetchJsonData() {
@@ -27,7 +28,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         const response = await fetch(`${linkFinal}/tables`, {
           credentials: 'include',
           headers: {
-            'Authorization': localStorage.getItem('token'),
+            'Authorization': sessionStorage.getItem('token'),
           },
         });
 
@@ -47,7 +48,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         const response = await fetch(`${linkFinal}/relationships`, {
           credentials: 'include',
           headers: {
-            'Authorization': localStorage.getItem('token'),
+            'Authorization': sessionStorage.getItem('token'),
           },
         });
 
@@ -341,5 +342,4 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     </div>
   );
 }
-
 export default TabelaCampos;
