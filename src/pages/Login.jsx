@@ -14,11 +14,20 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(true);
   const [focusField, setFocusField] = useState(null); 
 
+  const hostname = window.location.hostname;
+
   const getEmpresas = async () => {
     try {
       const response = await axios.get(`${linkFinal}/companies`);
       setEmpresas(response.data);
       setIsLoading(false);
+      if (hostname === "localhost") {
+        for (let i = 0; i < response.data.length; i++) {
+          if (response.data[i].codigo === 1) {
+            setNome_empresa(response.data[i].codigo);
+          }
+        }
+      }
     } catch (error) {
       console.error(error);
       setIsLoading(false);
@@ -38,8 +47,7 @@ export default function Login() {
         codigoEmpresa: nome_empresa,
       });
 
-      console.log(response.data);
-      localStorage.setItem("token", response.data);
+      sessionStorage.setItem("token", response.data);
       window.location.href = "/reports";
     } catch (error) {
       setErrorMessage("Usuário ou senha incorretos.");
