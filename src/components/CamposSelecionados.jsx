@@ -70,7 +70,7 @@ function CamposSelecionados({
 
   const handleOrderBySave = (selectedOption, fieldName) => {
     const newOrder = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
-    localStorage.setItem('orderByString', newOrder);
+    sessionStorage.setItem('orderByString', newOrder);
     setSelectedOrder(selectedOption ? { fieldName, value: selectedOption.value } : null);
   };
 
