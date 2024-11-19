@@ -28,9 +28,10 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     async function fetchJsonData() {
       try {
         const response = await fetch(`${linkFinal}/tables`, {
+          
           credentials: 'include',
           headers: {
-            'Authorization': localStorage.getItem('token'),
+            'Authorization': sessionStorage.getItem('token'),
           },
         });
 
@@ -50,7 +51,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         const response = await fetch(`${linkFinal}/relationships`, {
           credentials: 'include',
           headers: {
-            'Authorization': localStorage.getItem('token'),
+            'Authorization': sessionStorage.getItem('token'),
           },
         });
 
@@ -78,7 +79,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': localStorage.getItem('token'),
+            'Authorization': sessionStorage.getItem('token'),
           },
           body: JSON.stringify({ mainTable: selectedTabela, tablesPairs: tablesPairs }),
         });
