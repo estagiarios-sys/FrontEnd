@@ -7,9 +7,9 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
 function App() {
-  localStorage.setItem("orderByString", "");
-  localStorage.setItem("SQLGeradoFinal", "Nenhum SQL gerado no momento");
-  localStorage.removeItem("loadedQuery");
+  sessionStorage.setItem("orderByString", "");
+  sessionStorage.setItem("SQLGeradoFinal", "Nenhum SQL gerado no momento");
+  sessionStorage.removeItem("loadedQuery");
   return (
     <Router>
       <Routes>

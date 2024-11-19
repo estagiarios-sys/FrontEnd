@@ -20,62 +20,57 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
   const campos = getSelectedCampos();
-  const tablesPairs = [];
 
   const toggleInfo = (infoId) => {
-    setMostrarInfo((prev) =>  (prev === infoId ? null : infoId));
+    setMostrarInfo((prev) => (prev === infoId ? null : infoId));
   };
 
-  // Busca os dados de tabelas e relacionamentos
   useEffect(() => {
-    async function fetchJsonData() {
+    async function fetchInitialData() {
       try {
-        const response = await fetch(`${linkFinal}/tables`, {
-          credentials: 'include',
-          headers: {
-            'Authorization': localStorage.getItem('token'),
-          }, 
-        });
+        const [tablesResponse, relationshipsResponse] = await Promise.all([
+          fetch(`${linkFinal}/tables`, {
+            credentials: 'include',
+            headers: {
+              'Authorization': sessionStorage.getItem('token'),
+            },
+          }),
+          fetch(`${linkFinal}/relationships`, {
+            credentials: 'include',
+            headers: {
+              'Authorization': sessionStorage.getItem('token'),
+            },
+          }),
+        ]);
 
-        const data = await response.json();
-        setJsonData(data);
-        setIsLoading(false);
-
-      } catch (error) {
-        setIsLoading(false);
-        console.error('Erro ao buscar os dados do JSON:', error);
-      }
-    }
-
-    async function fetchRelationships() {
-      try {
-        const response = await fetch(`${linkFinal}/relationships`, {
-          credentials: 'include',
-          headers: {
-            'Authorization': localStorage.getItem('token'),
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Erro na requisição: ${response.statusText}`);
+        if (!tablesResponse.ok || !relationshipsResponse.ok) {
+          throw new Error(
+            `Erro nas requisições: ${!tablesResponse.ok ? `Tables (${tablesResponse.status})` : ''
+            } ${!relationshipsResponse.ok ? `Relationships (${relationshipsResponse.status})` : ''
+            }`
+          );
         }
 
-        const data = await response.json();
-        setRelationships(data);
+        const tablesData = await tablesResponse.json();
+        const relationshipsData = await relationshipsResponse.json();
+
+        setJsonData(tablesData);
+        setRelationships(relationshipsData);
+
+        if (mainRequestLoaded) {
+          setSelectedTabela(mainRequestLoaded.table);
+          setSelectedRelacionada(mainRequestLoaded.tablesPairs);
+        }
       } catch (error) {
-        console.error('Erro ao buscar as relações:', error);
+        console.error('Erro ao buscar dados iniciais:', error.message);
+      } finally {
+        setIsLoading(false);
       }
     }
 
-    fetchJsonData();
-    fetchRelationships();
-   
-    if (isloading) {
-      fetchJsonData();
-      fetchRelationships();
-    }
+    fetchInitialData();
+  }, [mainRequestLoaded]);
 
-  }, []);
 
 
   useEffect(() => {
@@ -83,47 +78,41 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       if (!selectedTabela) return;
 
       try {
-        // Faz a requisição para buscar colunas da tabela principal
-        const responseMainTable = await fetch(`${linkFinal}/tables/columns`, {
+        // Faz a requisição para buscar colunas da tabela principal e tabelas relacionadas
+        const response = await fetch(`${linkFinal}/tables/columns`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': localStorage.getItem('token'),
+            'Authorization': sessionStorage.getItem('token'),
           },
-          body: JSON.stringify({ mainTable: selectedTabela, tablesPairs: tablesPairs }),
+          body: JSON.stringify({
+            mainTable: selectedTabela,
+            tablesPairs: selectedRelacionada,
+          }),
         });
 
-        const mainTableData = await responseMainTable.json();
-        const mainTableValues = Object.values(mainTableData)[0] || {};
+        const data = await response.json();
 
         // Inicializa os valores combinados com as colunas da tabela principal
+        const mainTableValues = data[selectedTabela] || {};
+
+        // Mescla os campos das tabelas relacionadas
         let combinedValues = { ...mainTableValues };
 
-        // Itera pelas tabelas relacionadas para buscar suas colunas
-        for (const related of selectedRelacionada) {
-          const relatedTableName = related.includes(' e ')
-            ? related.split(' e ')[1]
-            : related;
+        // Itera pelas tabelas relacionadas para mesclar suas colunas
+        for (const relatedPair of selectedRelacionada) {
+          // Extrai o nome da tabela relacionada
+          const tablesInPair = relatedPair.split(' e ');
+          const relatedTableName = tablesInPair.find(name => name !== selectedTabela);
 
-          const responseRelatedTable = await fetch(`${linkFinal}/tables/columns`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': localStorage.getItem('token'),
-            },
-            body: JSON.stringify({ mainTable: relatedTableName }),
-          });
+          const relatedTableValues = data[relatedTableName] || {};
 
-          const relatedTableData = await responseRelatedTable.json();
-          const relatedTableValues = Object.values(relatedTableData)[0] || {};
-
-          // Mescla os campos da tabela relacionada
           combinedValues = { ...combinedValues, ...relatedTableValues };
         }
-
+        
         // Atualiza o estado com os campos combinados
         setValores(combinedValues);
-        setColumnsData(mainTableData);
+        setColumnsData(data);
       } catch (error) {
         console.error('Erro ao buscar as colunas:', error);
         setColumnsData({});
@@ -163,8 +152,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     const selectedValues = new Set(campos.map(campo => campo.value));
     const options = new Map();
 
-    if (selectedTabela && jsonData[selectedTabela]) {
-      Object.entries(jsonData[selectedTabela]).forEach(([campo, tipo]) => {
+    if (selectedTabela && columnsData[selectedTabela]) {
+      Object.entries(columnsData[selectedTabela]).forEach(([campo, tipo]) => {
         const optionValue = `${selectedTabela}.${campo}`;
         if (!selectedValues.has(optionValue)) {
           options.set(optionValue, {
@@ -177,14 +166,13 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     }
 
     // Adiciona campos das tabelas selecionadas como relacionadas
-    if (selectedRelacionada.length > 0) {
+    if (selectedRelacionada.length > 0 && columnsData) {
       selectedRelacionada.forEach(relacionadaTabela => {
-        const relacionadaTabelaNome = relacionadaTabela.includes(' e ')
-          ? relacionadaTabela.split(' e ')[1]
-          : relacionadaTabela;
+        const tablesInPair = relacionadaTabela.split(' e ');
+        const relacionadaTabelaNome = tablesInPair.find(name => name !== selectedTabela);
 
-        if (jsonData[relacionadaTabelaNome]) {
-          Object.entries(jsonData[relacionadaTabelaNome]).forEach(([campo, tipo]) => {
+        if (columnsData[relacionadaTabelaNome]) {
+          Object.entries(columnsData[relacionadaTabelaNome]).forEach(([campo, tipo]) => {
             const optionValue = `${relacionadaTabelaNome}.${campo}`;
             if (!selectedValues.has(optionValue)) {
               options.set(optionValue, {
@@ -200,7 +188,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
     // Ordena as opções
     return Array.from(options.values()).sort((a, b) => a.label.localeCompare(b.label));
-  }, [selectedTabela, jsonData, selectedRelacionada, relationships, campos]);
+  }, [selectedTabela, columnsData, selectedRelacionada, relationships, campos]);
 
   const relacionadaOptions = useMemo(() => {
     if (!selectedTabela) return [];
@@ -222,7 +210,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       });
 
     selectedRelacionada.forEach(relacionadaTabela => {
-      const relacionadaTabelaNome = relacionadaTabela.includes(' e ') ? relacionadaTabela.split(' e ')[1] : relacionadaTabela;
+      const tablesInPair = relacionadaTabela.split(' e ');
+      const relacionadaTabelaNome = tablesInPair.find(name => name !== selectedTabela);
 
       relationships
         .filter(rel => rel.includes(relacionadaTabelaNome))
@@ -266,19 +255,19 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   }, []);
 
 
-    const handleClickOutside = (event) => {
-      if (
-        dicaRef.current &&
-        !dicaRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
-      ) {
-        setMostrarInfo(null);
-      }
-    };
+  const handleClickOutside = (event) => {
+    if (
+      dicaRef.current &&
+      !dicaRef.current.contains(event.target) &&
+      buttonRef.current &&
+      !buttonRef.current.contains(event.target)
+    ) {
+      setMostrarInfo(null);
+    }
+  };
 
   useEffect(() => {
-    
+
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
@@ -305,50 +294,51 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     setMenuIsOpen(true);
   };
 
-  // Adiciona campos automaticamente ao selecionar tabela ou relacionamentos
-  useEffect(() => {
-    if (selectedTabela && jsonData[selectedTabela]) {
-      const defaultFields = Object.keys(jsonData[selectedTabela]).map(campo => ({
-        value: `${selectedTabela}.${campo}`,
-        type: jsonData[selectedTabela][campo],
-        apelido: '',
-      }));
+  // // Adiciona campos automaticamente ao selecionar tabela
+  // useEffect(() => {
+  //   if (selectedTabela && columnsData[selectedTabela]) {
+  //     const defaultFields = Object.keys(columnsData[selectedTabela]).map(campo => ({
+  //       value: `${selectedTabela}.${campo}`,
+  //       type: columnsData[selectedTabela][campo],
+  //       apelido: '',
+  //     }));
 
-      setSelectedCampos(prev => {
-        const newFields = defaultFields.filter(
-          field => !prev.some(f => f.value === field.value)
-        );
-        console.log('Auto-selecting default fields for selectedTabela:', newFields);
-        return [...prev, ...newFields];
-      });
-    }
-  }, [selectedTabela, jsonData]);
+  //     setSelectedCampos(prev => {
+  //       const newFields = defaultFields.filter(
+  //         field => !prev.some(f => f.value === field.value)
+  //       );
+  //       console.log('Auto-selecting default fields for selectedTabela:', newFields);
+  //       return [...prev, ...newFields];
+  //     });
+  //   }
+  // }, [selectedTabela, columnsData]);
 
-  useEffect(() => {
-    if (selectedRelacionada.length > 0) {
-      const relatedFields = selectedRelacionada.flatMap(relacionada => {
-        const tableName = relacionada.includes(' e ')
-          ? relacionada.split(' e ')[1]
-          : relacionada;
-        if (jsonData[tableName]) {
-          return Object.keys(jsonData[tableName]).map(campo => ({
-            value: `${tableName}.${campo}`,
-            type: jsonData[tableName][campo],
-            apelido: '',
-          }));
-        }
-        return [];
-      });
+  // // Adiciona campos automaticamente ao selecionar relacionamentos
+  // useEffect(() => {
+  //   if (selectedRelacionada.length > 0 && columnsData) {
+  //     const relatedFields = selectedRelacionada.flatMap(relacionada => {
+  //       const tablesInPair = relacionada.split(' e ');
+  //       const relatedTableName = tablesInPair.find(name => name !== selectedTabela);
 
-      setSelectedCampos(prev => {
-        const newFields = relatedFields.filter(
-          field => !prev.some(f => f.value === field.value)
-        );
-        console.log('Auto-selecting related fields for selectedRelacionada:', newFields);
-        return [...prev, ...newFields];
-      });
-    }
-  }, [selectedRelacionada, jsonData]);
+  //       if (columnsData[relatedTableName]) {
+  //         return Object.keys(columnsData[relatedTableName]).map(campo => ({
+  //           value: `${relatedTableName}.${campo}`,
+  //           type: columnsData[relatedTableName][campo],
+  //           apelido: '',
+  //         }));
+  //       }
+  //       return [];
+  //     });
+
+  //     setSelectedCampos(prev => {
+  //       const newFields = relatedFields.filter(
+  //         field => !prev.some(f => f.value === field.value)
+  //       );
+  //       console.log('Auto-selecting related fields for selectedRelacionada:', newFields);
+  //       return [...prev, ...newFields];
+  //     });
+  //   }
+  // }, [selectedRelacionada, columnsData]);
 
   const customStyles = {
     valueContainer: (provided) => ({
@@ -432,10 +422,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
             isMulti
             name="campos"
             inputId="campos"
-            options={Object.entries(valores).map(([key, value]) => ({
-              value: key,
-              label: key,
-            }))}
+            options={campoOptions}
             className="basic-multi-select w-96"
             classNamePrefix="Select"
             placeholder="Selecione os Campos..."

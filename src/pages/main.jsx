@@ -23,19 +23,19 @@ function Main() {
         type: campo.type,
         apelido: campo.nickName || ''
       }));
-    
+
       setSelectedCampos(prevSelectedCampos => {
         const newCampos = camposToAdd.filter(campo => {
           return !prevSelectedCampos.some(selected => selected.value === campo.value);
         });
-    
+
         return [...prevSelectedCampos, ...newCampos];
       });
-    
+
       setAvailableCampos([]);
     }
   }, [mainRequestLoaded]);
-  
+
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
   };
@@ -59,12 +59,12 @@ function Main() {
     const camposRestantes = selectedCampos.filter(campo =>
       !(typeof campo.value === 'string' && checkedCampos.includes(campo.value))
     );
-    const orderByString = localStorage.getItem('orderByString') || '';
+    const orderByString = sessionStorage.getItem('orderByString') || '';
 
     removeSelectedTotalizers(camposParaRemover.map(campo => campo.value));
 
     if (camposParaRemover.some(campo => orderByString.includes(campo.value))) {
-      localStorage.setItem('orderByString', '');
+      sessionStorage.setItem('orderByString', '');
     }
 
     setAvailableCampos([...availableCampos, ...camposParaRemover]);
@@ -96,7 +96,7 @@ function Main() {
       window.dispatchEvent(new CustomEvent('clearSelectedCampos'));
     }
 
-    localStorage.setItem('orderByString', '');
+    sessionStorage.setItem('orderByString', '');
     resetTotalizers();
     setAvailableCampos(prevAvailableCampos => [
       ...prevAvailableCampos,
@@ -198,7 +198,7 @@ function Main() {
           setPdfOK={setPdfOK}
           setMainRequestLoaded={setMainRequestLoaded}
         />
-       <Footer logoSystextil={logoSystextil} />
+        <Footer logoSystextil={logoSystextil} />
       </div>
     </div>
   );

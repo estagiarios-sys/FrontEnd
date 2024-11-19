@@ -72,9 +72,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [editarRequestLoad, setEditarRequestLoad] = useState(false);
     const tableRef = useRef(null);
     const itemsPerPage = 14;
-    let orderByString = localStorage.getItem('orderByString');
+    let orderByString = sessionStorage.getItem('orderByString');
     let idNotificacao = null;
-    
+
 
     const handleModalAviso = (message) => {
         openModal('alert', 'ALERTA', message);
@@ -666,14 +666,14 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 )}
             </div>
             {/* Modais */}
-            <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded.conditions} loadedColumns={requestLoaded.columns}/>
+            <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded.conditions} loadedColumns={requestLoaded.columns} />
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} sqlGeral={sqlGeral} sqlTotalizers={sqlTotalizers} />
-            <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} editarRequestLoad={editarRequestLoad}/>
+            <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} editarRequestLoad={editarRequestLoad} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
             <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} tempoEstimado={estimatedTime} onFetchData={fetchData} />
-            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} imgPDF={imgPdf} titlePdf={titlePdf} jsonRequest={jsonRequest}/>
+            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} imgPDF={imgPdf} titlePdf={titlePdf} jsonRequest={jsonRequest} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
     );
