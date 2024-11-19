@@ -497,13 +497,14 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                         nome={"Filtros"}
                         icon={"M12 4.5v15m7.5-7.5h-15"}
                     >
+                        {/* Ícone de notificações (se houver condições) */}
                         {conditionsArray.length > 0 && (
                             <span className="absolute -top-2 -right-1 bg-custom-vermelho text-white rounded-full text-xs w-4 h-4 flex justify-center items-center">
                                 {conditionsArray.length}
                             </span>
                         )}
                     </IconsTemplate>
-                    <IconsTemplate 
+                    <IconsTemplate
                         funcao={() => openModal('editar')}
                         nome={"Editar"}
                         icon={"m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"}
@@ -548,14 +549,14 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             </div>
             <div className="text-center w-[1200px]">
                 <div className="border-2 border-neutral-600 my-3 w-10/12 mx-auto overflow-auto">
-                    <Tabela 
-                        tableData={tableData} 
-                        renderTotalizer={renderTotalizer} 
-                        tableRef={tableRef} 
-                        columns={columns} 
-                        hasData={hasData} 
-                        columnWidths={columnWidths} 
-                        startIndex={startIndex} 
+                    <Tabela
+                        tableData={tableData}
+                        renderTotalizer={renderTotalizer}
+                        tableRef={tableRef}
+                        columns={columns}
+                        hasData={hasData}
+                        columnWidths={columnWidths}
+                        startIndex={startIndex}
                         endIndex={endIndex}
                     />
                 </div>
