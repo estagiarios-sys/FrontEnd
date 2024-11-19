@@ -16,7 +16,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [valores, setValores] = useState([]);
   const [isloading, setIsLoading] = useState(true);
 
-
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
   const campos = getSelectedCampos();
@@ -25,6 +24,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     setMostrarInfo((prev) => (prev === infoId ? null : infoId));
   };
 
+  // realizando duas requisicoes paralelas ao carregar a pagina
   useEffect(() => {
     async function fetchInitialData() {
       try {
@@ -93,7 +93,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
         const data = await response.json();
 
-        // Inicializa os valores combinados com as colunas da tabela principal
+        //  Obtém as colunas associadas à tabela principal.
         const mainTableValues = data[selectedTabela] || {};
 
         // Mescla os campos das tabelas relacionadas
@@ -109,10 +109,11 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
           combinedValues = { ...combinedValues, ...relatedTableValues };
         }
-        
+
         // Atualiza o estado com os campos combinados
         setValores(combinedValues);
         setColumnsData(data);
+
       } catch (error) {
         console.error('Erro ao buscar as colunas:', error);
         setColumnsData({});
@@ -148,6 +149,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     }
   }, [selectedTabela, selectedRelacionada, selectedCampos]);
 
+
+
+  // Criar uma lista de opções formatadas para exibir os campos da tabela principal no formato "Tabela - Campo"
   const campoOptions = useMemo(() => {
     const selectedValues = new Set(campos.map(campo => campo.value));
     const options = new Map();
@@ -242,19 +246,21 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     return relacionamentosAdicionados;
   }, [selectedTabela, selectedRelacionada, relationships]);
 
+
+
+  // Limpar a lista de campos selecionados
   useEffect(() => {
     const handleClearSelectedCampos = () => {
       setSelectedCampos([]);
     };
-
     window.addEventListener('clearSelectedCampos', handleClearSelectedCampos);
-
     return () => {
       window.removeEventListener('clearSelectedCampos', handleClearSelectedCampos);
     };
   }, []);
 
 
+  // Função para lidar com o clique fora do componente
   const handleClickOutside = (event) => {
     if (
       dicaRef.current &&
@@ -266,21 +272,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     }
   };
 
-  useEffect(() => {
 
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-
-  // Função para remover um campo
-  const removeField = (fieldToRemove) => {
-    setSelectedCampos((prev) => prev.filter((field) => field.value !== fieldToRemove));
-  };
-
+  // Função para lidar com o clique fora do componente 
   const handleChange = selectedOptions => {
     const updatedCampos = selectedOptions
       ? selectedOptions.map(option => ({
@@ -293,52 +286,23 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     setSelectedCampos(updatedCampos);
     setMenuIsOpen(true);
   };
+  
 
-  // // Adiciona campos automaticamente ao selecionar tabela
-  // useEffect(() => {
-  //   if (selectedTabela && columnsData[selectedTabela]) {
-  //     const defaultFields = Object.keys(columnsData[selectedTabela]).map(campo => ({
-  //       value: `${selectedTabela}.${campo}`,
-  //       type: columnsData[selectedTabela][campo],
-  //       apelido: '',
-  //     }));
+  // Função para lidar com o clique fora do componente
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
-  //     setSelectedCampos(prev => {
-  //       const newFields = defaultFields.filter(
-  //         field => !prev.some(f => f.value === field.value)
-  //       );
-  //       console.log('Auto-selecting default fields for selectedTabela:', newFields);
-  //       return [...prev, ...newFields];
-  //     });
-  //   }
-  // }, [selectedTabela, columnsData]);
 
-  // // Adiciona campos automaticamente ao selecionar relacionamentos
-  // useEffect(() => {
-  //   if (selectedRelacionada.length > 0 && columnsData) {
-  //     const relatedFields = selectedRelacionada.flatMap(relacionada => {
-  //       const tablesInPair = relacionada.split(' e ');
-  //       const relatedTableName = tablesInPair.find(name => name !== selectedTabela);
 
-  //       if (columnsData[relatedTableName]) {
-  //         return Object.keys(columnsData[relatedTableName]).map(campo => ({
-  //           value: `${relatedTableName}.${campo}`,
-  //           type: columnsData[relatedTableName][campo],
-  //           apelido: '',
-  //         }));
-  //       }
-  //       return [];
-  //     });
+  // Função para remover um campo
+  const removeField = (fieldToRemove) => {
+    setSelectedCampos((prev) => prev.filter((field) => field.value !== fieldToRemove));
+  };
 
-  //     setSelectedCampos(prev => {
-  //       const newFields = relatedFields.filter(
-  //         field => !prev.some(f => f.value === field.value)
-  //       );
-  //       console.log('Auto-selecting related fields for selectedRelacionada:', newFields);
-  //       return [...prev, ...newFields];
-  //     });
-  //   }
-  // }, [selectedRelacionada, columnsData]);
 
   const customStyles = {
     valueContainer: (provided) => ({
