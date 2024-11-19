@@ -116,7 +116,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         // Atualiza o estado com os campos combinados
         setValores(combinedValues);
         setColumnsData(data);
-      
+   
 
       } catch (error) {
         console.error('Erro ao buscar as colunas:', error);
@@ -150,6 +150,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       };
       console.log('onDataChange Triggered:', data);
       onDataChange(data);
+      
     }
   }, [selectedTabela, selectedRelacionada, selectedCampos]);
 
@@ -173,6 +174,9 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       });
     }
 
+    
+
+
     // Adiciona campos das tabelas selecionadas como relacionadas
     if (selectedRelacionada.length > 0 && columnsData) {
       selectedRelacionada.forEach(relacionadaTabela => {
@@ -188,6 +192,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
                 label: `${relacionadaTabelaNome} - ${campo}`,
                 type: tipo,
               });
+              
             }
           });
         }
@@ -278,18 +283,29 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
 
   // Função para lidar com o clique fora do componente 
-  const handleChange = selectedOptions => {
+  const handleChange = (selectedOptions) => {
     const updatedCampos = selectedOptions
-      ? selectedOptions.map(option => ({
-        value: option.value,
-        type: option.type,
-        apelido: '',
-      }))
+      ? selectedOptions.map((option) => {
+          // Busca o campo correspondente para manter os valores
+          const existingCampo = campoOptions.find(
+            (campo) => campo.value === option.value
+          );
+  
+          return existingCampo
+            ? {
+                value: existingCampo.value,
+                type: existingCampo.type, // Preserva o type
+                apelido: '',
+              }
+            : null;
+        }).filter(Boolean) // Remove valores nulos caso não encontre o campo
       : [];
-    console.log('handleChange Triggered. New selectedCampos:', updatedCampos);
+  
+    console.log('Updated selectedCampos:', updatedCampos);
     setSelectedCampos(updatedCampos);
     setMenuIsOpen(true);
   };
+  
   
 
   // Função para lidar com o clique fora do componente
