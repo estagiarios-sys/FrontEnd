@@ -1,41 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import CustomSelect from './genericos/CustomSelect';
+import { DragDropContext, Droppable } from '@hello-pangea/dnd';
+import Campo from './Campos/Campo';
+import { ordenacaoOptions, TotalizerOptions, getFilteredTotalizerOptions } from './Campos/Options'; // Presumindo que você separou essas opções em outro arquivo
 
 let exportedSelectedCampos = [];
-
-// Suas opções de ordenação e totalizadores
-const ordenacaoOptions = [
-  { value: 'ASC', label: 'ASC' },
-  { value: 'DESC', label: 'DESC' },
-];
-
-const TotalizerOptions = [
-  { value: 'COUNT', label: 'CONTAGEM' },
-  { value: 'SUM', label: 'SOMA' },
-  { value: 'AVG', label: 'MÉDIA' },
-  { value: 'MIN', label: 'MÍNIMO' },
-  { value: 'MAX', label: 'MÁXIMO' },
-];
-
-// Função para obter opções filtradas
-const getFilteredTotalizerOptions = (type) => {
-  switch (type) {
-    case 'NUMBER':
-    case 'FLOAT':
-    case 'DOUBLE':
-    case 'BINARY_FLOAT':
-    case 'BINARY_DOUBLE':
-      return TotalizerOptions;
-    case 'DATE':
-    case 'VARCHAR2':
-    case 'CLOB':
-    case 'CHAR':
-      return TotalizerOptions.filter(option => option.value === 'COUNT');
-    default:
-      return [];
-  }
-};
 
 let totalizers = {};
 
@@ -74,10 +42,10 @@ function CamposSelecionados({
         const orderByString = mainRequestLoaded.orderBy;
         const [fieldName, orderDirection] = orderByString.trim().split(/\s+/);
         setSelectedOrder({ fieldName, value: orderDirection });
-        sessionStorage.setItem('orderByString', orderByString);
+        localStorage.setItem('orderByString', orderByString);
       } else {
         setSelectedOrder(null);
-        sessionStorage.removeItem('orderByString');
+        localStorage.removeItem('orderByString');
       }
 
       if (mainRequestLoaded.totalizers) {
@@ -87,7 +55,7 @@ function CamposSelecionados({
   }, [mainRequestLoaded]);
 
   useEffect(() => {
-    if (sessionStorage.getItem('orderByString') === '') {
+    if (localStorage.getItem('orderByString') === '') {
       setSelectedOrder(null);
     }
   }, [selectedCampos]);
@@ -102,7 +70,7 @@ function CamposSelecionados({
 
   const handleOrderBySave = (selectedOption, fieldName) => {
     const newOrder = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
-    sessionStorage.setItem('orderByString', newOrder);
+    localStorage.setItem('orderByString', newOrder);
     setSelectedOrder(selectedOption ? { fieldName, value: selectedOption.value } : null);
   };
 
@@ -184,82 +152,27 @@ function CamposSelecionados({
               <tbody>
                 {selectedCampos.length > 0 ? (
                   selectedCampos.map(({ value, type, apelido }, index) => (
-                    <Draggable key={value} draggableId={value} index={index}>
-                      {(provided) => (
-                        <tr
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="bg-white hover:bg-gray-70"
-                        >
-                          {showCheckboxColumn && (
-                            <td className="py-2 px-4 border-b border-custom-azul text-sm">
-                              <input
-                                type="checkbox"
-                                id={`checkbox-${value}`}
-                                name={`checkbox-${value}`}
-                                checked={checkedCampos.includes(value)}
-                                onChange={() => handleCheckboxChange(value)}
-                                className="form-checkbox h-5 w-5 accent-custom-azul-escuro"
-                              />
-                            </td>
-                          )}
-                          <td className="py-2 px-4 border-b border-custom-azul text-sm">
-                            <input
-                              type="text"
-                              id={`input-${value}`}
-                              name={`input-${value}`}
-                              defaultValue={apelido || ''}
-                              onBlur={(e) => handleCustomNameChange(e, { value })}
-                              className="border border-custom-azul-escuro focus:ring-1 focus:ring-custom-azul-escuro rounded p-1 focus:outline-none"
-                              placeholder={value}
-                            />
-                          </td>
-                          <td
-                            className="py-2 px-4 border-b border-custom-azul text-sm"
-                            onClick={() => handleTdClick(value)}
-                          >
-                            <CustomSelect
-                              ref={(ref) => (selectRefs.current[value] = ref)}
-                              options={ordenacaoOptions}
-                              value={
-                                selectedOrder && selectedOrder.fieldName === value
-                                  ? { value: selectedOrder.value, label: selectedOrder.value }
-                                  : null
-                              }
-                              onChange={(selectedOption) => handleOrderBySave(selectedOption, value)}
-                              placeholder="Selecione..."
-                              className="basic-single"
-                              classNamePrefix="select"
-                              width="9rem"
-                              isClearable
-                            />
-                          </td>
-                          <td
-                            className="py-2 px-4 border-b border-custom-azul text-sm"
-                            onClick={() => handleTotalizerClick(value)}
-                          >
-                            <CustomSelect
-                              ref={(ref) => (selectTotalizerRefs.current[value] = ref)}
-                              options={getFilteredTotalizerOptions(type)}
-                              value={
-                                totalizers[value]
-                                  ? getFilteredTotalizerOptions(type).find(
-                                    (option) => option.value === totalizers[value]
-                                  ) || null
-                                  : null
-                              }
-                              onChange={(selectedOption) => handleTotalizerSave(selectedOption, { value })}
-                              placeholder="Selecione..."
-                              className="basic-single"
-                              classNamePrefix="select"
-                              width="12rem"
-                              isClearable
-                            />
-                          </td>
-                        </tr>
-                      )}
-                    </Draggable>
+                    <Campo
+                      key={value}
+                      value={value}
+                      type={type}
+                      apelido={apelido}
+                      index={index}
+                      selectedOrder={selectedOrder}
+                      totalizers={totalizers}
+                      checkedCampos={checkedCampos}
+                      handleCheckboxChange={handleCheckboxChange}
+                      handleCustomNameChange={handleCustomNameChange}
+                      handleOrderBySave={handleOrderBySave}
+                      handleTotalizerSave={handleTotalizerSave}
+                      handleTdClick={handleTdClick}
+                      handleTotalizerClick={handleTotalizerClick}
+                      selectRefs={selectRefs}
+                      selectTotalizerRefs={selectTotalizerRefs}
+                      ordenacaoOptions={ordenacaoOptions}
+                      getFilteredTotalizerOptions={getFilteredTotalizerOptions}
+                      openSelect={openSelect}
+                    />
                   ))
                 ) : (
                   <tr>
