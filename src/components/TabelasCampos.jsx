@@ -54,8 +54,10 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         const tablesData = await tablesResponse.json();
         const relationshipsData = await relationshipsResponse.json();
 
+
         setJsonData(tablesData);
         setRelationships(relationshipsData);
+
 
         if (mainRequestLoaded) {
           setSelectedTabela(mainRequestLoaded.table);
