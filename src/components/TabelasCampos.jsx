@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Select from 'react-select';
 import { getSelectedCampos } from './CamposSelecionados';
 import { linkFinal } from '../config.js';
+import Loading from './genericos/Loading';
 
 function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [jsonData, setJsonData] = useState({});
@@ -10,18 +11,20 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [selectedRelacionada, setSelectedRelacionada] = useState([]);
   const [selectedCampos, setSelectedCampos] = useState([]);
   const [columnsData, setColumnsData] = useState({});
-  const [mostrarInfo1, setMostrarInfo1] = useState(false);
-  const [mostrarInfo2, setMostrarInfo2] = useState(false);
-  const [mostrarInfo3, setMostrarInfo3] = useState(false);
+  const [mostrarInfo, setMostrarInfo] = useState(null);
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const [valores, setValores] = useState([]);
+  const [isloading, setIsLoading] = useState(true);
 
 
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
   const campos = getSelectedCampos();
   const tablesPairs = [];
-  // const valores = [];
+
+  const toggleInfo = (infoId) => {
+    setMostrarInfo((prev) =>  (prev === infoId ? null : infoId));
+  };
 
   // Busca os dados de tabelas e relacionamentos
   useEffect(() => {
@@ -31,16 +34,15 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
           credentials: 'include',
           headers: {
             'Authorization': localStorage.getItem('token'),
-          },
+          }, 
         });
-
-        if (!response.ok) {
-          throw new Error(`Erro na requisição: ${response.statusText}`);
-        }
 
         const data = await response.json();
         setJsonData(data);
+        setIsLoading(false);
+
       } catch (error) {
+        setIsLoading(false);
         console.error('Erro ao buscar os dados do JSON:', error);
       }
     }
@@ -67,14 +69,22 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
     fetchJsonData();
     fetchRelationships();
+   
+    if (isloading) {
+      fetchJsonData();
+      fetchRelationships();
+    }
+
   }, []);
+
 
   useEffect(() => {
     async function fetchColumns() {
       if (!selectedTabela) return;
 
       try {
-        const response = await fetch(`${linkFinal}/tables/columns`, {
+        // Faz a requisição para buscar colunas da tabela principal
+        const responseMainTable = await fetch(`${linkFinal}/tables/columns`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -83,17 +93,37 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
           body: JSON.stringify({ mainTable: selectedTabela, tablesPairs: tablesPairs }),
         });
 
-        const data = await response.json();
+        const mainTableData = await responseMainTable.json();
+        const mainTableValues = Object.values(mainTableData)[0] || {};
 
-        // Extraia os valores do primeiro item
-        const extractedValues = Object.values(data)[0];
-        console.log('Valores:', extractedValues);
+        // Inicializa os valores combinados com as colunas da tabela principal
+        let combinedValues = { ...mainTableValues };
 
-        // Atualize o estado valores
-        setValores(extractedValues);
+        // Itera pelas tabelas relacionadas para buscar suas colunas
+        for (const related of selectedRelacionada) {
+          const relatedTableName = related.includes(' e ')
+            ? related.split(' e ')[1]
+            : related;
 
-        // Atualize as colunas no estado
-        setColumnsData(data);
+          const responseRelatedTable = await fetch(`${linkFinal}/tables/columns`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': localStorage.getItem('token'),
+            },
+            body: JSON.stringify({ mainTable: relatedTableName }),
+          });
+
+          const relatedTableData = await responseRelatedTable.json();
+          const relatedTableValues = Object.values(relatedTableData)[0] || {};
+
+          // Mescla os campos da tabela relacionada
+          combinedValues = { ...combinedValues, ...relatedTableValues };
+        }
+
+        // Atualiza o estado com os campos combinados
+        setValores(combinedValues);
+        setColumnsData(mainTableData);
       } catch (error) {
         console.error('Erro ao buscar as colunas:', error);
         setColumnsData({});
@@ -101,7 +131,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     }
 
     fetchColumns();
-  }, [selectedTabela]);
+  }, [selectedTabela, selectedRelacionada]);
 
 
   // Atualiza o estado quando usar o ModalSalvos
@@ -235,7 +265,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     };
   }, []);
 
-  useEffect(() => {
+
     const handleClickOutside = (event) => {
       if (
         dicaRef.current &&
@@ -243,18 +273,19 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         buttonRef.current &&
         !buttonRef.current.contains(event.target)
       ) {
-        setMostrarInfo1(false);
-        setMostrarInfo2(false);
-        setMostrarInfo3(false);
+        setMostrarInfo(null);
       }
     };
 
+  useEffect(() => {
+    
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
 
   // Função para remover um campo
   const removeField = (fieldToRemove) => {
@@ -334,6 +365,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
   return (
     <div className="flex flex-col justify-start items-start ml-20">
+      {isloading && <Loading />}
       <div className="mt-5">
         <label htmlFor="tabelas">Tabela</label>
         <div className="containerClick">
@@ -352,8 +384,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
             }}
             value={tabelas.find(option => option.value === selectedTabela)}
           />
-          <div id='info-click' className={mostrarInfo1 ? 'up show' : 'up'} ref={dicaRef}>
-            <button id="info-click-button" onClick={() => setMostrarInfo1(prev => !prev)} ref={buttonRef}>
+          <div id='info-click' className={mostrarInfo === 'info1' ? 'up show' : 'up'} ref={dicaRef}>
+            <button id="info-click-button" onClick={() => toggleInfo('info1')} ref={buttonRef}>
               <svg className="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clipRule="evenodd" />
               </svg>
@@ -383,8 +415,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
             styles={customStyles}
           />
 
-          <div id='info-click' className={mostrarInfo2 ? 'up show' : 'up'} ref={dicaRef}>
-            <button id="info-click-button" onClick={() => setMostrarInfo2(prev => !prev)} ref={buttonRef}>
+          <div id='info-click' className={mostrarInfo === 'info2' ? 'up show' : 'up'} ref={dicaRef}>
+            <button id="info-click-button" onClick={() => toggleInfo('info2')} ref={buttonRef}>
               <svg className="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clipRule="evenodd" />
               </svg>
@@ -418,9 +450,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
             styles={customStyles}
           />
 
-
-          <div id='info-click' className={mostrarInfo3 ? 'up show' : 'up'} ref={dicaRef}>
-            <button id="info-click-button" onClick={() => setMostrarInfo3(prev => !prev)} ref={buttonRef}>
+          <div id='info-click' className={mostrarInfo === 'info3' ? 'up show' : 'up'} ref={dicaRef}>
+            <button id="info-click-button" onClick={() => toggleInfo('info3')} ref={buttonRef}>
               <svg className="icon-info-click" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clipRule="evenodd" />
               </svg>
