@@ -116,7 +116,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     // Função para construir o JSON Request
     const buildJsonRequest = () => {
         const modifiedColumns = selectedColumns.map(column => ({
-            name: `${selectTable}.${column.value}`,
+            name: column.value,
             type: column.type,
             nickName: column.apelido
         }));
