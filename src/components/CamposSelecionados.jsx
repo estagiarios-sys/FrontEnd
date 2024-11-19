@@ -74,20 +74,20 @@ function CamposSelecionados({
         const orderByString = mainRequestLoaded.orderBy;
         const [fieldName, orderDirection] = orderByString.trim().split(/\s+/);
         setSelectedOrder({ fieldName, value: orderDirection });
-        localStorage.setItem('orderByString', orderByString);
+        sessionStoragege.setItem('orderByString', orderByString);
       } else {
         setSelectedOrder(null);
-        localStorage.removeItem('orderByString');
+        sessionStorage.removeItem('orderByString');
       }
-  
+
       if (mainRequestLoaded.totalizers) {
         totalizers = mainRequestLoaded.totalizers;
       }
     }
-  }, [mainRequestLoaded]);  
+  }, [mainRequestLoaded]);
 
   useEffect(() => {
-    if(localStorage.getItem('orderByString') === '') {
+    if (sessionStorage.getItem('orderByString') === '') {
       setSelectedOrder(null);
     }
   }, [selectedCampos]);
@@ -102,7 +102,7 @@ function CamposSelecionados({
 
   const handleOrderBySave = (selectedOption, fieldName) => {
     const newOrder = selectedOption ? `${fieldName} ${selectedOption.value}` : '';
-    localStorage.setItem('orderByString', newOrder);
+    sessionStorage.setItem('orderByString', newOrder);
     setSelectedOrder(selectedOption ? { fieldName, value: selectedOption.value } : null);
   };
 
@@ -245,8 +245,8 @@ function CamposSelecionados({
                               value={
                                 totalizers[value]
                                   ? getFilteredTotalizerOptions(type).find(
-                                      (option) => option.value === totalizers[value]
-                                    ) || null
+                                    (option) => option.value === totalizers[value]
+                                  ) || null
                                   : null
                               }
                               onChange={(selectedOption) => handleTotalizerSave(selectedOption, { value })}
