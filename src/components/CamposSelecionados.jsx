@@ -74,7 +74,7 @@ function CamposSelecionados({
         const orderByString = mainRequestLoaded.orderBy;
         const [fieldName, orderDirection] = orderByString.trim().split(/\s+/);
         setSelectedOrder({ fieldName, value: orderDirection });
-        sessionStoragege.setItem('orderByString', orderByString);
+        sessionStorage.setItem('orderByString', orderByString);
       } else {
         setSelectedOrder(null);
         sessionStorage.removeItem('orderByString');

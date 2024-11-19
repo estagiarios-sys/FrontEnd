@@ -94,6 +94,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         });
 
         const data = await response.json();
+        
 
         //  Obtém as colunas associadas à tabela principal.
         const mainTableValues = data[selectedTabela] || {};
@@ -115,6 +116,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         // Atualiza o estado com os campos combinados
         setValores(combinedValues);
         setColumnsData(data);
+      
 
       } catch (error) {
         console.error('Erro ao buscar as colunas:', error);
