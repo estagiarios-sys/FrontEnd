@@ -13,8 +13,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [columnsData, setColumnsData] = useState({});
   const [mostrarInfo, setMostrarInfo] = useState(null);
   const [menuIsOpen, setMenuIsOpen] = useState(false);
-  const [valores, setValores] = useState([]);
-  const [isloading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
@@ -113,8 +112,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
           combinedValues = { ...combinedValues, ...relatedTableValues };
         }
 
-        // Atualiza o estado com os campos combinados
-        setValores(combinedValues);
         setColumnsData(data);
    
 
@@ -318,10 +315,10 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
 
 
-  // Função para remover um campo
-  const removeField = (fieldToRemove) => {
-    setSelectedCampos((prev) => prev.filter((field) => field.value !== fieldToRemove));
-  };
+  // // Função para remover um campo / N ENTENDI O Q FAZ E SÓ COMENTEI
+  // const removeField = (fieldToRemove) => {
+  //   setSelectedCampos((prev) => prev.filter((field) => field.value !== fieldToRemove));
+  // };
 
 
   const customStyles = {
@@ -339,7 +336,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
   return (
     <div className="flex flex-col justify-start items-start ml-20">
-      {isloading && <Loading />}
+      {isLoading && <Loading />}
       <div className="mt-5">
         <label htmlFor="tabelas">Tabela</label>
         <div className="containerClick">
