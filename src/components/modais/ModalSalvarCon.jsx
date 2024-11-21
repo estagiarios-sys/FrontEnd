@@ -13,6 +13,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
 
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
+        setSavedQueryId(sessionStorage.getItem('IdQuery'));
 
         if (isOpen) {
             if (hasScroll) {
@@ -103,10 +104,13 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     };
 
     const updateQuery = async () => {
-       setSavedQueryId(sessionStorage.getItem('IdQuery'));
        formData.append("id", savedQueryId)
        formData.delete('stringSavedQuerySaving');
-       formData.append('stringSavedQueryUpdating', JSON.stringify(jsonRequest));  // Recupera o ID da consulta salva
+       formData.append('stringSavedQueryUpdating', JSON.stringify(jsonRequest));
+         
+       for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+        }
       
         if (!savedQueryId) {
             openModal('ALERTA', 'ID da consulta não encontrado. Não é possível atualizar.');
