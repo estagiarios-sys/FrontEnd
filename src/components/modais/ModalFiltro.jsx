@@ -36,13 +36,29 @@ const CustomSingleValue = (props) => (
     </components.SingleValue>
 );
 
-function ModalFiltro({ isOpen, onClose, columns, onSave, loadedConditions, loadedColumns }) {
+function ModalFiltro({ isOpen, onClose, columns, onSave, loadedConditions, loadedColumns, selectedTabela, requestLoaded }) {
     const [selectedCampos, setSelectedCampos] = useState([]);
     const [addedCampos, setAddedCampos] = useState([]);
     const [modal, setModal] = useState({ isOpen: false, message: "", type: "ALERTA" });
     const [condicoesArrayComparacao, setCondicoesArrayComparacao] = useState([]);
+    const [lastSelectedTabela, setLastSelectedTabela] = useState(selectedTabela);
+    
     const selectRefs = useRef([]);
     const containerRef = useRef(null);
+    
+    useEffect(() => {
+        if (selectedTabela !== lastSelectedTabela) {
+            // Reseta filtros apenas para trocas de tabela simples
+            if (!requestLoaded?.fromSavedQuery) {
+                setAddedCampos([]);
+                setCondicoesArrayComparacao([]);
+                onSave?.([]);
+            }
+            setLastSelectedTabela(selectedTabela);
+        }
+    }, [selectedTabela, lastSelectedTabela, requestLoaded]);
+
+
 
     useEffect(() => {
         if (loadedConditions && loadedConditions.length > 0) {
@@ -77,7 +93,7 @@ function ModalFiltro({ isOpen, onClose, columns, onSave, loadedConditions, loade
             setAddedCampos([]);
             setCondicoesArrayComparacao([]);
             onSave?.([]);
-        }
+        } 
     }, [loadedConditions, columns]);
 
     const handleClose = useCallback(() => {
