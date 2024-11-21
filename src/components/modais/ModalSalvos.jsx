@@ -108,7 +108,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                     'Authorization': sessionStorage.getItem('token'),
                 }
             });
-
+            
 
             if (!response.ok) {
                 throw new Error(`Erro na requisição: ${response.statusText}`);

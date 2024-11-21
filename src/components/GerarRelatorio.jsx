@@ -160,6 +160,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                     tablesPairs: requestLoaded.tablesPairs,
                 };
 
+                if (!requestLoaded.conditions || requestLoaded.conditions.length === 0) {
+                    setConditionsArray([]);
+                }
+
                 setMainRequestLoaded(mainRequestLoaded);
                 setEditarRequestLoad(editarRequestLoad);
                 setRequestLoaded(false);

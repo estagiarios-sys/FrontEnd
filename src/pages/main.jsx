@@ -24,6 +24,7 @@ function Main() {
         apelido: campo.nickName || ''
       }));
 
+
       setSelectedCampos(prevSelectedCampos => {
         const newCampos = camposToAdd.filter(campo => {
           return !prevSelectedCampos.some(selected => selected.value === campo.value);

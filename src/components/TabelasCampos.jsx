@@ -3,6 +3,7 @@ import Select from 'react-select';
 import { getSelectedCampos } from './CamposSelecionados';
 import { linkFinal } from '../config.js';
 import Loading from './genericos/Loading';
+import axios from 'axios'
 
 function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [jsonData, setJsonData] = useState({});
@@ -27,37 +28,39 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   useEffect(() => {
     async function fetchInitialData() {
       try {
-        const [tablesResponse, relationshipsResponse] = await Promise.all([
-          fetch(`${linkFinal}/tables`, {
-            credentials: 'include',
-            headers: {
-              'Authorization': sessionStorage.getItem('token'),
-            },
-          }),
-          fetch(`${linkFinal}/relationships`, {
-            credentials: 'include',
-            headers: {
-              'Authorization': sessionStorage.getItem('token'),
-            },
-          }),
-        ]);
 
-        if (!tablesResponse.ok || !relationshipsResponse.ok) {
-          throw new Error(
-            `Erro nas requisições: ${!tablesResponse.ok ? `Tables (${tablesResponse.status})` : ''
-            } ${!relationshipsResponse.ok ? `Relationships (${relationshipsResponse.status})` : ''
-            }`
-          );
+        const tablesResponse = await axios.get(`${linkFinal}/tables`, {
+          withCredentials: true,
+          headers: {
+            'Authorization': sessionStorage.getItem('token'),
+          },
+        });
+  
+        if (tablesResponse.status !== 200) {
+          throw new Error(`Erro ao obter as tabelas (Status: ${tablesResponse.status})`);
         }
-
-        const tablesData = await tablesResponse.json();
-        const relationshipsData = await relationshipsResponse.json();
-
-
+  
+       
+        const tablesData = tablesResponse.data;
         setJsonData(tablesData);
+  
+       
+        const relationshipsResponse = await axios.get(`${linkFinal}/relationships`, {
+          withCredentials: true,
+          headers: {
+            'Authorization': sessionStorage.getItem('token'),
+          },
+        });
+  
+        if (relationshipsResponse.status !== 200) {
+          throw new Error(`Erro ao obter as relações (Status: ${relationshipsResponse.status})`);
+        }
+  
+      
+        const relationshipsData = relationshipsResponse.data;
         setRelationships(relationshipsData);
-
-
+  
+      
         if (mainRequestLoaded) {
           setSelectedTabela(mainRequestLoaded.table);
           setSelectedRelacionada(mainRequestLoaded.tablesPairs);
@@ -68,9 +71,11 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         setIsLoading(false);
       }
     }
-
+  
     fetchInitialData();
   }, [mainRequestLoaded]);
+  
+  
 
 
 

@@ -36,16 +36,26 @@ function CamposSelecionados({
   const selectRefs = useRef({});
   const selectTotalizerRefs = useRef({});
 
+  const resetSelectedCampos = () => {
+    onSelectedCamposChange([]);
+  };
+
   useEffect(() => {
     if (mainRequestLoaded) {
+      resetSelectedCampos(); 
+
+      if (mainRequestLoaded.selectedCampos) {
+        onSelectedCamposChange(mainRequestLoaded.selectedCampos);
+      }
+
       if (mainRequestLoaded.orderBy) {
         const orderByString = mainRequestLoaded.orderBy;
         const [fieldName, orderDirection] = orderByString.trim().split(/\s+/);
         setSelectedOrder({ fieldName, value: orderDirection });
-        localStorage.setItem('orderByString', orderByString);
+        sessionStorage.setItem('orderByString', orderByString);
       } else {
         setSelectedOrder(null);
-        localStorage.removeItem('orderByString');
+        sessionStorage.removeItem('orderByString');
       }
 
       if (mainRequestLoaded.totalizers) {
@@ -55,7 +65,7 @@ function CamposSelecionados({
   }, [mainRequestLoaded]);
 
   useEffect(() => {
-    if (localStorage.getItem('orderByString') === '') {
+    if (sessionStorage.getItem('orderByString') === '') {
       setSelectedOrder(null);
     }
   }, [selectedCampos]);
@@ -109,6 +119,7 @@ function CamposSelecionados({
     });
 
     onSelectedCamposChange(updatedCampos);
+
   };
 
   const showCheckboxColumn = selectedCampos.length > 0;

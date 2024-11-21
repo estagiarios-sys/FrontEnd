@@ -44,22 +44,15 @@ function ModalConsultar({ isOpen, onClose, onFetchData }) {
         setIsClicked(prev => !prev); // Alterna o estado de clique
     };
 
-    const handleOptionClick = async (option) => {
+    const handleOptionClick = async () => {
         setShowDropdown(false); // Fecha o dropdown após clicar em uma opção
 
         try {
-            if (option === 'Buscar dados') {
-                setLoading(true); // Ativa o estado de carregamento
-                await onFetchData();
-                setLoading(false); // Desativa o estado de carregamento
-                setModal({ isOpen: true, type: 'SUCESSO', message: 'Relatório gerado com sucesso!' });
-            } else if (option === 'Baixar PDF') {
-                setModal({ isOpen: true, type: 'SUCESSO', message: 'O PDF está sendo gerado, quando finalizar você será notificado.' });
-                await onFetchData('PDF');
-            } else if (option === 'Baixar CSV') {
-                await onFetchData('CSV');
-                setModal({ isOpen: true, type: 'SUCESSO', message: 'CSV gerado com sucesso!' });
-            }
+            setLoading(true); // Ativa o estado de carregamento
+            await onFetchData();
+            setLoading(false); // Desativa o estado de carregamento
+             setModal({ isOpen: true, type: 'SUCESSO', message: 'Relatório gerado com sucesso!' });
+            
         } catch (error) {
             console.error('Erro ao processar a opção:', error);
             setModal({ isOpen: true, type: 'ALERTA', message: 'Erro ao processar a consulta. Por favor, tente novamente.' });
@@ -124,37 +117,13 @@ function ModalConsultar({ isOpen, onClose, onFetchData }) {
                             Cancelar
                         </button>
                         <button
-                            className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
-                            onClick={mostrarOpcoes}
+                            className="font-bold border-none text-white rounded-lg w-32 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
+                            onClick={handleOptionClick}
                         >
-                            Opções
-                            <FaCaretDown
-                                style={{
-                                    transition: 'transform 0.3s ease',
-                                    transform: isClicked ? 'rotate(180deg)' : 'rotate(0deg)',
-                                }}
-                            />
+                            Buscar Dados
                         </button>
                     </div>
                 </div>
-                {showDropdown && (
-                    <div
-                        ref={dropdownRef}
-                        className="absolute bottom-[60px] right-[10px] bg-white border border-gray-300 rounded-lg shadow-lg z-[1000] overflow-hidden"
-                    >
-                        {['Buscar dados', 'Baixar PDF', 'Baixar CSV'].map((option) => (
-                            <button
-                                key={option}
-                                className="block w-full px-3 py-2 bg-gray-100 text-left text-sm text-gray-800 cursor-pointer transition-colors duration-200"
-                                onClick={() => handleOptionClick(option)}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 105, 115, 0.15)'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
-                            >
-                                {option}
-                            </button>
-                        ))}
-                    </div>
-                )}
             </div>
             <ModalAlert
                 isOpen={modal.isOpen}

@@ -46,34 +46,37 @@ function ModalFiltro({ isOpen, onClose, columns, onSave, loadedConditions, loade
 
     useEffect(() => {
         if (loadedConditions && loadedConditions.length > 0) {
-
             const parsedCampos = loadedConditions.map((conditionStr) => {
-                const conditionMatch = conditionStr.match(/^(.+?)\s*(>=|<=|!=|=|>|<)\s*'(.+)'$/);
+            const conditionMatch = conditionStr.match(/^(.+?)\s*(>=|<=|!=|=|>|<)\s*'(.+)'$/);
 
-                if (conditionMatch) {
-                    const [, field, operator, value] = conditionMatch;
+            if (conditionMatch) {
+                const [, field, operator, value] = conditionMatch;
 
-                    const column = loadedColumns.find((col) => col.name === field.trim());
+                const column = loadedColumns.find((col) => col.name === field.trim());
 
-                    if (column) {
-                        return {
-                            id: `${field}-${Date.now()}-${Math.random()}`,
-                            value: field.trim(),
-                            label: column.apelido || field.trim(),
-                            type: column.type,
-                            checked: false,
-                            valor: value.replace(/''/g, "'"),
-                            ordenacao: operator,
-                        };
-                    }
+                if (column) {
+                return {
+                    id: `${field}-${Date.now()}-${Math.random()}`,
+                    value: field.trim(),
+                    label: column.apelido || field.trim(),
+                    type: column.type,
+                    checked: false,
+                    valor: value.replace(/''/g, "'"),
+                    ordenacao: operator,
+                };
                 }
+            }
 
-                return null;
+            return null;
             }).filter(Boolean);
 
             setAddedCampos(parsedCampos);
             setCondicoesArrayComparacao(loadedConditions);
             onSave?.(loadedConditions);
+        } else if (loadedConditions && loadedConditions.length === 0) {
+            setAddedCampos([]);
+            setCondicoesArrayComparacao([]);
+            onSave?.([]);
         }
     }, [loadedConditions, columns]);
 
