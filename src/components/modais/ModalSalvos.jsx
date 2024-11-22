@@ -45,9 +45,9 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                 }
 
                 const data = await response.json();
-                console.log('Consultas salvas:', data);
 
                 setCampoOptions(data);
+                
                 
             } catch (error) {
                 console.error('Erro ao buscar as consultas salvas:', error);
@@ -108,7 +108,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                     'Authorization': sessionStorage.getItem('token'),
                 }
             });
-            
+
 
             if (!response.ok) {
                 throw new Error(`Erro na requisição: ${response.statusText}`);
@@ -121,7 +121,8 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
             }
 
             console.log('data: ', data);
-            setRequestLoaded(data);
+
+            setRequestLoaded({...data, fromSavedQuery: true});
         } catch (error) {
             console.error('Erro ao carregar a consulta salva:', error);
         } finally {
@@ -169,6 +170,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                             onChange={(selectedOption) => {
                                 setSelectedCampo(selectedOption);
                                 setExcludeCampo(selectedOption ? selectedOption.id : null);
+                                sessionStorage.setItem('IdQuery', selectedOption.id);
                             }}
                             value={selectedCampo}
                             getOptionLabel={(option) => option.queryName}

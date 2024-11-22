@@ -5,7 +5,7 @@ export default function Footer(props){
         <div className="text-and-logo">
           <img src={props.logoSystextil} alt="Descrição da Imagem" />
           <span className="separator">|</span>
-          <span>Simplificando a cadeia têxtil!</span>
+          <span>Referência em solução de gestão para a cadeia têxtil e da moda</span>
         </div>
       </footer>
     )

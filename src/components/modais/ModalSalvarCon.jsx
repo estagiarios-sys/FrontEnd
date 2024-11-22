@@ -3,6 +3,7 @@ import ModalAlert from './ModalAlert';
 import { json } from "react-router-dom";
 import { linkFinal } from '../../config.js';
 
+
 function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     const [inputValue, setInputValue] = useState('');
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
@@ -12,6 +13,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
 
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
+        setSavedQueryId(sessionStorage.getItem('IdQuery'));
 
         if (isOpen) {
             if (hasScroll) {
@@ -71,6 +73,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
         ['stringSavedQuerySaving', 'imgPDF'].forEach(field => formData.delete(field));
         formData.append('stringSavedQuerySaving', JSON.stringify(jsonRequest));
         formData.append('imgPDF', imgPDF);
+       
 
         try {
             const response = await fetch(`${linkFinal}/saved-query`, {
@@ -89,8 +92,10 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 }
             } else {
                 const data = await response.json();
+                console.log('Consulta salva:', data.id);
                 setSavedQueryId(data.id);  // Armazena o ID da consulta salva
                 openModal('SUCESSO', 'Consulta salva!');
+                
             }
         } catch (error) {
             console.error('Error:', error);
@@ -99,6 +104,14 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     };
 
     const updateQuery = async () => {
+       formData.append("id", savedQueryId)
+       formData.delete('stringSavedQuerySaving');
+       formData.append('stringSavedQueryUpdating', JSON.stringify(jsonRequest));
+         
+       for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+        }
+      
         if (!savedQueryId) {
             openModal('ALERTA', 'ID da consulta não encontrado. Não é possível atualizar.');
             return;
@@ -113,11 +126,12 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 }
             });
 
+            
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
 
-            await response.json();
+            JSON.stringify(response);
             openModal('SUCESSO', 'Consulta atualizada com sucesso!');
         } catch (error) {
             console.error('Error:', error);

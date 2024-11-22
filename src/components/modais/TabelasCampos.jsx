@@ -24,7 +24,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     setMostrarInfo((prev) => (prev === infoId ? null : infoId));
   };
 
-  // realizando duas requisicoes paralelas ao carregar a pagina
   useEffect(() => {
     async function fetchInitialData() {
       try {
@@ -60,7 +59,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         const relationshipsData = relationshipsResponse.data;
         setRelationships(relationshipsData);
   
-      
+        // Verifica se os dados iniciais foram carregados
         if (mainRequestLoaded) {
           setSelectedTabela(mainRequestLoaded.table);
           setSelectedRelacionada(mainRequestLoaded.tablesPairs);
@@ -76,8 +75,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   }, [mainRequestLoaded]);
   
   
-
-
 
   useEffect(() => {
     async function fetchColumns() {
@@ -153,6 +150,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       console.log('onDataChange Triggered:', data);
       onDataChange(data);
       
+      
     }
   }, [selectedTabela, selectedRelacionada, selectedCampos]);
 
@@ -176,9 +174,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       });
     }
 
-    
-
-
+  
     // Adiciona campos das tabelas selecionadas como relacionadas
     if (selectedRelacionada.length > 0 && columnsData) {
       selectedRelacionada.forEach(relacionadaTabela => {
