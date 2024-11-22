@@ -3,6 +3,8 @@ import ModalModal from '../modais/ModalAlert'; // Importa o modal de alerta
 import PropTypes from 'prop-types'; // Biblioteca para validação de props
 
 function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
+  const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Controla o estado do modal de alerta (aberto/fechado, tipo, mensagem)
+
   // Estado para indicar se o usuário está arrastando um arquivo sobre a área
   const [dragActive, setDragActive] = useState(false);
 
@@ -101,6 +103,10 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
     };
   }, [preview]);
 
+  const handleConfirmar = () => {
+    setModal({ isOpen: false, type: '', message: '' }); // Fecha o modal de alerta
+  };
+
   // Renderiza o formulário de drag-and-drop e a pré-visualização da imagem
   return (
     <form
@@ -137,7 +143,7 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
         modalType="ALERTA" // Altere "ATENÇÃO" para um valor válido
         isOpen={modalAlertImagem} // Controla se o modal está aberto
         onClose={() => setModalAlertImagem(false)} // Fecha o modal ao clicar em "Fechar"
-        onConfirm={onClose} // Executa ação de confirmação (fechar)
+        onConfirm={handleConfirmar} // Executa ação de confirmação (fechar)
         confirmText="Fechar" // Texto do botão de confirmação
         message={modalMessage} // Mensagem de alerta
       />
