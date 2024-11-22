@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../../imagens/logo-systextil-cinza.png';
+import logo from '../../assets/imagens/logo-systextil-cinza.png';
 
 const Loading = () => {
   return (

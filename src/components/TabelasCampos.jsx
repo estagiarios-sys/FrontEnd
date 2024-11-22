@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Select from 'react-select';
-import { getSelectedCampos } from './CamposSelecionados';
+import { getSelectedCampos } from './CamposSelecionados.jsx';
 import { linkFinal } from '../config.js';
-import Loading from './genericos/Loading';
+import Loading from './genericos/Loading.jsx';
 import axios from 'axios'
 
 function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {

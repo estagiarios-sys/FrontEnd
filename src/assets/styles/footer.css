@@ -1,0 +1,33 @@
+/* Estilos do footer */
+.footer {
+    background-color: #0E8F98; /* Cor de fundo do footer */
+    color: white; /* Cor do texto do footer */
+    padding: 1rem; /* Reduz o espaçamento interno para diminuir a altura */
+    width: 100%;
+    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1); /* Sombra opcional para destaque */
+    display: flex; /* Usa flexbox para layout */
+    justify-content: space-between; /* Espaça o conteúdo entre as extremidades */
+    align-items: center; /* Alinha os itens verticalmente ao centro */
+    margin-top: auto; /* Garante que o footer fique no fim da página */
+    user-select: none;
+}
+
+.footer img {
+    width: 120px; /* Ajusta o tamanho da imagem conforme necessário */
+    height: auto; /* Mantém a proporção da imagem */
+    /* Ajuste o tamanho da imagem para adequar ao novo padding */
+}
+
+.footer .text-and-logo {
+    display: flex; /* Usa flexbox para alinhar logo e texto */
+    align-items: center; /* Alinha verticalmente no centro */
+    gap: 0.5rem; /* Espaçamento entre a logo, o separador e o texto */
+}
+
+.footer .copyright-text {
+    margin-left: 120px; /* Ajuste o espaçamento lateral conforme necessário */
+}
+
+.footer .text-and-logo {
+    margin-right: 120px; /* Ajuste o espaçamento lateral conforme necessário */
+}
