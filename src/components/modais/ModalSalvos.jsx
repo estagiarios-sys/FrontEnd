@@ -125,7 +125,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                 data.pdfImage = "data:image/png;base64," + data.pdfImage;
             }
 
-            console.log('data: ', data);
+            // console.log('data: ', data);
 
             setRequestLoaded({
                 ...data,

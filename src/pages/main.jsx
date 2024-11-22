@@ -46,7 +46,7 @@ function Main() {
     setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo)));
     setSelectedTabela(data.tabela);
     setSelectedRelacionada(data.relacionada || []);
-    console.log("Data: " + JSON.stringify(data)) // Agora espera um array de relacionadas
+    // console.log("Data: " + JSON.stringify(data)) // Agora espera um array de relacionadas
   };
 
   // Remove campos selecionados com checkbox marcado e adiciona de volta aos disponíveis

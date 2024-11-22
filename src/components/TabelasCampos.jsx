@@ -147,7 +147,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         relacionada: [...new Set(selectedRelacionada)],
         campos: [...new Set(selectedCampos)],
       };
-      console.log('onDataChange Triggered:', data);
+      // console.log('onDataChange Triggered:', data);
       onDataChange(data);
       
       
@@ -299,7 +299,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         }).filter(Boolean) // Remove valores nulos caso não encontre o campo
       : [];
   
-    console.log('Updated selectedCampos:', updatedCampos);
+    // console.log('Updated selectedCampos:', updatedCampos);
     setSelectedCampos(updatedCampos);
     setMenuIsOpen(true);
   };

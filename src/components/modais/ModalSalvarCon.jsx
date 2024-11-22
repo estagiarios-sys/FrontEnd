@@ -104,7 +104,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 }
             } else {
                 const data = await response.json();
-                console.log('Consulta salva:', data.id);
+                // console.log('Consulta salva:', data.id);
                 setSavedQueryId(data.id);  // Armazena o ID da consulta salva
                 openModal('SUCESSO', 'Consulta salva!');
 

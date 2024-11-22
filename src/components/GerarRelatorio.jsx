@@ -131,7 +131,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         const jsonRequest = {
             table: selectTable,
             columns: modifiedColumns,
-            conditions: conditionsArray.length,
+            conditions: conditionsArray,
             orderBy: orderByString,
             tablesPairs: selectedRelatedTables,
             totalizers: getTotalizers(),
@@ -247,7 +247,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
 
             const responseData = await response.json();
 
-            console.log("Dados Recebidos: " + JSON.stringify(responseData));
+            // console.log("Dados Recebidos: " + JSON.stringify(responseData));
 
             const [sql, sql2, updatedColumns, data, resultTotalizer] = responseData;
 

@@ -47,23 +47,24 @@ function ModalFiltro({ isOpen, onClose, columns, onSave, loadedConditions, loade
     const containerRef = useRef(null);
     
     useEffect(() => {
-        console.log('ModalFiltro useEffect triggered');
-        console.log('selectedTabela:', selectedTabela);
-        console.log('lastSelectedTabelaRef.current:', lastSelectedTabelaRef.current);
-        console.log('requestLoaded:', requestLoaded);
+        // console.log('ModalFiltro useEffect triggered');
+        // console.log('selectedTabela:', selectedTabela);
+        // console.log('lastSelectedTabelaRef.current:', lastSelectedTabelaRef.current);
+        // console.log('requestLoaded:', requestLoaded);
 
         if (selectedTabela !== lastSelectedTabelaRef.current) {
             if (requestLoaded?.fromSavedQuery) {
-                console.log('Loaded from saved query, keeping filters');
-                // Do not reset filters
+                // console.log('Loaded from saved query, keeping filters');
+                
             } else {
-                console.log('Table changed manually, resetting filters');
+                // console.log('Table changed manually, resetting filters');
                 setAddedCampos([]);
                 setCondicoesArrayComparacao([]);
                 onSave?.([]);
             }
         } else {
-            console.log('Table unchanged, keeping filters');
+            // console.log('Table unchanged, keeping filters');
+            
         }
 
         lastSelectedTabelaRef.current = selectedTabela;
