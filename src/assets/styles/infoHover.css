@@ -1,0 +1,118 @@
+@import './cores.css';
+
+.containerHover {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+#info-hover {
+    position: relative;
+    padding: 8px;
+}
+
+/* texto padrão */
+#info-hover .info-texto {
+    visibility: hidden;
+    width: auto;
+    background-color: rgba(51, 51, 51, 0.8);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    font-size: 10px;
+}
+
+/* Balão para cima */
+#info-hover.up .info-texto {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#info-hover.up .info-texto::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(51, 51, 51, 0.8) transparent transparent transparent;
+}
+
+/* Balão para baixo */
+#info-hover.down .info-texto {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#info-hover.down .info-texto::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent rgba(51, 51, 51, 0.8) transparent;
+}
+
+/* Balão para a esquerda */
+#info-hover.left .info-texto {
+    right: 120%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#info-hover.left .info-texto::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%) rotate(180deg);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent rgba(51, 51, 51, 0.8) transparent transparent;
+}
+
+/* Balão para a direita */
+#info-hover.right .info-texto {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#info-hover.right .info-texto::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%) rotate(180deg);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(51, 51, 51, 0.8);
+}
+
+/* Mostrar balão ao passar por cima */
+#info-hover:hover .info-texto {
+    visibility: visible;
+    opacity: 1;
+}
+
+.icon-info-hover {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--azul);
+}
+
+.icon-info-hover:hover {
+    color: var(--azul-escuro);
+}
+

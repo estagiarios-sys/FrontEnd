@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import TabelaCampos from '../components/TabelasCampos';
-import CamposSelecionados from '../components/CamposSelecionados';
-import GerarRelatorio from '../components/GerarRelatorio';
-import logoSystextil from '../imagens/logo-systextil-branca.png';
-import { resetTotalizers, removeSelectedTotalizers } from '../components/CamposSelecionados';
+import TabelaCampos from '../components/modais/TabelasCampos';
+import CamposSelecionados from '../components/modais/CamposSelecionados';
+import GerarRelatorio from '../components/modais/GerarRelatorio';
+import logoSystextil from '../assets/imagens/logo-systextil-branca.png';
+import { resetTotalizers, removeSelectedTotalizers } from '../components/modais/CamposSelecionados';
 import ModalNotificacao from '../components/modais/ModalNotificacao';
 import Footer from '../components/Campos/Footer';
 

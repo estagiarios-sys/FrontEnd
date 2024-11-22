@@ -7,13 +7,14 @@ body {
     @apply font-sans;
 }
 
-@import './styles/cores.css';
-@import './styles/main.css';
-@import './styles/footer.css';
-@import './styles/infoClick.css';
-@import './styles/infoHover.css';
-@import './styles/lista.css';
-@import './styles/scroll.css';
+@import '../src/assets/styles/cores.css';
+@import '../src/assets/styles/main.css';
+@import '../src/assets/styles/footer.css';
+@import '../src/assets/styles/infoClick.css';
+@import '../src/assets/styles/infoHover.css';
+@import '../src/assets/styles/lista.css';
+@import '../src/assets/styles/scroll.css';
+
 
 body {
     user-select: none;

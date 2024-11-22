@@ -1,25 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import Campo from './Campos/Campo';
-import { ordenacaoOptions, TotalizerOptions, getFilteredTotalizerOptions } from './Campos/Options'; // Presumindo que você separou essas opções em outro arquivo
-
-let exportedSelectedCampos = [];
-
-let totalizers = {};
-
-export function removeSelectedTotalizers(camposParaRemover) {
-  camposParaRemover.forEach((campo) => {
-    delete totalizers[campo];
-  });
-}
-
-export function resetTotalizers() {
-  totalizers = {};
-}
-
-export function getTotalizers() {
-  return totalizers;
-}
+import Campo from '../Campos/Campo';
+import { ordenacaoOptions, getFilteredTotalizerOptions } from '../Campos/Options';
+import {
+  getTotalizers,
+  getSelectedCampos,
+  removeSelectedTotalizers,
+  resetTotalizers,
+  setExportedSelectedCampos,
+  setTotalizers
+} from '../../utils/totalizers';
 
 function CamposSelecionados({
   selectedCampos = [],
@@ -29,10 +19,10 @@ function CamposSelecionados({
   onSelectedCamposChange,
   mainRequestLoaded,
 }) {
-  exportedSelectedCampos = selectedCampos;
+  setExportedSelectedCampos(selectedCampos);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [openSelect, setOpenSelect] = useState(null); // Para rastrear qual select está aberto
+  const [openSelect, setOpenSelect] = useState(null);
   const selectRefs = useRef({});
   const selectTotalizerRefs = useRef({});
 
@@ -42,7 +32,7 @@ function CamposSelecionados({
 
   useEffect(() => {
     if (mainRequestLoaded) {
-      resetSelectedCampos(); 
+      resetSelectedCampos();
 
       if (mainRequestLoaded.selectedCampos) {
         onSelectedCamposChange(mainRequestLoaded.selectedCampos);
@@ -59,10 +49,10 @@ function CamposSelecionados({
       }
 
       if (mainRequestLoaded.totalizers) {
-        totalizers = mainRequestLoaded.totalizers;
+        setTotalizers(mainRequestLoaded.totalizers);
       }
     }
-  }, [mainRequestLoaded]);
+  }, [mainRequestLoaded, onSelectedCamposChange]);
 
   useEffect(() => {
     if (sessionStorage.getItem('orderByString') === '') {
@@ -72,9 +62,9 @@ function CamposSelecionados({
 
   const handleTotalizerSave = (selectedOption, campo) => {
     if (selectedOption) {
-      totalizers[campo.value] = selectedOption.value;
+      getTotalizers()[campo.value] = selectedOption.value;
     } else {
-      delete totalizers[campo.value];
+      delete getTotalizers()[campo.value];
     }
   };
 
@@ -86,7 +76,7 @@ function CamposSelecionados({
 
   const handleTdClick = (campo) => {
     const isOpen = openSelect === campo;
-    setOpenSelect(isOpen ? null : campo); // Fecha se já estiver aberto, ou abre se estiver fechado
+    setOpenSelect(isOpen ? null : campo);
     if (selectRefs.current[campo] && !isOpen) {
       selectRefs.current[campo].openMenu();
     }
@@ -94,7 +84,7 @@ function CamposSelecionados({
 
   const handleTotalizerClick = (campo) => {
     const isOpen = openSelect === campo;
-    setOpenSelect(isOpen ? null : campo); // Fecha se já estiver aberto, ou abre se estiver fechado
+    setOpenSelect(isOpen ? null : campo);
     if (selectTotalizerRefs.current[campo] && !isOpen) {
       selectTotalizerRefs.current[campo].openMenu();
     }
@@ -111,7 +101,6 @@ function CamposSelecionados({
       if (selectedCampo.value === campo.value) {
         return {
           ...selectedCampo,
-          //DEIXAR O ESPAÇO NO FINAL PARA VOLTAR O VALOR CORRETO DO BANCO DE DADOS POSTERIORMENTE
           apelido: inputValue + ' ',
         };
       }
@@ -119,13 +108,11 @@ function CamposSelecionados({
     });
 
     onSelectedCamposChange(updatedCampos);
-
   };
 
   const showCheckboxColumn = selectedCampos.length > 0;
 
   const handleScroll = () => {
-    // Fecha todos os menus abertos do CustomSelect
     Object.values(selectRefs.current).forEach((ref) => {
       if (ref && ref.closeMenu) {
         ref.closeMenu();
@@ -136,7 +123,7 @@ function CamposSelecionados({
         ref.closeMenu();
       }
     });
-    setOpenSelect(null); // Reseta o estado
+    setOpenSelect(null);
   };
 
   return (
@@ -170,7 +157,7 @@ function CamposSelecionados({
                       apelido={apelido}
                       index={index}
                       selectedOrder={selectedOrder}
-                      totalizers={totalizers}
+                      totalizers={getTotalizers()}
                       checkedCampos={checkedCampos}
                       handleCheckboxChange={handleCheckboxChange}
                       handleCustomNameChange={handleCustomNameChange}
@@ -205,8 +192,5 @@ function CamposSelecionados({
   );
 }
 
-export const getSelectedCampos = () => {
-  return exportedSelectedCampos;
-};
-
 export default CamposSelecionados;
+export { getTotalizers, getSelectedCampos, removeSelectedTotalizers, resetTotalizers };

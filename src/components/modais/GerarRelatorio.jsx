@@ -1,20 +1,20 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import ModalSql from "./modais/ModalSql";
-import ModalPrevia from "./modais/ModalPrevia";
-import ModalExportar, { downloadCSV, downloadPDF } from "./modais/ModalExportar";
-import ModalSalvos from "./modais/ModalSalvos";
-import ModalFiltro from "./modais/ModalFiltro";
-import ModalSalvarCon from "./modais/ModalSalvarCon";
-import ModalAlert from "./modais/ModalAlert";
-import ModalEditar from "./modais/ModalEditar";
-import { getTotalizers } from "./CamposSelecionados";
+import ModalSql from "./ModalSql";
+import ModalPrevia from "./ModalPrevia";
+import ModalExportar, { downloadCSV, downloadPDF } from "./ModalExportar";
+import ModalSalvos from "./ModalSalvos";
+import ModalFiltro from "./ModalFiltro";
+import ModalSalvarCon from "./ModalSalvarCon";
+import ModalAlert from "./ModalAlert";
+import ModalEditar from "./ModalEditar";
+import { getTotalizers } from "./CamposSelecionados.jsx";
 import { FaAngleDoubleLeft, FaAngleLeft, FaAngleRight, FaAngleDoubleRight } from 'react-icons/fa';
-import ModalConsultar from "./modais/ModalConsultar";
-import Loading from "./genericos/Loading";
-import { linkFinal } from '../config.js';
-import Button from "./Campos/Button.jsx";
-import IconsTemplate from "./Campos/IconsTemplate.jsx";
-import Tabela from "./Campos/Tabela.jsx";
+import ModalConsultar from "./ModalConsultar";
+import Loading from "../genericos/Loading";
+import { linkFinal } from '../../config';
+import Button from "../Campos/Button.jsx";
+import IconsTemplate from "../Campos/IconsTemplate.jsx";
+import Tabela from "../Campos/Tabela.jsx";
 
 function useModal() {
     const [modals, setModals] = useState({

@@ -1,0 +1,133 @@
+@import './cores.css';
+
+.containerClick {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+#info-click {
+    position: relative;
+    padding: 8px;
+}
+
+/* texto padrão */
+#info-click .info-texto {
+    visibility: hidden;
+    width: auto;
+    background-color: rgba(51, 51, 51, 0.8);
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    font-size: 10px;
+}
+
+/* Balão para cima */
+#info-click.up .info-texto {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#info-click.up .info-texto::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(51, 51, 51, 0.8) transparent transparent transparent;
+}
+
+/* Balão para baixo */
+#info-click.down .info-texto {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#info-click.down .info-texto::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent rgba(51, 51, 51, 0.8) transparent;
+}
+
+/* Balão para a esquerda */
+#info-click.left .info-texto {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#info-click.left .info-texto::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%) rotate(180deg);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent rgba(51, 51, 51, 0.8) transparent transparent;
+}
+
+/* Balão para a direita */
+#info-click.right .info-texto {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#info-click.right .info-texto::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%) rotate(180deg);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(51, 51, 51, 0.8);
+}
+
+/* Mostrar balão ao clicar */
+#info-click.show .info-texto {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Adiciona um estilo para o button do ícone */
+#info-click-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-info-click {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--azul);
+}
+
+.icon-info-click:hover {
+    color: var(--azul-escuro);
+}
+
+.icon-info-click:active {
+    color: var(--azul);
+}

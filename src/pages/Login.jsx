@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import imagem from "../imagens/image.png";
+import imagem from "../assets/imagens/image.png";
 import { linkFinal } from "../config";
 import Select from 'react-select';
 import Loading from '../components/genericos/Loading';
