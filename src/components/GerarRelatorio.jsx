@@ -68,7 +68,9 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [imgPdf, setImgPdf] = useState('');
     const [base64Image, setBase64Image] = useState('');
     const [loading, setLoading] = useState(false);
-    const [requestLoaded, setRequestLoaded] = useState(false);
+    const [requestLoaded, setRequestLoaded] = useState(null);
+    const [shouldResetRequestLoaded, setShouldResetRequestLoaded] = useState(false);
+    const [selectedTabela, setSelectedTabela] = useState(null);
     const [sqlGeral, setSqlGeral] = useState('');
     const [sqlTotalizers, setSqlTotalizers] = useState('');
     const [jsonRequest, setJsonRequest] = useState({});
@@ -129,7 +131,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         const jsonRequest = {
             table: selectTable,
             columns: modifiedColumns,
-            conditions: conditionsArray,
+            conditions: conditionsArray.length,
             orderBy: orderByString,
             tablesPairs: selectedRelatedTables,
             totalizers: getTotalizers(),
@@ -140,58 +142,44 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     };
 
     useEffect(() => {
-        if (requestLoaded) {
-            if (Object.keys(requestLoaded).length === 0) {
-                setBase64Image(requestLoaded.pdfImage);
-                setTitlePdf(requestLoaded.pdfTitle);
+        if (requestLoaded && requestLoaded.fromSavedQuery) {
+            setBase64Image(requestLoaded.pdfImage);
+            setTitlePdf(requestLoaded.pdfTitle);
 
-                const editarRequestLoad = {
-                    pdfImage: requestLoaded.pdfImage,
-                    pdfTitle: requestLoaded.pdfTitle,
-                };
+            const editarRequestLoad = {
+                pdfImage: requestLoaded.pdfImage,
+                pdfTitle: requestLoaded.pdfTitle,
+            };
 
-                const mainRequestLoaded = {
-                    table: requestLoaded.table,
-                    conditions: requestLoaded.conditions,
-                    columns: requestLoaded.columns,
-                    orderBy: requestLoaded.orderBy,
-                    totalizers: requestLoaded.totalizers,
-                    tablesPairs: requestLoaded.tablesPairs,
-                };
+            const mainRequestLoaded = {
+                table: requestLoaded.table,
+                conditions: requestLoaded.conditions,
+                columns: requestLoaded.columns,
+                orderBy: requestLoaded.orderBy,
+                totalizers: requestLoaded.totalizers,
+                tablesPairs: requestLoaded.tablesPairs,
+            };
 
-                if (!requestLoaded.conditions || requestLoaded.conditions.length === 0) {
-                    setConditionsArray([]);
-                }
+            setSelectedTabela(requestLoaded.table);      
 
-                setMainRequestLoaded(mainRequestLoaded);
-                setEditarRequestLoad(editarRequestLoad);
-                setRequestLoaded(false);
-            } else {
-                // Limpa requestLoaded e insere os novos dados
-                const newRequestLoaded = { ...requestLoaded };
-                setBase64Image(newRequestLoaded.pdfImage);
-                setTitlePdf(newRequestLoaded.pdfTitle);
-
-                const editarRequestLoad = {
-                    pdfImage: newRequestLoaded.pdfImage,
-                    pdfTitle: newRequestLoaded.pdfTitle,
-                };
-
-                const mainRequestLoaded = {
-                    table: newRequestLoaded.table,
-                    conditions: newRequestLoaded.conditions,
-                    columns: newRequestLoaded.columns,
-                    orderBy: newRequestLoaded.orderBy,
-                    totalizers: newRequestLoaded.totalizers,
-                    tablesPairs: newRequestLoaded.tablesPairs,
-                };
-
-                setMainRequestLoaded(mainRequestLoaded);
-                setEditarRequestLoad(editarRequestLoad);
-                setRequestLoaded(false);
-            }
+            setMainRequestLoaded(mainRequestLoaded);
+            setEditarRequestLoad(editarRequestLoad);
+            
+            setShouldResetRequestLoaded(true);
         }
     }, [requestLoaded]);
+
+
+    useEffect(() => {
+        setSelectedTabela(selectTable);
+    }, [selectTable]);
+
+    useEffect(() => {
+        if (shouldResetRequestLoaded) {
+            setRequestLoaded(null);
+            setShouldResetRequestLoaded(false);
+        }
+    }, [shouldResetRequestLoaded]);
 
     const handleSaveConditions = (conditions) => {
         setConditionsArray(conditions);
@@ -611,7 +599,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 )}
             </div>
             {/* Modais */}
-            <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded.conditions} loadedColumns={requestLoaded.columns} selectedTabela={selectTable} />
+            <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded?.conditions} loadedColumns={requestLoaded?.columns} selectedTabela={selectedTabela} requestLoaded={requestLoaded}/>
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} sqlGeral={sqlGeral} sqlTotalizers={sqlTotalizers} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} editarRequestLoad={editarRequestLoad} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />

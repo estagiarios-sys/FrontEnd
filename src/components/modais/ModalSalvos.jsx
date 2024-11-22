@@ -127,7 +127,10 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
 
             console.log('data: ', data);
 
-            setRequestLoaded({...data, fromSavedQuery: true});
+            setRequestLoaded({
+                ...data,
+                fromSavedQuery: true
+            });
         } catch (error) {
             console.error('Erro ao carregar a consulta salva:', error);
         } finally {

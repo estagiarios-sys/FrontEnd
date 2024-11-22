@@ -41,22 +41,33 @@ function ModalFiltro({ isOpen, onClose, columns, onSave, loadedConditions, loade
     const [addedCampos, setAddedCampos] = useState([]);
     const [modal, setModal] = useState({ isOpen: false, message: "", type: "ALERTA" });
     const [condicoesArrayComparacao, setCondicoesArrayComparacao] = useState([]);
-    const [lastSelectedTabela, setLastSelectedTabela] = useState(selectedTabela);
     
+    const lastSelectedTabelaRef = useRef(selectedTabela);   
     const selectRefs = useRef([]);
     const containerRef = useRef(null);
     
     useEffect(() => {
-        if (selectedTabela !== lastSelectedTabela) {
-            // Reseta filtros apenas para trocas de tabela simples
-            if (!requestLoaded?.fromSavedQuery) {
+        console.log('ModalFiltro useEffect triggered');
+        console.log('selectedTabela:', selectedTabela);
+        console.log('lastSelectedTabelaRef.current:', lastSelectedTabelaRef.current);
+        console.log('requestLoaded:', requestLoaded);
+
+        if (selectedTabela !== lastSelectedTabelaRef.current) {
+            if (requestLoaded?.fromSavedQuery) {
+                console.log('Loaded from saved query, keeping filters');
+                // Do not reset filters
+            } else {
+                console.log('Table changed manually, resetting filters');
                 setAddedCampos([]);
                 setCondicoesArrayComparacao([]);
                 onSave?.([]);
             }
-            setLastSelectedTabela(selectedTabela);
+        } else {
+            console.log('Table unchanged, keeping filters');
         }
-    }, [selectedTabela, lastSelectedTabela, requestLoaded]);
+
+        lastSelectedTabelaRef.current = selectedTabela;
+    }, [selectedTabela, requestLoaded, onSave]);
 
 
 
