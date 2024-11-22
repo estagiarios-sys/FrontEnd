@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import Campo from '../Campos/Campo';
-import { ordenacaoOptions, getFilteredTotalizerOptions } from '../Campos/Options';
+import Campo from './Campos/Campo';
+import { ordenacaoOptions, getFilteredTotalizerOptions } from './Campos/Options';
 import {
   getTotalizers,
   getSelectedCampos,
@@ -9,7 +9,7 @@ import {
   resetTotalizers,
   setExportedSelectedCampos,
   setTotalizers
-} from '../../utils/totalizers';
+} from '../utils/totalizers';
 
 function CamposSelecionados({
   selectedCampos = [],
