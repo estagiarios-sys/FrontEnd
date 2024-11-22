@@ -34,10 +34,6 @@ function CamposSelecionados({
     if (mainRequestLoaded) {
       resetSelectedCampos();
 
-      if (mainRequestLoaded.selectedCampos) {
-        onSelectedCamposChange(mainRequestLoaded.selectedCampos);
-      }
-
       if (mainRequestLoaded.orderBy) {
         const orderByString = mainRequestLoaded.orderBy;
         const [fieldName, orderDirection] = orderByString.trim().split(/\s+/);
@@ -52,7 +48,7 @@ function CamposSelecionados({
         setTotalizers(mainRequestLoaded.totalizers);
       }
     }
-  }, [mainRequestLoaded, onSelectedCamposChange]);
+  }, [mainRequestLoaded]);
 
   useEffect(() => {
     if (sessionStorage.getItem('orderByString') === '') {
