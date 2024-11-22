@@ -97,7 +97,7 @@ function CamposSelecionados({
       if (selectedCampo.value === campo.value) {
         return {
           ...selectedCampo,
-          apelido: inputValue + ' ',
+          apelido: inputValue + '',
         };
       }
       return selectedCampo;
