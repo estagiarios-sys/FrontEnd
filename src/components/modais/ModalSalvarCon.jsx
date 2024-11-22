@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import ModalAlert from './ModalAlert';
 import { json } from "react-router-dom";
 import { linkFinal } from '../../config.js';
-
+import Cookies from 'js-cookie';
+import CryptoJS from 'crypto-js';
 
 function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     const [inputValue, setInputValue] = useState('');
@@ -10,10 +11,21 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     const [error, setError] = useState(null);
     const [savedQueryId, setSavedQueryId] = useState(null);  // Armazena o ID da consulta salva
     const formData = new FormData();
+    const encryptedId = Cookies.get('IdQuery');
+    const secretKey = process.env.REACT_APP_SECRET_KEY;
 
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
-        setSavedQueryId(sessionStorage.getItem('IdQuery'));
+
+        if (encryptedId) {
+            try {
+                const decryptedId = CryptoJS.AES.decrypt(encryptedId, secretKey).toString(CryptoJS.enc.Utf8);
+                setSavedQueryId(decryptedId);
+            } catch (error) {
+                console.error('Erro ao decriptar o ID:', error);
+            }
+        }
+
 
         if (isOpen) {
             if (hasScroll) {
@@ -73,14 +85,14 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
         ['stringSavedQuerySaving', 'imgPDF'].forEach(field => formData.delete(field));
         formData.append('stringSavedQuerySaving', JSON.stringify(jsonRequest));
         formData.append('imgPDF', imgPDF);
-       
+
 
         try {
             const response = await fetch(`${linkFinal}/saved-query`, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Authorization': sessionStorage.getItem('token'),
+                    'Authorization': Cookies.get('token'),
                 }
             });
 
@@ -95,7 +107,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 console.log('Consulta salva:', data.id);
                 setSavedQueryId(data.id);  // Armazena o ID da consulta salva
                 openModal('SUCESSO', 'Consulta salva!');
-                
+
             }
         } catch (error) {
             console.error('Error:', error);
@@ -104,14 +116,10 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     };
 
     const updateQuery = async () => {
-       formData.append("id", savedQueryId)
-       formData.delete('stringSavedQuerySaving');
-       formData.append('stringSavedQueryUpdating', JSON.stringify(jsonRequest));
-         
-       for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-        }
-      
+        formData.append("id", savedQueryId)
+        formData.delete('stringSavedQuerySaving');
+        formData.append('stringSavedQueryUpdating', JSON.stringify(jsonRequest));
+
         if (!savedQueryId) {
             openModal('ALERTA', 'ID da consulta não encontrado. Não é possível atualizar.');
             return;
@@ -122,11 +130,11 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 method: 'PUT',
                 body: formData,
                 headers: {
-                    'Authorization': sessionStorage.getItem('token'),
+                    'Authorization': Cookies.get('token'),
                 }
             });
 
-            
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }

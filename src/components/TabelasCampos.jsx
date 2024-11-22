@@ -4,6 +4,7 @@ import { getSelectedCampos } from './CamposSelecionados.jsx';
 import { linkFinal } from '../config.js';
 import Loading from './genericos/Loading.jsx';
 import axios from 'axios'
+import Cookies from 'js-cookie';
 
 function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [jsonData, setJsonData] = useState({});
@@ -31,7 +32,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         const tablesResponse = await axios.get(`${linkFinal}/tables`, {
           withCredentials: true,
           headers: {
-            'Authorization': sessionStorage.getItem('token'),
+            'Authorization': Cookies.get('token'),
           },
         });
   
@@ -47,7 +48,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         const relationshipsResponse = await axios.get(`${linkFinal}/relationships`, {
           withCredentials: true,
           headers: {
-            'Authorization': sessionStorage.getItem('token'),
+            'Authorization': Cookies.get('token'),
           },
         });
   
@@ -86,7 +87,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': sessionStorage.getItem('token'),
+            'Authorization': Cookies.get('token'),
           },
           body: JSON.stringify({
             mainTable: selectedTabela,
@@ -96,7 +97,6 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
 
         const data = await response.json();
         
-
         //  Obtém as colunas associadas à tabela principal.
         const mainTableValues = data[selectedTabela] || {};
 

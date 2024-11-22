@@ -15,6 +15,7 @@ import { linkFinal } from '../config.js';
 import Button from "./Campos/Button.jsx";
 import IconsTemplate from "./Campos/IconsTemplate.jsx";
 import Tabela from "./Campos/Tabela.jsx";
+import Cookies from 'js-cookie';
 
 function useModal() {
     const [modals, setModals] = useState({
@@ -134,7 +135,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             totalizers: getTotalizers(),
         };
 
-        console.log('JSON Request:', jsonRequest);
         setJsonRequest(jsonRequest);
         return jsonRequest;
     };
@@ -212,7 +212,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem('token'),
+                    'Authorization': Cookies.get('token'),
                 },
                 body: titlePdf, // Serializa o título como JSON
             });
@@ -246,16 +246,20 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem('token'),
+                    'Authorization': Cookies.get('token'),
                 },
                 body: JSON.stringify(jsonRequest),
             });
+
+        
 
             if (!response.ok) {
                 throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
             }
 
             const responseData = await response.json();
+
+            console.log("Dados Recebidos: " + JSON.stringify(responseData));
 
             const [sql, sql2, updatedColumns, data, resultTotalizer] = responseData;
 
@@ -266,10 +270,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 };
             });
 
+            
             const columnsMap = updatedColumns.map((column) => ({
                 value: column,
             }));
 
+            
+            
             if (option === 'CSV') {
                 downloadCSV(columnsMap, dataFormat, handleModalAviso);
                 setPdfOK(true);

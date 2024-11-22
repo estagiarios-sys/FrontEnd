@@ -4,6 +4,7 @@ import imagem from "../assets/imagens/image.png";
 import { linkFinal } from "../config";
 import Select from 'react-select';
 import Loading from '../components/genericos/Loading';
+import Cookies from 'js-cookie';
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -47,7 +48,7 @@ export default function Login() {
         codigoEmpresa: nome_empresa,
       });
 
-      sessionStorage.setItem("token", response.data);
+      Cookies.set("token", response.data, { expires: 1 / 2.4, secure: true });
       window.location.href = "/reports";
     } catch (error) {
       setErrorMessage("Usuário ou senha incorretos.");

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Loading from "../genericos/Loading";
 import { linkFinal } from "../../config";
+import Cookies from 'js-cookie';
 
 function ModalPrevia({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
@@ -14,7 +15,7 @@ function ModalPrevia({ isOpen, onClose, combinedData }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': sessionStorage.getItem('token'),
+          'Authorization': Cookies.get('token'),
         },
         body: JSON.stringify(combinedData),
       });

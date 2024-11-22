@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
 import { FaBell } from 'react-icons/fa';
 import { linkFinal } from '../../config';
+import Cookies from 'js-cookie';
 
 Modal.setAppElement('#root');
 
@@ -17,7 +18,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
         try {
             const response = await fetch(`${linkFinal}/pdf`, {
                 headers: {
-                    'Authorization': sessionStorage.getItem('token'),
+                    'Authorization': Cookies.get('token'),
                 }
             });
             if (!response.ok) {
@@ -47,7 +48,7 @@ const ModalNotificacao = ({ setPdfOK, pdfOK }) => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem('token'),
+                    'Authorization': Cookies.get('token'),
                 }
             });
 

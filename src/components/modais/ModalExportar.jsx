@@ -4,7 +4,7 @@ import Papa from "papaparse";
 import ModalAlert from "./ModalAlert";
 import { FiFile, FiDownload } from "react-icons/fi";
 import { linkFinal } from "../../config";
-
+import Cookies from 'js-cookie';
 
 
 export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
@@ -20,7 +20,7 @@ export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                'Authorization': sessionStorage.getItem('token'),
+                'Authorization': Cookies.get('token'),
             },
             body: JSON.stringify(combinedData),
         });

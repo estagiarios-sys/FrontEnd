@@ -2,12 +2,17 @@ import React, { useEffect, useState } from "react";
 import Select from 'react-select';
 import ModalAlert from './ModalAlert';
 import { linkFinal } from '../../config.js';
+import Cookies from 'js-cookie';
+import CryptoJS from 'crypto-js';
+
 
 function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
     const [selectedCampo, setSelectedCampo] = useState(null);
     const [campoOptions, setCampoOptions] = useState([]);
     const [excludeCampo, setExcludeCampo] = useState(null);
-    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Usando o estado modal
+    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
+    const secretKey = process.env.REACT_APP_SECRET_KEY;
+
 
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
@@ -35,7 +40,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                 const response = await fetch(`${linkFinal}/saved-query`, {
                     credentials: 'include',
                     headers: {
-                        'Authorization': sessionStorage.getItem('token'),
+                        'Authorization': Cookies.get('token'),
                     }
                 });
 
@@ -64,7 +69,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
             const response = await fetch(`${linkFinal}/saved-query/${excludeCampo}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': sessionStorage.getItem('token'),
+                    'Authorization': Cookies.get('token'),
                 }
             });
 
@@ -105,7 +110,7 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
             const response = await fetch(`${linkFinal}/saved-query/${selectedCampo.id}`, {
                 credentials: 'include',
                 headers: {
-                    'Authorization': sessionStorage.getItem('token'),
+                    'Authorization': Cookies.get('token'),
                 }
             });
 
@@ -170,7 +175,12 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
                             onChange={(selectedOption) => {
                                 setSelectedCampo(selectedOption);
                                 setExcludeCampo(selectedOption ? selectedOption.id : null);
-                                sessionStorage.setItem('IdQuery', selectedOption.id);
+                                if (selectedOption && selectedOption.id) {
+                                    const encryptedId = CryptoJS.AES.encrypt(selectedOption.id.toString(), secretKey).toString();
+                                    Cookies.set('IdQuery', encryptedId, { secure: true, sameSite: 'strict', expires: 1 });
+                                } else {
+                                    Cookies.remove('IdQuery');
+                                }
                             }}
                             value={selectedCampo}
                             getOptionLabel={(option) => option.queryName}
@@ -217,3 +227,4 @@ function ModalSalvos({ isOpen, onClose, setRequestLoaded }) {
 }
 
 export default ModalSalvos;
+
