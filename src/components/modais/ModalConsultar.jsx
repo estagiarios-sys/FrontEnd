@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaCaretDown } from "react-icons/fa";
 import ModalAlert from "./ModalAlert";
 import Loading from "../genericos/Loading";
 
-function ModalConsultar({ isOpen, onClose, onFetchData }) {
+function ModalConsultar({ isOpen, onClose, tempoEstimado, onFetchData }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null);
     const [isClicked, setIsClicked] = useState(false);
@@ -14,7 +13,7 @@ function ModalConsultar({ isOpen, onClose, onFetchData }) {
         setModal({ isOpen: false, type: '', message: '' });
         onClose();
     };
-
+    
     useEffect(() => {
         const hasScroll = document.body.scrollHeight > window.innerHeight;
 
@@ -81,6 +80,15 @@ function ModalConsultar({ isOpen, onClose, onFetchData }) {
     }, [showDropdown]);
 
 
+    const formatTime = (seconds) => {
+        const totalSeconds = Math.floor(seconds);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        const formatNumber = (num) => String(num).padStart(2, '0');
+        return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(secs)}`;
+    };
+
     if (!isOpen) {
         return null;
     }
@@ -104,7 +112,7 @@ function ModalConsultar({ isOpen, onClose, onFetchData }) {
                 <div className="flex flex-col items-center mt-3">
                     <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                         <p className="font-medium mb-4">
-                            Selecione a opção desejada para a geração e ou consulta do relatório:
+                            O tempo estimado para a consulta é de {formatTime(tempoEstimado)}. Escolha uma das opções:
                         </p>
                     </div>
                 </div>

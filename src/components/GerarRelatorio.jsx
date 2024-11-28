@@ -75,6 +75,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [sqlTotalizers, setSqlTotalizers] = useState('');
     const [jsonRequest, setJsonRequest] = useState({});
     const [editarRequestLoad, setEditarRequestLoad] = useState(false);
+    const [estimatedTime, setEstimatedTime] = useState(null);
     const tableRef = useRef(null);
     const itemsPerPage = 14;
     let orderByString = sessionStorage.getItem('orderByString');
@@ -340,6 +341,36 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         `;
     };
 
+
+    const sendAnalysisData = async () => {
+        try {
+            setLoading(true);
+            const jsonRequest = buildJsonRequest();
+            const url = `${linkFinal}/report-data/analyze`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token'),
+
+                },
+                body: JSON.stringify(jsonRequest),
+            });
+            if (!response.ok) {
+                throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
+            }
+            const estimatedTimeBack = await response.json();
+            setEstimatedTime(estimatedTimeBack);
+            setLoading(false);
+            openModal('consultar');
+        } catch (error) {
+            setLoading(false);
+            openModal('alert', 'ALERTA', 'Erro ao enviar os dados. Por favor, tente novamente.');
+            console.error('Erro ao enviar os dados:', error);
+        }
+    };
+
+
     const updateColumnWidths = () => {
         if (tableRef.current) {
             const thElements = tableRef.current.querySelectorAll('th');
@@ -379,6 +410,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
             return;
         }
+        sendAnalysisData();
         openModal('consultar');
     };
 
@@ -605,7 +637,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
-            <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} onFetchData={fetchData} />
+            <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} tempoEstimato={estimatedTime} onFetchData={fetchData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} imgPDF={imgPdf} titlePdf={titlePdf} jsonRequest={jsonRequest} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
