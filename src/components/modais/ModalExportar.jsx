@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import Papa from "papaparse";
 import ModalAlert from "./ModalAlert";
 import { FiFile, FiDownload } from "react-icons/fi";
 import { linkFinal } from "../../config";
 import Cookies from 'js-cookie';
-
+import { RemoveScroll } from "react-remove-scroll";
 
 export async function downloadPDF(combinedData, handleModalAviso, setPdfOK) {
     if (!combinedData || Object.keys(combinedData).length === 0) {
@@ -131,55 +131,38 @@ function ModalExportar({
         onClose();
     };
 
-    // Impedir scroll da página quando o modal está aberto
-    useEffect(() => {
-        const hasScroll = document.body.scrollHeight > window.innerHeight;
-
-        if (isOpen) {
-            if (hasScroll) {
-                document.body.style.paddingRight = "6px"; // Adiciona padding
-            }
-            document.body.style.overflow = "hidden"; // Desativa o scroll
-        } else {
-            document.body.style.overflow = ""; // Restaura o scroll
-            document.body.style.paddingRight = ""; // Remove o padding
-        }
-
-        return () => {
-            document.body.style.overflow = ""; // Limpeza no fechamento
-            document.body.style.paddingRight = ""; // Limpeza no fechamento
-        };
-    }, [isOpen]);
-
+    // Impedir scroll da página quando o modal está aberto usando a biblioteca RemoveScroll
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg w-96 h-40 relative">
-                <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-3">
-                    <h5 className="font-bold mx-2">EXPORTAR ARQUIVO</h5>
-                    <button
-                        className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
-                        onClick={onClose}
-                        aria-label="Fechar modal"
-                        title="Fechar"
-                    >
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div className="flex flex-row justify-center items-center mt-5 gap-16">
-                    <DownloadButton
-                        onClick={handleDownloadPDF}
-                        icon={<FiFile size={24} />}
-                        label="Baixar PDF"
-                    />
-                    <DownloadButton
-                        onClick={() => {
-                            downloadCSV(selectedColumns, table, handleModalAviso);
-                        }}
-                        icon={<FiDownload size={24} />}
-                        label="Baixar CSV"
-                    />
+        <RemoveScroll enabled={isOpen}> {/* Wrap the modal content with RemoveScroll */}
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg w-96 h-40 relative">
+                    <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-3">
+                        <h5 className="font-bold mx-2">EXPORTAR ARQUIVO</h5>
+                        <button
+                            className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
+                            onClick={onClose}
+                            aria-label="Fechar modal"
+                            title="Fechar"
+                        >
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div className="flex flex-row justify-center items-center mt-5 gap-16">
+                        <DownloadButton
+                            onClick={handleDownloadPDF}
+                            icon={<FiFile size={24} />}
+                            label="Baixar PDF"
+                        />
+                        <DownloadButton
+                            onClick={() => {
+                                downloadCSV(selectedColumns, table, handleModalAviso);
+                            }}
+                            icon={<FiDownload size={24} />}
+                            label="Baixar CSV"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -191,7 +174,7 @@ function ModalExportar({
                 modalType="ALERTA"
                 confirmText="Fechar"
             />
-        </div>
+        </RemoveScroll>
     );
 }
 

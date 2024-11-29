@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Loading from "../genericos/Loading";
 import { linkFinal } from "../../config";
 import Cookies from 'js-cookie';
+import { RemoveScroll } from 'react-remove-scroll';  // Importe o RemoveScroll
 
 function ModalPrevia({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
 
   // Função para gerar o PDF
   const handlePreviewPDF = useCallback(async () => {
@@ -34,56 +34,45 @@ function ModalPrevia({ isOpen, onClose, combinedData }) {
     }
   }, [combinedData]); // Inclua combinedData como dependência
 
-  // Impedir scroll da página quando o modal está aberto
-  useEffect(() => {
-    const hasScroll = document.body.scrollHeight > window.innerHeight;
-
-    if (isOpen) {
+  // Impedir scroll da página quando o modal está aberto e gerar o PDF
+  if (isOpen) {
+    if (!isLoading && !pdfUrl) {
       setIsLoading(true); // Começa o carregamento
       handlePreviewPDF(); // Gera o PDF ao abrir o modal
-      if (hasScroll) {
-        document.body.style.paddingRight = "6px"; // Adiciona padding
-      }
-      document.body.style.overflow = "hidden"; // Desativa o scroll
-    } else {
-      document.body.style.overflow = ""; // Restaura o scroll
-      document.body.style.paddingRight = ""; // Remove o padding
     }
+  }
 
-    return () => {
-      document.body.style.overflow = ""; // Limpeza no fechamento
-      document.body.style.paddingRight = ""; // Limpeza no fechamento
-    };
-  }, [isOpen, handlePreviewPDF]); // Adicione handlePreviewPDF aqui
+  // Lidar com o evento de pressionar a tecla "Escape" para fechar o modal
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') onClose();
+  };
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+  if (isOpen) {
+    document.addEventListener('keydown', handleKeyDown);
+  } else {
+    document.removeEventListener('keydown', handleKeyDown);
+  }
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000]"
-      onClick={onClose} // Fecha o modal ao clicar fora dele
-    >
-      <div className="bg-white p-0 rounded-md relative w-4/5 max-w-[600px] max-h-[90%] overflow-y-auto">
-        {isLoading ? (
-          <Loading /> // Exibe o loading enquanto carrega o PDF
-        ) : (
-          pdfUrl && (
-            <div className="flex justify-center items-center flex-col h-full">
-              <iframe src={pdfUrl} width="100%" height="600px" title="PDF Preview" />
-            </div>
-          )
-        )}
+    <RemoveScroll enabled={isOpen}> {/* Envolva a aplicação com RemoveScroll */}
+      <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000]"
+        onClick={onClose} // Fecha o modal ao clicar fora dele
+      >
+        <div className="bg-white p-0 rounded-md relative w-4/5 max-w-[600px] max-h-[90%] overflow-y-auto">
+          {isLoading ? (
+            <Loading /> // Exibe o loading enquanto carrega o PDF
+          ) : (
+            pdfUrl && (
+              <div className="flex justify-center items-center flex-col h-full">
+                <iframe src={pdfUrl} width="100%" height="600px" title="PDF Preview" />
+              </div>
+            )
+          )}
+        </div>
       </div>
-    </div>
+    </RemoveScroll>
   );
 }
 

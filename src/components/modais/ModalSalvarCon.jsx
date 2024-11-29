@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import ModalAlert from './ModalAlert';
-import { json } from "react-router-dom";
 import { linkFinal } from '../../config.js';
 import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
+import { RemoveScroll } from "react-remove-scroll";
 
 function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     const [inputValue, setInputValue] = useState('');
@@ -15,8 +15,6 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     const secretKey = process.env.REACT_APP_SECRET_KEY;
 
     useEffect(() => {
-        const hasScroll = document.body.scrollHeight > window.innerHeight;
-
         if (encryptedId) {
             try {
                 const decryptedId = CryptoJS.AES.decrypt(encryptedId, secretKey).toString(CryptoJS.enc.Utf8);
@@ -25,23 +23,7 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
                 console.error('Erro ao decriptar o ID:', error);
             }
         }
-
-
-        if (isOpen) {
-            if (hasScroll) {
-                document.body.style.paddingRight = "6px"; // Adiciona padding para ajustar o layout
-            }
-            document.body.style.overflow = "hidden"; // Desativa o scroll da página
-        } else {
-            document.body.style.overflow = ""; // Restaura o scroll ao fechar o modal
-            document.body.style.paddingRight = ""; // Remove o padding ao fechar o modal
-        }
-
-        return () => {
-            document.body.style.overflow = "";
-            document.body.style.paddingRight = "";
-        };
-    }, [isOpen]);
+    })
 
     const handleConfirm = () => {
         if (modal.type === 'CONFIRMAR') {
@@ -150,57 +132,59 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
-                <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-2">
-                    <h5 className="font-bold mx-2">SALVAR CONSULTA</h5>
-                    <button
-                        className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
-                        onClick={onClose}
-                        aria-label="Fechar modal"
-                        title="Fechar"
-                    >
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div className="flex flex-col items-center mt-3">
-                    <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
-                        <h5 className="font-medium mb-4">Nome da Consulta</h5>
-                        <input
-                            type="text"
-                            id='consultaNome'
-                            name='consultaNome'
-                            onChange={handleInputChange1}
-                            className="w-full border border-custom-azul-escuro rounded p-1 focus:ring-1 focus:ring-custom-azul-escuro focus:outline-none"
-                        />
-                    </div>
-                </div>
-                <div className="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
-                    <div className="ml-auto flex items-center">
+        <RemoveScroll enabled={isOpen}> {/* Wrap the modal content with RemoveScroll */}
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg relative w-[500px] h-[250px]">
+                    <div className="w-full bg-custom-azul-escuro flex justify-between items-center text-white p-2">
+                        <h5 className="font-bold mx-2">SALVAR CONSULTA</h5>
                         <button
-                            className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
-                            onClick={handleOnClose}
+                            className="font-bold text-lg rounded-full w-8 h-8 flex justify-center items-center bg-[#0A7F8E] hover:bg-[#00AAB5] transition-colors duration-300"
+                            onClick={onClose}
+                            aria-label="Fechar modal"
+                            title="Fechar"
                         >
-                            Cancelar
-                        </button>
-                        <button
-                            className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
-                            onClick={saveQuery}
-                        >
-                            Salvar
+                            <span aria-hidden="true">×</span>
                         </button>
                     </div>
+                    <div className="flex flex-col items-center mt-3">
+                        <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
+                            <h5 className="font-medium mb-4">Nome da Consulta</h5>
+                            <input
+                                type="text"
+                                id='consultaNome'
+                                name='consultaNome'
+                                onChange={handleInputChange1}
+                                className="w-full border border-custom-azul-escuro rounded p-1 focus:ring-1 focus:ring-custom-azul-escuro focus:outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div className="rounded-b-lg flex p-2 absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
+                        <div className="ml-auto flex items-center">
+                            <button
+                                className="font-bold text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer mr-2 flex items-center justify-center bg-gray-500 hover:bg-gray-600 transition-colors duration-300"
+                                onClick={handleOnClose}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="font-bold border-none text-white rounded-lg w-20 h-10 p-0 text-sm cursor-pointer flex items-center justify-center bg-custom-azul hover:bg-custom-azul-escuro transition-colors duration-300"
+                                onClick={saveQuery}
+                            >
+                                Salvar
+                            </button>
+                        </div>
+                    </div>
                 </div>
+                <ModalAlert
+                    isOpen={modal.isOpen}
+                    onClose={closeModal}
+                    modalType={modal.type || 'ALERTA'}
+                    message={modal.message}
+                    confirmText={modal.type === 'CONFIRMAR' ? 'Substituir' : 'Ok'}
+                    onConfirm={handleConfirm}
+                />
             </div>
-            <ModalAlert
-                isOpen={modal.isOpen}
-                onClose={closeModal}
-                modalType={modal.type || 'ALERTA'}
-                message={modal.message}
-                confirmText={modal.type === 'CONFIRMAR' ? 'Substituir' : 'Ok'}
-                onConfirm={handleConfirm}
-            />
-        </div>
+        </RemoveScroll>
     );
 }
 

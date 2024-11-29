@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DragDropFile from "../genericos/DragDrop.jsx"; // Componente de arrastar e soltar para upload de arquivos
 import ModalAlert from "./ModalAlert.jsx"; // Componente de modal personalizado para exibir alertas
+import { RemoveScroll } from "react-remove-scroll";
 
 function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequestLoad }) {
     // Estados para armazenar o título, imagem e as informações do modal
@@ -96,30 +97,10 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
         }
     };
 
-    // useEffect para impedir o scroll da página quando o modal estiver aberto
-    useEffect(() => {
-        const hasScroll = document.body.scrollHeight > window.innerHeight;
-
-        if (isOpen) {
-            if (hasScroll) {
-                document.body.style.paddingRight = "6px"; // Adiciona padding para ajustar o layout
-            }
-            document.body.style.overflow = "hidden"; // Desativa o scroll da página
-        } else {
-            document.body.style.overflow = ""; // Restaura o scroll ao fechar o modal
-            document.body.style.paddingRight = ""; // Remove o padding ao fechar o modal
-        }
-
-        return () => {
-            // Limpeza ao desmontar o componente ou fechar o modal
-            document.body.style.overflow = "";
-            document.body.style.paddingRight = "";
-        };
-    }, [isOpen]); // Executa o efeito sempre que o estado `isOpen` mudar
-
     if (!isOpen) return null; // Não renderiza o modal se ele não estiver aberto
 
     return (
+        <RemoveScroll enabled={isOpen}> {/* Wrap the modal content with RemoveScroll */}
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg relative flex flex-col w-[500px] h-[580px]">
                 {/* Cabeçalho */}
@@ -197,7 +178,9 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
                 message={modal.message}
                 onConfirm={handleConfirmar} // Callback ao confirmar ação no modal
             />
+
         </div>
+        </RemoveScroll>
     );
 }
 
