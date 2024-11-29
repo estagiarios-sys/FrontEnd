@@ -177,25 +177,36 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   
     // Adiciona campos das tabelas selecionadas como relacionadas
     if (selectedRelacionada.length > 0 && columnsData) {
-      selectedRelacionada.forEach(relacionadaTabela => {
-        const tablesInPair = relacionadaTabela.split(' e ');
-        const relacionadaTabelaNome = tablesInPair.find(name => name !== selectedTabela);
-
-        if (columnsData[relacionadaTabelaNome]) {
-          Object.entries(columnsData[relacionadaTabelaNome]).forEach(([campo, tipo]) => {
-            const optionValue = `${relacionadaTabelaNome}.${campo}`;
-            if (!selectedValues.has(optionValue)) {
-              options.set(optionValue, {
-                value: optionValue,
-                label: `${relacionadaTabelaNome} - ${campo}`,
-                type: tipo,
-              });
-              
-            }
-          });
+      let processedTables = [selectedTabela];
+  
+        selectedRelacionada.forEach(relacionadaTabela => {
+          const tablesInPair = relacionadaTabela.split(' e ');
+          tablesInPair.forEach(nomeTabela => {
+            const relacionadaTabelaNome = nomeTabela !== selectedTabela ? nomeTabela : null;
+  
+          if (relacionadaTabelaNome && !processedTables.includes(relacionadaTabelaNome)) {
+            processedTables.push(relacionadaTabelaNome);  // Adiciona à lista de processadas
+          
+            //Verifica as tabelas relacionadas que etsão sendo puxadas.
+            //console.log(relacionadaTabelaNome);
+  
+          if (columnsData[relacionadaTabelaNome]) {
+            Object.entries(columnsData[relacionadaTabelaNome]).forEach(([campo, tipo]) => {
+              const optionValue = `${relacionadaTabelaNome}.${campo}`;
+              if (!selectedValues.has(optionValue)) {
+                options.set(optionValue, {
+                  value: optionValue,
+                  label: `${relacionadaTabelaNome} - ${campo}`,
+                  type: tipo,
+                });
+              }
+            });
+          }
         }
       });
-    }
+    });
+  }
+  
 
     // Ordena as opções
     return Array.from(options.values()).sort((a, b) => a.label.localeCompare(b.label));
