@@ -1,8 +1,7 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 
-// Define diferentes tipos de modais com seus respectivos títulos e textos padrões para os botões
 const modalTypes = {
   APAGAR: {
     title: 'Confirmar Exclusão', // Título para o modal de confirmação de exclusão
@@ -10,59 +9,54 @@ const modalTypes = {
     cancelText: 'Cancelar', // Texto padrão do botão de cancelamento
   },
   ALERTA: {
-    title: 'Atenção', // Título para o modal de alerta
+    title: 'Atenção', 
     defaultConfirmText: 'Confirmar',
-    cancelText: null, // Não há botão de cancelamento
+    cancelText: null, 
   },
   SUCESSO: {
-    title: 'Sucesso', // Título para o modal de sucesso
+    title: 'Sucesso', 
     defaultConfirmText: 'Confirmar',
-    cancelText: null, // Não há botão de cancelamento
+    cancelText: null, 
   },
   CONFIRMAR: {
-    title: 'Confirmação', // Título para o modal de confirmação
+    title: 'Confirmação', 
     defaultConfirmText: 'Confirmar',
     cancelText: 'Cancelar',
   },
   ERRO: {
-    title: 'MODAL NÃO CONFIGURADO CORRETAMENTE', // Título exibido caso o modalType não seja reconhecido
+    title: 'MODAL NÃO CONFIGURADO CORRETAMENTE',
     defaultConfirmText: 'Confirmar',
     cancelText: null,
   },
 };
 
-// Componente funcional para o modal
 const ModalAlert = ({
-  isOpen,      // Controla se o modal está visível ou não
-  onClose,     // Função chamada ao fechar o modal
-  onConfirm,   // Função chamada ao confirmar a ação
-  message,     // Mensagem a ser exibida no corpo do modal
-  modalType,   // Tipo do modal (APAGAR, ALERTA, SUCESSO, etc.)
-  confirmText, // Texto personalizado para o botão de confirmação
-  children,    // Conteúdo extra que pode ser passado para o modal
+  isOpen,
+  onClose,
+  onConfirm,
+  message,
+  modalType,
+  confirmText,
+  children,
 }) => {
-  // Efeito para fechar o modal ao pressionar a tecla "Escape"
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose(); // Fecha o modal se a tecla pressionada for "Escape"
-    };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown); // Adiciona o listener quando o modal está aberto
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Escape') {
+      onClose();
     }
+  }, [onClose]
+);
+ if (isOpen) {
+   window.addEventListener('keydown', handleKeyDown);
+ } else {
+   window.removeEventListener('keydown', handleKeyDown);
+ } 
 
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown); // Remove o listener quando o modal é fechado
-    };
-  }, [isOpen, onClose]);
-
-  // Função que é chamada quando o botão de confirmação é clicado
   const handleConfirm = useCallback(() => {
-    onConfirm(); // Executa a função de confirmação
-    onClose(); // Fecha o modal
+    onConfirm();
+    onClose();
   }, [onConfirm, onClose]);
 
-  // Se o modal não estiver aberto, retorna null (não renderiza nada)
   if (!isOpen) return null;
 
   // Desestrutura os valores do modalTypes baseado no tipo do modal, ou usa o modal de erro caso o tipo seja inválido
@@ -116,7 +110,6 @@ const ModalAlert = ({
   );
 };
 
-// Define os tipos de propriedades esperados para o componente
 ModalAlert.propTypes = {
   isOpen: PropTypes.bool, // Define se o modal está visível
   onClose: PropTypes.func, // Função chamada ao fechar o modal
