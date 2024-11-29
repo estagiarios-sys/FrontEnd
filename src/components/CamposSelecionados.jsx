@@ -17,28 +17,26 @@ function CamposSelecionados({
   handleCheckboxChange,
   checkedCampos = [],
   onSelectedCamposChange,
+  selectedOrder,
+  setSelectedOrder,
   mainRequestLoaded,
 }) {
   setExportedSelectedCampos(selectedCampos);
 
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [openSelect, setOpenSelect] = useState(null);
   const selectRefs = useRef({});
   const selectTotalizerRefs = useRef({});
 
-  const resetSelectedCampos = () => {
-    onSelectedCamposChange([]);
-  };
 
   useEffect(() => {
     if (mainRequestLoaded) {
-      resetSelectedCampos();
 
       if (mainRequestLoaded.orderBy) {
         const orderByString = mainRequestLoaded.orderBy;
         const [fieldName, orderDirection] = orderByString.trim().split(/\s+/);
         setSelectedOrder({ fieldName, value: orderDirection });
         sessionStorage.setItem('orderByString', orderByString);
+
       } else {
         setSelectedOrder(null);
         sessionStorage.removeItem('orderByString');
@@ -50,11 +48,13 @@ function CamposSelecionados({
     }
   }, [mainRequestLoaded]);
 
+
   useEffect(() => {
     if (sessionStorage.getItem('orderByString') === '') {
       setSelectedOrder(null);
     }
   }, [selectedCampos]);
+
 
   const handleTotalizerSave = (selectedOption, campo) => {
     if (selectedOption) {

@@ -15,27 +15,48 @@ function Main() {
   const [checkedCampos, setCheckedCampos] = useState([]);
   const [pdfOK, setPdfOK] = useState(false);
   const [mainRequestLoaded, setMainRequestLoaded] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [totalizers, setTotalizers] = useState({});
 
-  useEffect(() => {
-    if (mainRequestLoaded) {
-      const camposToAdd = mainRequestLoaded.columns.map(campo => ({
+
+  const handleMainRequestLoaded = (data) => {
+    if (data) {
+      const camposToAdd = data.columns.map((campo) => ({
         value: campo.name,
         type: campo.type,
-        apelido: campo.nickName || ''
+        apelido: campo.nickName || '',
       }));
 
-
-      setSelectedCampos(prevSelectedCampos => {
-        const newCampos = camposToAdd.filter(campo => {
-          return !prevSelectedCampos.some(selected => selected.value === campo.value);
+      setSelectedCampos((prevSelectedCampos) => {
+        const newCampos = camposToAdd.filter((campo) => {
+          return !prevSelectedCampos.some((selected) => selected.value === campo.value);
         });
 
         return [...prevSelectedCampos, ...newCampos];
       });
 
-      setAvailableCampos([]);  
+      setAvailableCampos([]);
+      setMainRequestLoaded(data);
+    
+      // Atualize o selectedOrder
+      if (data.orderBy) {
+        const orderByString = data.orderBy;
+        const [fieldName, orderDirection] = orderByString.trim().split(/\s+/);
+        setSelectedOrder({ fieldName, value: orderDirection });
+        sessionStorage.setItem('orderByString', orderByString);
+      } else {
+        setSelectedOrder(null);
+        sessionStorage.removeItem('orderByString');
+      }
+
+      // Atualize os totalizadores
+      if (data.totalizers) {
+        setTotalizers(data.totalizers);
+      } else {
+        resetTotalizers();
+      }
     }
-  }, [mainRequestLoaded]);
+  };
 
   const handleSelectedCamposChange = (updatedCampos) => {
     setSelectedCampos(updatedCampos);
@@ -43,7 +64,8 @@ function Main() {
 
   // Atualiza o estado quando os dados são alterados no componente TabelaCampos
   const handleDataChange = (data) => {
-    setAvailableCampos(data.campos.filter(campo => !selectedCampos.includes(campo)));
+    // console.log('handleDataChange called with data:', data);
+    setAvailableCampos(data.campos.filter((campo) => !selectedCampos.includes(campo)));
     setSelectedTabela(data.tabela);
     setSelectedRelacionada(data.relacionada || []);
     // console.log("Data: " + JSON.stringify(data)) // Agora espera um array de relacionadas
@@ -55,17 +77,17 @@ function Main() {
       window.dispatchEvent(new CustomEvent('clearSelectedCampos'));
     }
 
-    const camposParaRemover = selectedCampos.filter(campo =>
-      typeof campo.value === 'string' && checkedCampos.includes(campo.value)
+    const camposParaRemover = selectedCampos.filter(
+      (campo) => typeof campo.value === 'string' && checkedCampos.includes(campo.value)
     );
-    const camposRestantes = selectedCampos.filter(campo =>
-      !(typeof campo.value === 'string' && checkedCampos.includes(campo.value))
+    const camposRestantes = selectedCampos.filter(
+      (campo) => !(typeof campo.value === 'string' && checkedCampos.includes(campo.value))
     );
     const orderByString = sessionStorage.getItem('orderByString') || '';
 
-    removeSelectedTotalizers(camposParaRemover.map(campo => campo.value));
+    removeSelectedTotalizers(camposParaRemover.map((campo) => campo.value));
 
-    if (camposParaRemover.some(campo => orderByString.includes(campo.value))) {
+    if (camposParaRemover.some((campo) => orderByString.includes(campo.value))) {
       sessionStorage.setItem('orderByString', '');
     }
 
@@ -76,9 +98,9 @@ function Main() {
 
   // Move todos os campos disponíveis para a lista de campos selecionados e limpa a lista de disponíveis
   const handleAllRightClick = () => {
-    setSelectedCampos(prevSelectedCampos => {
-      const newCampos = availableCampos.filter(campo => {
-        return !prevSelectedCampos.some(selected => selected.value === campo.value);
+    setSelectedCampos((prevSelectedCampos) => {
+      const newCampos = availableCampos.filter((campo) => {
+        return !prevSelectedCampos.some((selected) => selected.value === campo.value);
       });
 
       // Retorna a nova lista de campos selecionados
@@ -100,7 +122,7 @@ function Main() {
 
     sessionStorage.setItem('orderByString', '');
     resetTotalizers();
-    setAvailableCampos(prevAvailableCampos => [
+    setAvailableCampos((prevAvailableCampos) => [
       ...prevAvailableCampos,
       ...selectedCampos
     ]);
@@ -122,9 +144,9 @@ function Main() {
 
   // Alterna o estado dos checkboxes
   const handleCheckboxChange = (campoValue) => {
-    setCheckedCampos(prevChecked =>
+    setCheckedCampos((prevChecked) =>
       prevChecked.includes(campoValue)
-        ? prevChecked.filter(item => item !== campoValue)
+        ? prevChecked.filter((item) => item !== campoValue)
         : [...prevChecked, campoValue]
     );
   };
@@ -140,17 +162,22 @@ function Main() {
         setPdfOK={setPdfOK}
         pdfOK={pdfOK}
       />
-      <div className='content flex flex-col justify-center'>
+      <div className="content flex flex-col justify-center">
         <div className="flex justify-around items-start">
           <div>
             <h1 className="font-bold text-3xl mt-4 ml-20">Tabelas e Campos</h1>
-            <TabelaCampos onDataChange={handleDataChange} handleAllLeftClick={handleAllLeftClick} mainRequestLoaded={mainRequestLoaded} />
+            <TabelaCampos
+              onDataChange={handleDataChange}
+              handleAllLeftClick={handleAllLeftClick}
+              mainRequestLoaded={mainRequestLoaded}
+            />
           </div>
           <div>
-            <div className='mt-36'>
-              <button id='info-hover'
+            <div className="mt-36">
+              <button
+                id="info-hover"
                 onClick={handleIndividualLeftClick}
-                className='left rounded-full bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul w-10 h-10 my-3 justify-center items-center flex'
+                className="left rounded-full bg-custom-azul hover:bg-custom-azul-escuro active:bg-custom-azul w-10 h-10 my-3 justify-center items-center flex"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -159,9 +186,10 @@ function Main() {
               </button>
             </div>
             <div>
-              <button id='info-hover'
+              <button
+                id="info-hover"
                 onClick={handleAllRightClick}
-                className='left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex'
+                className="left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -170,9 +198,10 @@ function Main() {
               </button>
             </div>
             <div>
-              <button id='info-hover'
+              <button
+                id="info-hover"
                 onClick={handleAllLeftClick}
-                className='left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex'
+                className="left rounded-full bg-custom-vermelho hover:bg-custom-vermelho-escuro active:bg-custom-vermelho w-10 h-10 my-3 justify-center items-center flex"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="size-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -190,6 +219,8 @@ function Main() {
               handleCheckboxChange={handleCheckboxChange}
               onSelectedCamposChange={handleSelectedCamposChange}
               mainRequestLoaded={mainRequestLoaded}
+              selectedOrder={selectedOrder}
+              setSelectedOrder={setSelectedOrder}
             />
           </div>
         </div>
@@ -198,7 +229,7 @@ function Main() {
           selectTable={selectedTabela}
           selectedRelatedTables={selectedRelacionada}
           setPdfOK={setPdfOK}
-          setMainRequestLoaded={setMainRequestLoaded}
+          handleMainRequestLoaded={handleMainRequestLoaded}
         />
         <Footer logoSystextil={logoSystextil} />
       </div>

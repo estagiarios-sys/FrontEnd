@@ -55,7 +55,7 @@ function useModal() {
     return { modals, openModal, closeModal };
 }
 
-function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, setPdfOK, setMainRequestLoaded }) {
+function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, setPdfOK, handleMainRequestLoaded }) {
     const { modals, openModal, closeModal } = useModal(); // Usando o hook personalizado para modais
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
@@ -162,7 +162,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
 
             setSelectedTabela(requestLoaded.table);      
 
-            setMainRequestLoaded(mainRequestLoaded);
+            handleMainRequestLoaded(mainRequestLoaded);
             setEditarRequestLoad(editarRequestLoad);
             
             setShouldResetRequestLoaded(true);
