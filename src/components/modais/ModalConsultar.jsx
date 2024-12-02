@@ -14,7 +14,7 @@ function ModalConsultar({ isOpen, onClose, onFetchData }) {
 
     const handleFetchData = async () => {
         try {
-            setLoading(true); // Ativa o estado de carregamento
+            setLoading(true);
             await onFetchData(); // Chama a função de busca de dados
             setModal({
                 isOpen: true,
@@ -29,7 +29,7 @@ function ModalConsultar({ isOpen, onClose, onFetchData }) {
                 message: 'Erro ao processar a consulta. Por favor, tente novamente.',
             });
         } finally {
-            setLoading(false); // Desativa o estado de carregamento
+            setLoading(false);
         }
     };
 
