@@ -27,13 +27,15 @@ function Main() {
         apelido: campo.nickName || '',
       }));
 
-      setSelectedCampos((prevSelectedCampos) => {
-        const newCampos = camposToAdd.filter((campo) => {
-          return !prevSelectedCampos.some((selected) => selected.value === campo.value);
-        });
+      // Substitui os campos selecionados pelos novos campos
+      setSelectedCampos(camposToAdd);
 
-        return [...prevSelectedCampos, ...newCampos];
-      });
+      // Aqui limpa dos campos selecionados, pf não exclua
+      setAvailableCampos([]);
+      setCheckedCampos([]);
+      setSelectedTabela(data.table);
+      setSelectedRelacionada(data.tablesPairs || []);
+      setMainRequestLoaded(data);
 
       setAvailableCampos([]);
       setMainRequestLoaded(data);

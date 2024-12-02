@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import DragDropFile from "../genericos/DragDrop.jsx"; // Componente de arrastar e soltar para upload de arquivos
-import ModalAlert from "./ModalAlert.jsx"; // Componente de modal personalizado para exibir alertas
+import DragDropFile from "../genericos/DragDrop.jsx";
+import ModalAlert from "./ModalAlert.jsx";
 import { RemoveScroll } from "react-remove-scroll";
 
 function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequestLoad }) {
+   
     // Estados para armazenar o título, imagem e as informações do modal
     const [title, setTitle] = useState(''); // Armazena o título do PDF
     const [image, setImage] = useState(null); // Armazena a imagem (logotipo) carregada
@@ -49,8 +50,8 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
             // Limpa o título e a imagem se o modal for do tipo "APAGAR"
             setTitle('');
             setImage(null);
-            handleTitlePdf(''); // Atualiza o título do PDF no componente pai
-            handleImgPdf(''); // Atualiza a imagem do PDF no componente pai
+            handleTitlePdf('');
+            handleImgPdf('');
             setModal({ isOpen: false, type: '', message: '' }); // Fecha o modal
         } else if (modal.type === 'CONFIRMAR') {
             setModal({ isOpen: false, type: '', message: '' }); // Fecha o modal de confirmação e encerra o modal de edição

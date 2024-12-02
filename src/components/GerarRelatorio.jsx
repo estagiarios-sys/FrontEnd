@@ -161,11 +161,11 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 tablesPairs: requestLoaded.tablesPairs,
             };
 
-            setSelectedTabela(requestLoaded.table);      
+            setSelectedTabela(requestLoaded.table);
 
             handleMainRequestLoaded(mainRequestLoaded);
             setEditarRequestLoad(editarRequestLoad);
-            
+
             setShouldResetRequestLoaded(true);
         }
     }, [requestLoaded]);
@@ -204,11 +204,19 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                     'Authorization': Cookies.get('token'),
                 },
                 body: titlePdf, // Serializa o título como JSON
+                // body: JSON.stringify({ title: titlePdf }),
             });
 
             // Verifica se a resposta foi bem-sucedida
             if (!response.ok) {
-                throw new Error(`Erro ao criar ID da notificação: ${response.statusText}`);
+                let errorDetails = '';
+                try {
+                    const errorData = await response.json();
+                    errorDetails = JSON.stringify(errorData);
+                } catch (e) {
+                    errorDetails = await response.text();
+                }
+                throw new Error(`Erro ao criar ID da notificação: ${response.statusText} - ${errorDetails}`);
             }
 
             // Pega o ID retornado
@@ -258,6 +266,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             }
 
             const jsonRequest = buildJsonRequest();
+            // console.log('Sending jsonRequest:', JSON.stringify(jsonRequest, null, 2));
 
             const url = `${linkFinal}/report-data`;
 
@@ -270,10 +279,17 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 body: JSON.stringify(jsonRequest),
             });
 
-        
+
 
             if (!response.ok) {
-                throw new Error(`Erro ao buscar os dados: ${response.statusText}`);
+                let errorDetails = '';
+                try {
+                    const errorData = await response.json();
+                    errorDetails = JSON.stringify(errorData);
+                } catch (e) {
+                    errorDetails = await response.text();
+                }
+                throw new Error(`Erro ao buscar os dados: ${response.statusText} - ${errorDetails}`);
             }
 
             const responseData = await response.json();
@@ -289,13 +305,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 };
             });
 
-            
+
             const columnsMap = updatedColumns.map((column) => ({
                 value: column,
             }));
 
-            
-            
+
+
             if (option === 'CSV') {
                 downloadCSV(columnsMap, dataFormat, handleModalAviso);
                 setPdfOK(true);
@@ -656,7 +672,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 )}
             </div>
             {/* Modais */}
-            <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded?.conditions} loadedColumns={requestLoaded?.columns} selectedTabela={selectedTabela} requestLoaded={requestLoaded}/>
+            <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded?.conditions} loadedColumns={requestLoaded?.columns} selectedTabela={selectedTabela} requestLoaded={requestLoaded} />
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} sqlGeral={sqlGeral} sqlTotalizers={sqlTotalizers} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} editarRequestLoad={editarRequestLoad} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />

@@ -8,8 +8,14 @@ function ModalPrevia({ isOpen, onClose, combinedData }) {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Função para gerar o PDF
+
   const handlePreviewPDF = useCallback(async () => {
+    
+    // Garantir que imgPDF seja uma string (mesmo que vazia)
+    if (combinedData.imgPDF === null || combinedData.imgPDF === undefined) {
+      combinedData.imgPDF = '';
+    }
+
     try {
       const response = await fetch(`${linkFinal}/pdf/preview`, {
         method: 'POST',
