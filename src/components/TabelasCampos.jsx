@@ -5,6 +5,7 @@ import { linkFinal } from '../config.js';
 import Loading from './genericos/Loading.jsx';
 import axios from 'axios'
 import Cookies from 'js-cookie';
+import debounce from 'lodash.debounce';
 
 function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [jsonData, setJsonData] = useState({});
@@ -75,56 +76,71 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
     fetchInitialData();
   }, [mainRequestLoaded]);
   
-  
 
-  useEffect(() => {
-    async function fetchColumns() {
-      if (!selectedTabela) return;
+  async function fetchColumns() {
+    if (!selectedTabela) return;
 
-      try {
-        // Faz a requisição para buscar colunas da tabela principal e tabelas relacionadas
-        const response = await fetch(`${linkFinal}/tables/columns`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': Cookies.get('token'),
-          },
-          body: JSON.stringify({
-            mainTable: selectedTabela,
-            tablesPairs: selectedRelacionada,
-          }),
-        });
+    try {
+      setIsLoading(true)
+      // Faz a requisição para buscar colunas da tabela principal e tabelas relacionadas
+      const response = await fetch(`${linkFinal}/tables/columns`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': Cookies.get('token'),
+        },
+        body: JSON.stringify({
+          mainTable: selectedTabela,
+          tablesPairs: selectedRelacionada,
+        }),
+      });
 
-        const data = await response.json();
-        
-        //  Obtém as colunas associadas à tabela principal.
-        const mainTableValues = data[selectedTabela] || {};
+      const data = await response.json();
+      
+      //  Obtém as colunas associadas à tabela principal.
+      const mainTableValues = data[selectedTabela] || {};
 
-        // Mescla os campos das tabelas relacionadas
-        let combinedValues = { ...mainTableValues };
+      // Mescla os campos das tabelas relacionadas
+      let combinedValues = { ...mainTableValues };
 
-        // Itera pelas tabelas relacionadas para mesclar suas colunas
-        for (const relatedPair of selectedRelacionada) {
-          // Extrai o nome da tabela relacionada
-          const tablesInPair = relatedPair.split(' e ');
-          const relatedTableName = tablesInPair.find(name => name !== selectedTabela);
+      // Itera pelas tabelas relacionadas para mesclar suas colunas
+      for (const relatedPair of selectedRelacionada) {
+        // Extrai o nome da tabela relacionada
+        const tablesInPair = relatedPair.split(' e ');
+        const relatedTableName = tablesInPair.find(name => name !== selectedTabela);
 
-          const relatedTableValues = data[relatedTableName] || {};
+        const relatedTableValues = data[relatedTableName] || {};
 
-          combinedValues = { ...combinedValues, ...relatedTableValues };
-        }
-
-        setColumnsData(data);
-   
-
-      } catch (error) {
-        console.error('Erro ao buscar as colunas:', error);
-        setColumnsData({});
+        combinedValues = { ...combinedValues, ...relatedTableValues };
       }
-    }
 
-    fetchColumns();
-  }, [selectedTabela, selectedRelacionada]);
+      setColumnsData(data);
+ 
+
+    } catch (error) {
+      console.error('Erro ao buscar as colunas:', error);
+      setColumnsData({});
+    }finally{
+      setIsLoading(false)
+    }
+  }
+
+ 
+  
+  useEffect(() => {
+    if(menuIsOpen){
+      fetchColumns();
+    }
+  
+  }, [menuIsOpen]);
+
+  const handleMenuOpen = () => {
+    setMenuIsOpen(true);
+  }
+
+  const handleMenuClose = () => {
+    setMenuIsOpen(false);
+  }
 
 
   // Atualiza o estado quando usar o ModalSalvos
@@ -425,8 +441,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
               label: campo.value,
             }))}
             menuIsOpen={menuIsOpen}
-            onMenuOpen={() => setMenuIsOpen(true)}
-            onMenuClose={() => setMenuIsOpen(false)}
+            onMenuOpen={handleMenuOpen}
+            onMenuClose={handleMenuClose}
             styles={customStyles}
           />
 

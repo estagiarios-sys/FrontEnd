@@ -3,7 +3,7 @@ import ModalAlert from "./ModalAlert";
 import Loading from "../genericos/Loading";
 import { RemoveScroll } from "react-remove-scroll";
 
-function ModalConsultar({ isOpen, onClose, onFetchData }) {
+function ModalConsultar({ isOpen, onClose, onFetchData, timeData }) {
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Controla o estado do modalAlert dependendo tera q ser arrubado pois estava no modelo para gerar varios modais dependendo da acao
     const [loading, setLoading] = useState(false);
 
@@ -58,7 +58,7 @@ function ModalConsultar({ isOpen, onClose, onFetchData }) {
                     <div className="flex flex-col items-center mt-3">
                         <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                             <p className="font-medium mb-4">
-                                Clique em "Buscar Dados" para gerar ou consultar o relatório:
+                            O seu tempo previsto para gerar o relatório é de aproximadamente: {timeData}. <br/> Deseja continuar?
                             </p>
                         </div>
                     </div>

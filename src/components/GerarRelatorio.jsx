@@ -16,6 +16,7 @@ import Button from "./Campos/Button.jsx";
 import IconsTemplate from "./Campos/IconsTemplate.jsx";
 import Tabela from "./Campos/Tabela.jsx";
 import Cookies from 'js-cookie';
+import axios from "axios";
 
 function useModal() {
     const [modals, setModals] = useState({
@@ -75,6 +76,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [sqlTotalizers, setSqlTotalizers] = useState('');
     const [jsonRequest, setJsonRequest] = useState({});
     const [editarRequestLoad, setEditarRequestLoad] = useState(false);
+    const [timeData, setTimeData] = useState('');
     const tableRef = useRef(null);
     const itemsPerPage = 14;
     let orderByString = sessionStorage.getItem('orderByString');
@@ -122,7 +124,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             type: column.type,
             nickName: column.apelido
         }));
-
 
         if (orderByString == null) {
             orderByString = '';
@@ -219,11 +220,41 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
     };
 
+    const fetchTimeData = async () => {
+        try {
+
+            const jsonRequest = buildJsonRequest();
+
+            const url = `${linkFinal}/report-data`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': Cookies.get('token'),
+                },
+                body: JSON.stringify(jsonRequest),
+            });
+
+            const responseData = await response.json();
+
+            const [sql] = responseData;
+
+            return sql; 
+
+    }catch(error){
+        console.log('Erro ao buscar os dados:', error);
+        throw error;
+    }
+
+}
+
+
     const fetchData = async (option) => {
         try {
 
             if (option === 'PDF') {
-                createEmpty();
+                await createEmpty();
             }
 
             const jsonRequest = buildJsonRequest();
@@ -268,7 +299,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             if (option === 'CSV') {
                 downloadCSV(columnsMap, dataFormat, handleModalAviso);
                 setPdfOK(true);
-                return;
+                return; // Retorna aqui se for opção CSV
             }
 
             if (option === 'PDF') {
@@ -279,7 +310,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                     imgPDF: base64Image,
                 };
                 await downloadPDF(combinedData, handleModalAviso, setPdfOK);
-                return;
+                return; // Retorna aqui se for opção PDF
             }
             setSqlGeral(sql);
             setSqlTotalizers(sql2);
@@ -288,11 +319,14 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setTableData(dataFormat);
             setCurrentPage(1);
 
+
         } catch (error) {
             console.error('Erro ao buscar os dados:', error);
             throw error;
         }
     };
+
+
 
     const generateFullTableHTML = (columns, dataFormat, resultTotalizer, updatedColumnWidths, maxRows = null) => {
         if (!dataFormat || dataFormat.length === 0) return '<p>Nenhum dado encontrado.</p>';
@@ -373,13 +407,36 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
     }, [imgPdf]);
 
+    const buscaTime = async () => {
+        try {
+          
+            const sql = await fetchTimeData();
+
+            const response = await axios.post('http://localhost:3002/busca-time', {
+                query: sql,
+            });
+
+            setTimeData(response.data.executionPlan);
+
+        } catch (error) {
+            console.error('Erro ao buscar dados:', error);
+            openModal('alert', 'ALERTA', 'Erro ao buscar dados. Por favor, tente novamente.');
+        }
+    };
 
     const handleModalGenerate = () => {
+        
         if (selectedColumns.length === 0) {
             openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
+            setLoading(false);
             return;
         }
-        openModal('consultar');
+        setLoading(true);
+        buscaTime().finally(() => {
+            setLoading(false);
+            openModal('consultar');
+        });
+        
     };
 
     const renderTotalizerHTML = (columns, resultTotalizer) => {
@@ -406,10 +463,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                     ${columns.map((col, index) => {
             const totalizerKey = totalizerKeys.find(key => key.includes(col));
             return `
-                            <td class="font-regular text-black pb-3">
-                                ${totalizerKey ? resultTotalizer[totalizerKey] : ""}
-                            </td>
-                        `;
+                                <td class="font-regular text-black pb-3">
+                                    ${totalizerKey ? resultTotalizer[totalizerKey] : ""}
+                                </td>
+                            `;
         }).join('')}
                 </tr>
             </ftotalizer>
@@ -605,11 +662,12 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
-            <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} onFetchData={fetchData} />
+            <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} onFetchData={fetchData} timeData={timeData} />
             <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} imgPDF={imgPdf} titlePdf={titlePdf} jsonRequest={jsonRequest} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
     );
+
 }
 
 export default GenerateReport;
