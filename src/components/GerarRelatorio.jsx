@@ -675,7 +675,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded?.conditions} loadedColumns={requestLoaded?.columns} selectedTabela={selectedTabela} requestLoaded={requestLoaded} />
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} sqlGeral={sqlGeral} sqlTotalizers={sqlTotalizers} />
             <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} editarRequestLoad={editarRequestLoad} />
-            <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} combinedData={combinedData} />
+            <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} key={JSON.stringify(combinedData)} combinedData={combinedData} />
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
             <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} onFetchData={fetchData} timeData={timeData} />

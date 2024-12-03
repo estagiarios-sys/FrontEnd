@@ -8,7 +8,7 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
     // Estados para armazenar o título, imagem e as informações do modal
     const [title, setTitle] = useState(''); // Armazena o título do PDF
     const [image, setImage] = useState(null); // Armazena a imagem (logotipo) carregada
-    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Controla o estado do modal de alerta (aberto/fechado, tipo, mensagem)
+    const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); 
 
     //Função para converter uma string base64 em um arquivo File
     const base64ToFile = (base64String, fileName) => {
@@ -26,16 +26,25 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
 
     // Carrega os dados do editarRequestLoad ao montar o componente
     useEffect(() => {
-        if (editarRequestLoad) {
-            setTitle(editarRequestLoad.pdfTitle || '');
-
-            // Se a imagem estiver em base64, converte para File
-            if (editarRequestLoad.pdfImage) {
-                const imageFile = base64ToFile(editarRequestLoad.pdfImage, 'image.png');
-                setImage(imageFile);
+        if (isOpen) {
+            if (editarRequestLoad) {
+                setTitle(editarRequestLoad.pdfTitle || '');
+                if (editarRequestLoad.pdfImage) {
+                    const imageFile = base64ToFile(editarRequestLoad.pdfImage, 'image.png');
+                    setImage(imageFile);
+                } else {
+                    setImage(null);
+                }
+            } else {
+                setTitle('');
+                setImage(null);
             }
+        } else {
+            setTitle('');
+            setImage(null);
         }
-    }, [editarRequestLoad]);
+    }, [isOpen, editarRequestLoad]);
+
 
     // Função para armazenar o arquivo de imagem carregado
     const handleImageUpload = (file) => {
@@ -116,7 +125,6 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
                         <span aria-hidden="true">×</span> {/* Ícone de fechar */}
                     </button>
                 </div>
-
                 {/* Conteúdo */}
                 <div className="flex-1 w-full p-4 overflow-auto">
                     <div className="w-12/12 bg-gray-200 bg-opacity-30 rounded-md p-2 relative">
@@ -138,7 +146,6 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
                             />
                         </div>
                     </div>
-
                     {/* Campo para logotipo */}
                     <div>
                         <h5 className="font-medium mb-1">Logotipo:</h5>
@@ -149,7 +156,6 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
                         </div>
                     </div>
                 </div>
-
                 {/* Rodapé com botões */}
                 <div className="flex p-2 rounded-b-lg absolute bottom-0 w-full bg-white border-t border-gray-300 shadow-md justify-between">
                     <div className="flex items-center">
@@ -170,7 +176,6 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
                     </div>
                 </div>
             </div>
-
             {/* Componente ModalAlert para exibir alertas e confirmações */}
             <ModalAlert
                 isOpen={modal.isOpen}
@@ -179,7 +184,6 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
                 message={modal.message}
                 onConfirm={handleConfirmar} // Callback ao confirmar ação no modal
             />
-
         </div>
         </RemoveScroll>
     );
