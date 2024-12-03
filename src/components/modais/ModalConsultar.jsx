@@ -58,7 +58,7 @@ function ModalConsultar({ isOpen, onClose, onFetchData, timeData }) {
                     <div className="flex flex-col items-center mt-3">
                         <div className="w-11/12 bg-gray-200 bg-opacity-30 rounded-md p-4 relative">
                             <p className="font-medium mb-4">
-                            O seu tempo previsto para gerar o relatório é de aproximadamente: {timeData}. <br/> Deseja continuar?
+                            O seu tempo previsto para gerar o relatório é de aproximadamente: {timeData} segundos. <br/> Deseja continuar?
                             </p>
                         </div>
                     </div>

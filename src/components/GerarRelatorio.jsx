@@ -228,34 +228,56 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
     };
 
-    const fetchTimeData = async () => {
+    const sendAnalysisData = async () => {
         try {
-
+            setLoading(true);
             const jsonRequest = buildJsonRequest();
 
-            const url = `${linkFinal}/report-data`;
+            const url = 'http://localhost:8082/back_reports/report-data/analyze';
 
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': Cookies.get('token'),
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(jsonRequest),
             });
 
-            const responseData = await response.json();
+            if (!response.ok) {
+                throw new Error(`Erro ao enviar os dados: ${response.statusText}`);
+            }
 
-            const [sql] = responseData;
+            const estimatedTimeResponse = await response.json();
 
-            return sql; 
+            let estimatedTimeBack;
 
-    }catch(error){
-        console.log('Erro ao buscar os dados:', error);
-        throw error;
-    }
+            if (typeof estimatedTimeResponse === 'number') {
+                estimatedTimeBack = estimatedTimeResponse;
+            } else if (typeof estimatedTimeResponse === 'object' && 'estimatedTime' in estimatedTimeResponse) {
+                estimatedTimeBack = estimatedTimeResponse.estimatedTime;
+            } else {
+                throw new Error('Resposta inesperada do backend.');
+            }
 
-}
+
+            if (typeof estimatedTimeBack !== 'number' || isNaN(estimatedTimeBack)) {
+                throw new Error('Tempo estimado inválido.');
+            }
+
+            setTimeData(estimatedTimeBack);
+
+
+            setLoading(false);
+
+            openModal('consultar');
+
+        } catch (error) {
+            setLoading(false);
+            openModal('alert', 'ALERTA', 'Erro ao enviar os dados. Por favor, tente novamente.');
+            console.error('Erro ao enviar os dados:', error);
+        }
+    };
 
 
     const fetchData = async (option) => {
@@ -423,22 +445,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
     }, [imgPdf]);
 
-    const buscaTime = async () => {
-        try {
-          
-            const sql = await fetchTimeData();
-
-            const response = await axios.post('http://localhost:3002/busca-time', {
-                query: sql,
-            });
-
-            setTimeData(response.data.executionPlan);
-
-        } catch (error) {
-            console.error('Erro ao buscar dados:', error);
-            openModal('alert', 'ALERTA', 'Erro ao buscar dados. Por favor, tente novamente.');
-        }
-    };
+   
 
     const handleModalGenerate = () => {
         
@@ -448,7 +455,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             return;
         }
         setLoading(true);
-        buscaTime().finally(() => {
+        sendAnalysisData().finally(() => {
             setLoading(false);
             openModal('consultar');
         });
@@ -530,7 +537,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                     <div className="flex mt-3">
                         <Button
                             text={"consultar"}
-                            function={handleModalGenerate}
+                            function={sendAnalysisData}
                         />
                         <Button
                             text={"Salvar Consulta"}
