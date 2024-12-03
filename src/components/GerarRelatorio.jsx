@@ -536,7 +536,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                     <h1 className="font-bold text-3xl">Ações</h1>
                     <div className="flex mt-3">
                         <Button
-                            text={"consultar"}
+                            text={"Gerar Consulta"}
                             function={sendAnalysisData}
                         />
                         <Button
