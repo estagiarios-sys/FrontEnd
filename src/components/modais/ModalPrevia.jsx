@@ -11,10 +11,19 @@ function ModalPrevia({ isOpen, onClose, combinedData }) {
 
   const handlePreviewPDF = useCallback(async () => {
     
+    console.log('Dados enviados 1:', combinedData);
+
     // Garantir que imgPDF seja uma string (mesmo que vazia)
     if (combinedData.imgPDF === null || combinedData.imgPDF === undefined) {
       combinedData.imgPDF = '';
     }
+
+    if (combinedData.titlePDF === null || combinedData.titlePDF === undefined) {
+      combinedData.titlePDF = '';
+
+      console.log('Dados enviados 2.5:', combinedData);
+    }
+
 
     try {
       const response = await fetch(`${linkFinal}/pdf/preview`, {
@@ -33,6 +42,9 @@ function ModalPrevia({ isOpen, onClose, combinedData }) {
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       setPdfUrl(url);
+
+      console.log('Dados enviados 3:', combinedData);
+
     } catch (error) {
       console.error('Erro ao gerar o PDF:', error);
     } finally {

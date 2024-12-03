@@ -27,7 +27,7 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
     // Carrega os dados do editarRequestLoad ao montar o componente
     useEffect(() => {
         if (editarRequestLoad) {
-            setTitle(editarRequestLoad.pdfTitle);
+            setTitle(editarRequestLoad.pdfTitle || '');
 
             // Se a imagem estiver em base64, converte para File
             if (editarRequestLoad.pdfImage) {
