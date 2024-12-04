@@ -48,7 +48,7 @@ export default function Login() {
         codigoEmpresa: nome_empresa,
       });
 
-      Cookies.set("token", response.data, { expires: 1 / 2.4, secure: true });
+        Cookies.set("token", response.data, { expires: 1 / 12, secure: true });
       window.location.href = "/reports";
     } catch (error) {
       setErrorMessage("Usuário ou senha incorretos.");
