@@ -68,9 +68,14 @@ function ModalConsultar({ isOpen, onClose, onFetchData, timeData }) {
                                         O seu tempo previsto para gerar o relatório é de aproximadamente {timeData} segundos. <br />
                                         Deseja continuar?
                                     </>
+                                ) : timeData < 3600 ? (
+                                    <>
+                                        O seu tempo previsto para gerar o relatório é de aproximadamente {Math.floor(timeData / 60)} minutos e {timeData % 60} segundos. <br />
+                                        Deseja continuar?
+                                    </>
                                 ) : (
                                     <>
-                                        O seu tempo previsto para gerar o relatório é de aproximadamente {Math.floor(timeData / 60)} minutos. <br />
+                                        O seu tempo previsto para gerar o relatório é de aproximadamente {Math.floor(timeData / 3600)} horas, {Math.floor((timeData % 3600) / 60)} minutos e {timeData % 60} segundos. <br />
                                         Deseja continuar?
                                     </>
                                 )}
