@@ -16,7 +16,7 @@ import Button from "./Campos/Button.jsx";
 import IconsTemplate from "./Campos/IconsTemplate.jsx";
 import Tabela from "./Campos/Tabela.jsx";
 import Cookies from 'js-cookie';
-import axios from "axios";
+// import axios from "axios";
 
 function useModal() {
     const [modals, setModals] = useState({
@@ -66,7 +66,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [columnWidths, setColumnWidths] = useState([]);
     const [combinedData, setCombinedData] = useState(null);
     const [titlePdf, setTitlePdf] = useState('');
-    const [imgPdf, setImgPdf] = useState('');
+    const [imgPdf, setImgPdf] = useState(null);
     const [base64Image, setBase64Image] = useState('');
     const [loading, setLoading] = useState(false);
     const [requestLoaded, setRequestLoaded] = useState(null);
@@ -75,7 +75,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [sqlGeral, setSqlGeral] = useState('');
     const [sqlTotalizers, setSqlTotalizers] = useState('');
     const [jsonRequest, setJsonRequest] = useState({});
-    const [editarRequestLoad, setEditarRequestLoad] = useState(false);
+    const [editarRequestLoad, setEditarRequestLoad] = useState(null);
     const [timeData, setTimeData] = useState('');
     const tableRef = useRef(null);
     const itemsPerPage = 14;
@@ -147,7 +147,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setBase64Image(requestLoaded.pdfImage);
             setTitlePdf(requestLoaded.pdfTitle);
 
-            const editarRequestLoad = {
+            const editarRequestLoadData = {
                 pdfImage: requestLoaded.pdfImage,
                 pdfTitle: requestLoaded.pdfTitle,
             };
@@ -164,11 +164,13 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setSelectedTabela(requestLoaded.table);
 
             handleMainRequestLoaded(mainRequestLoaded);
-            setEditarRequestLoad(editarRequestLoad);
+            setEditarRequestLoad(editarRequestLoadData);
 
             setShouldResetRequestLoaded(true);
         }
     }, [requestLoaded]);
+
+
 
 
     useEffect(() => {
@@ -421,13 +423,32 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
     };
 
+    useEffect(() => {
+        if (base64Image && editarRequestLoad) {
+            setEditarRequestLoad(prev => ({
+                ...prev,
+                pdfImage: base64Image
+            }));
+        }
+    }, [base64Image]);
+
+
+    // Função para atualizar o título e editarRequestLoad
     const handleTitlePdf = (title) => {
+        // console.log("Componente Pai: Atualizando título para:", title);
         setTitlePdf(title);
+        setEditarRequestLoad(prev => ({
+            ...prev,
+            pdfTitle: title
+        }));
     };
 
+    // Função para atualizar a imagem e editarRequestLoad
     const handleImgPdf = (img) => {
+        // console.log("Componente Pai: Atualizando imagem para:", img);
         setImgPdf(img);
     };
+
 
     useEffect(() => {
         const convertToBase64 = (imgPdf) => {
@@ -447,19 +468,23 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
 
    
 
-    const handleModalGenerate = () => {
+    // const handleModalGenerate = () => {
         
-        if (selectedColumns.length === 0) {
-            openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
-            setLoading(false);
-            return;
-        }
-        setLoading(true);
-        sendAnalysisData().finally(() => {
-            setLoading(false);
-            openModal('consultar');
-        });
+    //     if (selectedColumns.length === 0) {
+    //         openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
+    //         setLoading(false);
+    //         return;
+    //     }
+    //     setLoading(true);
+    //     sendAnalysisData().finally(() => {
+    //         setLoading(false);
+    //         openModal('consultar');
+    //     });
         
+    // };
+
+    const handleClearEditarRequestLoad = () => {
+        setEditarRequestLoad(null);
     };
 
     const renderTotalizerHTML = (columns, resultTotalizer) => {
@@ -681,7 +706,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             {/* Modais */}
             <ModalFiltro isOpen={modals.filtro} onClose={() => closeModal('filtro')} columns={selectedColumns} onSave={handleSaveConditions} loadedConditions={requestLoaded?.conditions} loadedColumns={requestLoaded?.columns} selectedTabela={selectedTabela} requestLoaded={requestLoaded} />
             <ModalSql isOpen={modals.sql} onClose={() => closeModal('sql')} sqlGeral={sqlGeral} sqlTotalizers={sqlTotalizers} />
-            <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} editarRequestLoad={editarRequestLoad} />
+            <ModalEditar isOpen={modals.editar} onClose={() => closeModal('editar')} handleTitlePdf={handleTitlePdf} handleImgPdf={handleImgPdf} editarRequestLoad={editarRequestLoad} handleClearEditarRequestLoad={handleClearEditarRequestLoad} />
             <ModalPrevia isOpen={modals.previa} onClose={() => closeModal('previa')} key={JSON.stringify(combinedData)} combinedData={combinedData} />
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
