@@ -34,6 +34,7 @@ function ModalPrevia({ isOpen, onClose, combinedData }) {
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       setPdfUrl(url);
+      
     } catch (error) {
       console.error('Erro ao gerar o PDF:', error);
     } finally {

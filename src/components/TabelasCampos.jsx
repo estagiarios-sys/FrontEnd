@@ -5,7 +5,6 @@ import { linkFinal } from '../config.js';
 import Loading from './genericos/Loading.jsx';
 import axios from 'axios'
 import Cookies from 'js-cookie';
-import debounce from 'lodash.debounce';
 
 function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const [jsonData, setJsonData] = useState({});
@@ -21,6 +20,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const dicaRef = useRef(null);
   const buttonRef = useRef(null);
   const campos = getSelectedCampos();
+  const prevTabelaRef = useRef(null);
+  const prevRelacionadaRef = useRef(null);
 
   const toggleInfo = (infoId) => {
     setMostrarInfo((prev) => (prev === infoId ? null : infoId));
@@ -36,31 +37,31 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
             'Authorization': Cookies.get('token'),
           },
         });
-  
+
         if (tablesResponse.status !== 200) {
           throw new Error(`Erro ao obter as tabelas (Status: ${tablesResponse.status})`);
         }
-  
-       
+
+
         const tablesData = tablesResponse.data;
         setJsonData(tablesData);
-  
-       
+
+
         const relationshipsResponse = await axios.get(`${linkFinal}/relationships`, {
           withCredentials: true,
           headers: {
             'Authorization': Cookies.get('token'),
           },
         });
-  
+
         if (relationshipsResponse.status !== 200) {
           throw new Error(`Erro ao obter as relações (Status: ${relationshipsResponse.status})`);
         }
-  
-      
+
+
         const relationshipsData = relationshipsResponse.data;
         setRelationships(relationshipsData);
-  
+
         // Verifica se os dados iniciais foram carregados
         if (mainRequestLoaded) {
           setSelectedTabela(mainRequestLoaded.table);
@@ -72,16 +73,25 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
         setIsLoading(false);
       }
     }
-  
+
     fetchInitialData();
   }, [mainRequestLoaded]);
-  
+
 
   async function fetchColumns() {
     if (!selectedTabela) return;
 
+    if (
+      prevTabelaRef.current === selectedTabela &&
+      JSON.stringify(selectedRelacionada) === JSON.stringify(prevRelacionadaRef.current)
+    ) {
+      // console.log('Requisição duplicada, ignorando...');
+      return;
+    }
+
     try {
       setIsLoading(true)
+
       // Faz a requisição para buscar colunas da tabela principal e tabelas relacionadas
       const response = await fetch(`${linkFinal}/tables/columns`, {
         method: 'POST',
@@ -96,7 +106,7 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       });
 
       const data = await response.json();
-      
+
       //  Obtém as colunas associadas à tabela principal.
       const mainTableValues = data[selectedTabela] || {};
 
@@ -115,23 +125,25 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       }
 
       setColumnsData(data);
- 
+
+      prevTabelaRef.current = selectedTabela;
+      prevRelacionadaRef.current = [...selectedRelacionada];
 
     } catch (error) {
       console.error('Erro ao buscar as colunas:', error);
       setColumnsData({});
-    }finally{
+    } finally {
       setIsLoading(false)
     }
   }
 
- 
-  
+
+
   useEffect(() => {
-    if(menuIsOpen){
+    if (menuIsOpen) {
       fetchColumns();
     }
-  
+
   }, [menuIsOpen]);
 
   const handleMenuOpen = () => {
@@ -165,8 +177,8 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       };
       // console.log('onDataChange Triggered:', data);
       onDataChange(data);
-      
-      
+
+
     }
   }, [selectedTabela, selectedRelacionada, selectedCampos]);
 
@@ -190,39 +202,39 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
       });
     }
 
-  
+
     // Adiciona campos das tabelas selecionadas como relacionadas
     if (selectedRelacionada.length > 0 && columnsData) {
       let processedTables = [selectedTabela];
-  
-        selectedRelacionada.forEach(relacionadaTabela => {
-          const tablesInPair = relacionadaTabela.split(' e ');
-          tablesInPair.forEach(nomeTabela => {
-            const relacionadaTabelaNome = nomeTabela !== selectedTabela ? nomeTabela : null;
-  
+
+      selectedRelacionada.forEach(relacionadaTabela => {
+        const tablesInPair = relacionadaTabela.split(' e ');
+        tablesInPair.forEach(nomeTabela => {
+          const relacionadaTabelaNome = nomeTabela !== selectedTabela ? nomeTabela : null;
+
           if (relacionadaTabelaNome && !processedTables.includes(relacionadaTabelaNome)) {
             processedTables.push(relacionadaTabelaNome);  // Adiciona à lista de processadas
-          
+
             //Verifica as tabelas relacionadas que etsão sendo puxadas.
             //console.log(relacionadaTabelaNome);
-  
-          if (columnsData[relacionadaTabelaNome]) {
-            Object.entries(columnsData[relacionadaTabelaNome]).forEach(([campo, tipo]) => {
-              const optionValue = `${relacionadaTabelaNome}.${campo}`;
-              if (!selectedValues.has(optionValue)) {
-                options.set(optionValue, {
-                  value: optionValue,
-                  label: `${relacionadaTabelaNome} - ${campo}`,
-                  type: tipo,
-                });
-              }
-            });
+
+            if (columnsData[relacionadaTabelaNome]) {
+              Object.entries(columnsData[relacionadaTabelaNome]).forEach(([campo, tipo]) => {
+                const optionValue = `${relacionadaTabelaNome}.${campo}`;
+                if (!selectedValues.has(optionValue)) {
+                  options.set(optionValue, {
+                    value: optionValue,
+                    label: `${relacionadaTabelaNome} - ${campo}`,
+                    type: tipo,
+                  });
+                }
+              });
+            }
           }
-        }
+        });
       });
-    });
-  }
-  
+    }
+
 
     // Ordena as opções
     return Array.from(options.values()).sort((a, b) => a.label.localeCompare(b.label));
@@ -311,27 +323,27 @@ function TabelaCampos({ onDataChange, handleAllLeftClick, mainRequestLoaded }) {
   const handleChange = (selectedOptions) => {
     const updatedCampos = selectedOptions
       ? selectedOptions.map((option) => {
-          // Busca o campo correspondente para manter os valores
-          const existingCampo = campoOptions.find(
-            (campo) => campo.value === option.value
-          );
-  
-          return existingCampo
-            ? {
-                value: existingCampo.value,
-                type: existingCampo.type, // Preserva o type
-                apelido: '',
-              }
-            : null;
-        }).filter(Boolean) // Remove valores nulos caso não encontre o campo
+        // Busca o campo correspondente para manter os valores
+        const existingCampo = campoOptions.find(
+          (campo) => campo.value === option.value
+        );
+
+        return existingCampo
+          ? {
+            value: existingCampo.value,
+            type: existingCampo.type, // Preserva o type
+            apelido: '',
+          }
+          : null;
+      }).filter(Boolean) // Remove valores nulos caso não encontre o campo
       : [];
-  
+
     // console.log('Updated selectedCampos:', updatedCampos);
     setSelectedCampos(updatedCampos);
     setMenuIsOpen(true);
   };
-  
-  
+
+
 
   // Função para lidar com o clique fora do componente
   useEffect(() => {

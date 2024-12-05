@@ -24,26 +24,21 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
         return new File([uint8Array], fileName, { type: mimeType });
     };
 
-    // Carrega os dados do editarRequestLoad ao montar o componente
     useEffect(() => {
         if (isOpen) {
+            // Atualiza o estado ao abrir o modal
             if (editarRequestLoad) {
-                setTitle(editarRequestLoad.pdfTitle || '');
+                setTitle(editarRequestLoad.pdfTitle || ''); // Define o título do PDF
                 if (editarRequestLoad.pdfImage) {
                     const imageFile = base64ToFile(editarRequestLoad.pdfImage, 'image.png');
-                    setImage(imageFile);
+                    setImage(imageFile); // Define a imagem
                 } else {
-                    setImage(null);
+                    setImage(null); // Remove a imagem se não existir
                 }
-            } else {
-                setTitle('');
-                setImage(null);
             }
-        } else {
-            setTitle('');
-            setImage(null);
         }
     }, [isOpen, editarRequestLoad]);
+
 
 
     // Função para armazenar o arquivo de imagem carregado
@@ -84,16 +79,19 @@ function ModalEditar({ isOpen, onClose, handleTitlePdf, handleImgPdf, editarRequ
     // Função para carregar os dados (título e imagem)
     const handleCarregar = () => {
         if (title === '' && image === null) {
-            // Exibe alerta se nenhum dado tiver sido inserido
             setModal({ isOpen: true, type: 'ALERTA', message: 'Nenhum dado inserido para carregar.' });
             return;
         } else {
             handleTitlePdf(title); // Envia o título para o componente pai
             handleImgPdf(image); // Envia a imagem para o componente pai
-            // Exibe mensagem de sucesso
             setModal({ isOpen: true, type: 'SUCESSO', message: 'Dados carregados com sucesso!' });
+
+            // Garante que os estados são mantidos após salvar
+            setTitle(title);
+            setImage(image);
         }
     };
+
 
     // Função para excluir os dados carregados (título e imagem)
     const handleExcluir = () => {
