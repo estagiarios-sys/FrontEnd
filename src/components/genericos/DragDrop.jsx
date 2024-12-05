@@ -1,23 +1,17 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import ModalModal from '../modais/ModalAlert'; // Importa o modal de alerta
-import PropTypes from 'prop-types'; // Biblioteca para validação de props
+import ModalModal from '../modais/ModalAlert';
+import PropTypes from 'prop-types';
 
-function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
-  const [modal, setModal] = useState({ isOpen: false, type: '', message: '' }); // Controla o estado do modal de alerta (aberto/fechado, tipo, mensagem)
+function DragDropFile({ onFileUpload, image }) {
+  const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
 
   // Estado para indicar se o usuário está arrastando um arquivo sobre a área
   const [dragActive, setDragActive] = useState(false);
 
   // Estado para armazenar a URL da pré-visualização da imagem
   const [preview, setPreview] = useState(null);
-
-  // Referência para o input do tipo "file"
   const inputRef = useRef(null);
-
-  // Estado para a mensagem do modal
   const [modalMessage, setModalMessage] = useState('');
-
-  // Estado para controlar a abertura do modal de alerta de imagem
   const [modalAlertImagem, setModalAlertImagem] = useState(false);
 
   // useEffect para gerar e limpar a pré-visualização da imagem quando a prop "image" muda
@@ -34,7 +28,6 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
     }
   }, [image]);
 
-  // Função para exibir o modal de alerta caso o arquivo não seja uma imagem
   const handleModalAlertImagem = () => {
     setModalMessage('Por favor, envie um arquivo de imagem.');
     setModalAlertImagem(true);
@@ -104,23 +97,22 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
   }, [preview]);
 
   const handleConfirmar = () => {
-    setModal({ isOpen: false, type: '', message: '' }); // Fecha o modal de alerta
+    setModal({ isOpen: false, type: '', message: '' }); 
   };
 
-  // Renderiza o formulário de drag-and-drop e a pré-visualização da imagem
   return (
     <form
       className="relative w-full max-w-[28rem] h-72 text-center"
-      onDragEnter={handleDrag} // Inicia o processo de drag-and-drop
-      onSubmit={(e) => e.preventDefault()} // Previne o envio do formulário
+      onDragEnter={handleDrag}
+      onSubmit={(e) => e.preventDefault()}
     >
       <input
-        ref={inputRef} // Conecta o input à referência para controle manual
+        ref={inputRef}
         type="file"
         id="input-file-upload"
-        className="hidden" // Oculta o input de arquivo padrão
-        accept="image/*" // Restringe a seleção apenas para arquivos de imagem
-        onChange={handleChange} // Lida com a mudança ao selecionar um arquivo
+        className="hidden"
+        accept="image/*"
+        onChange={handleChange}
       />
       <label
         htmlFor="input-file-upload"
@@ -130,7 +122,7 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
           <p className="text-tiny">Arraste e solte sua imagem aqui</p>
           <button
             className="cursor-pointer p-1 text-base bg-transparent hover:underline text-tiny"
-            onClick={onButtonClick} // Simula o clique no input de arquivo
+            onClick={onButtonClick}
             type="button"
           >
             Carregar arquivo
@@ -140,12 +132,12 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
 
       {/* Modal de alerta para arquivos inválidos */}
       <ModalModal
-        modalType="ALERTA" // Altere "ATENÇÃO" para um valor válido
-        isOpen={modalAlertImagem} // Controla se o modal está aberto
-        onClose={() => setModalAlertImagem(false)} // Fecha o modal ao clicar em "Fechar"
-        onConfirm={handleConfirmar} // Executa ação de confirmação (fechar)
-        confirmText="Fechar" // Texto do botão de confirmação
-        message={modalMessage} // Mensagem de alerta
+        modalType="ALERTA"
+        isOpen={modalAlertImagem}
+        onClose={() => setModalAlertImagem(false)}
+        onConfirm={handleConfirmar}
+        confirmText="Fechar"
+        message={modalMessage}
       />
 
       {/* Área que detecta o drag-and-drop e aplica a ação ao soltar */}
@@ -155,7 +147,7 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
-          onDrop={handleDrop} // Solta o arquivo ao arrastar sobre a área
+          onDrop={handleDrop}
         ></div>
       )}
 
@@ -174,7 +166,6 @@ function DragDropFile({ isOpen, onClose, onFileUpload, image }) {
   );
 }
 
-// Definição das props esperadas pelo componente
 DragDropFile.propTypes = {
   onFileUpload: PropTypes.func.isRequired, // A função de callback para quando o arquivo é enviado
 };

@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
 import { RemoveScroll } from "react-remove-scroll";
 
-function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
+function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest, realizouConsulta }) {
     const [inputValue, setInputValue] = useState('');
     const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
     const [error, setError] = useState(null);
@@ -56,6 +56,12 @@ function ModalSalvarCon({ isOpen, onClose, imgPDF, titlePdf, jsonRequest }) {
     };
 
     const saveQuery = async () => {
+
+        if (!realizouConsulta) { 
+            setModal({ isOpen: true, type: 'ALERTA', message: 'Realize uma consulta antes de salvar.' });
+            return;
+        }
+
         if (!inputValue) {
             setModal({ isOpen: true, type: 'ALERTA', message: 'Digite um nome para a consulta.' });
             return;

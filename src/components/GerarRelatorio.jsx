@@ -77,8 +77,10 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
     const [jsonRequest, setJsonRequest] = useState({});
     const [editarRequestLoad, setEditarRequestLoad] = useState(null);
     const [timeData, setTimeData] = useState('');
+    const [realizouConsulta, setRealizouConsulta] = useState(false);
     const tableRef = useRef(null);
     const itemsPerPage = 14;
+
     let orderByString = sessionStorage.getItem('orderByString');
     let idNotificacao = null;
 
@@ -230,9 +232,33 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
         }
     };
 
+    const handleExcessao = () => {
+
+        if (selectedTabela.length === 0) {
+            openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma Tabela.');
+            return true; 
+        }
+
+        if (selectedColumns.length === 0) {
+            openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
+            return true;
+        }
+
+        return false;
+    };
+
+
     const sendAnalysisData = async () => {
         try {
             setLoading(true);
+
+            const validationError = handleExcessao();
+
+            if (validationError) {
+                setLoading(false);
+                return;
+            }
+
             const jsonRequest = buildJsonRequest();
 
             const url = 'http://localhost:8082/back_reports/report-data/analyze';
@@ -262,17 +288,17 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
                 throw new Error('Resposta inesperada do backend.');
             }
 
-
             if (typeof estimatedTimeBack !== 'number' || isNaN(estimatedTimeBack)) {
                 throw new Error('Tempo estimado inválido.');
             }
 
             setTimeData(estimatedTimeBack);
 
-
             setLoading(false);
 
             openModal('consultar');
+
+            setRealizouConsulta(true);
 
         } catch (error) {
             setLoading(false);
@@ -465,23 +491,6 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             setBase64Image('');
         }
     }, [imgPdf]);
-
-   
-
-    // const handleModalGenerate = () => {
-        
-    //     if (selectedColumns.length === 0) {
-    //         openModal('alert', 'ALERTA', 'Por favor, selecione pelo menos uma coluna.');
-    //         setLoading(false);
-    //         return;
-    //     }
-    //     setLoading(true);
-    //     sendAnalysisData().finally(() => {
-    //         setLoading(false);
-    //         openModal('consultar');
-    //     });
-        
-    // };
 
     const handleClearEditarRequestLoad = () => {
         setEditarRequestLoad(null);
@@ -711,7 +720,7 @@ function GenerateReport({ selectedColumns, selectTable, selectedRelatedTables, s
             <ModalExportar isOpen={modals.exportar} onClose={() => closeModal('exportar')} table={tableData} selectedColumns={selectedColumns} combinedData={combinedData} setPdfOK={setPdfOK} createEmpty={createEmpty} />
             <ModalSalvos isOpen={modals.salvos} onClose={() => closeModal('salvos')} setRequestLoaded={setRequestLoaded} />
             <ModalConsultar isOpen={modals.consultar} onClose={() => closeModal('consultar')} onFetchData={fetchData} timeData={timeData} />
-            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} imgPDF={imgPdf} titlePdf={titlePdf} jsonRequest={jsonRequest} />
+            <ModalSalvarCon isOpen={modals.salvarCon} onClose={() => closeModal('salvarCon')} imgPDF={imgPdf} titlePdf={titlePdf} jsonRequest={jsonRequest} realizouConsulta={realizouConsulta} />
             <ModalAlert isOpen={modals.alert.isOpen} onClose={() => closeModal('alert')} onConfirm={confirmModalAlert} message={modals.alert.message} modalType={modals.alert.modalType} confirmText="Fechar" />
         </div>
     );
